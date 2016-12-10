@@ -27,7 +27,9 @@ def load_config():
 
     ### Setup bot name
 
-    botname = os.environ.get('GITHUB_BOT_NAME', 'ipyn[bot]')
+    botname = os.environ.get('GITHUB_BOT_NAME', None)
+    if not botname:
+        raise ValueError('Need to set a botnames')
 
     if "@" in botname:
         print("Don't include @ in the botname !")
@@ -84,7 +86,7 @@ import re
 # MIGRATE_RE = re.compile(re.escape(AT_BOTNAME)+'(?P<sudo> sudo)?(?: can you)? migrate (?:this )?to (?P<org>[a-z-]+)/(?P<repo>[a-z-]+)')
 # BACKPORT_RE = re.compile(re.escape(AT_BOTNAME)+'(?: can you)? backport (?:this )?(?:on|to) ([\w.]+)')
 
-hello_re = re.compile(re.escape('hello '+CONFIG['at_botname']))
+hello_re = re.compile(re.escape(CONFIG['at_botname'])+' hello')
 
 @everyone
 def replyuser(session, payload):
@@ -165,7 +167,7 @@ class WebHookHandler(MainHandler):
                             print(body, 'did not match', reg)
                     pass
                 else:
-                    print('Was not mentioned', CONFIG['botname'] )
+                    print('Was not mentioned', CONFIG['botname'], body)
             elif installation and installation.get('account'):
                 print('we got a new installation maybe ?!', payload)
                 return self.finish()
