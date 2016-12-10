@@ -151,7 +151,7 @@ class WebHookHandler(MainHandler):
                 if user == CONFIG['botname']:
                     return self.finish("Not responding to self")
                 body = payload['comment']['body']
-                if CONFIG['BOTNAME'] in body:
+                if CONFIG['botname'] in body:
 
                     # to dispatch to commands
                     installation_id = payload['installation']['id']
