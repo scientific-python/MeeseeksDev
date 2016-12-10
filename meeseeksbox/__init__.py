@@ -136,13 +136,21 @@ class WebHookHandler(MainHandler):
 
         ## new comment created
         elif type_ == 'created':
-            user = payload['comment']['user']['login'] 
-            if user == CONFIG['botname']:
-                return self.finish("Not responding to self")
+            comment = payload.get('comment', None)
+            installation = payload.get('installation', None)
+            if installation:
+                print('we got a new installation !')
+                return self.finish()
+            elif comment:
+                user = payload['comment']['user']['login'] 
+                if user == CONFIG['botname']:
+                    return self.finish("Not responding to self")
 
-            if CONFIG['BOTNAME'] in payload['comment']['body']:
-                # to dispatch to commands
-                pass
+                if CONFIG['BOTNAME'] in payload['comment']['body']:
+                    # to dispatch to commands
+                    pass
+            else:
+                print('not handled', payload)
         else :
             print("can't deal with ", type_, "yet")
 
