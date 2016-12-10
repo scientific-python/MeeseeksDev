@@ -126,6 +126,7 @@ class WebHookHandler(MainHandler):
         action = payload.get("action", None)
 
         if action:
+            print('## dispatching request', self.request.headers.get('X-GitHub-Delivery'))
             return self.dispatch_action(action, payload)
         else:
             print('No action available  for the webhook :', payload)
@@ -169,7 +170,7 @@ class WebHookHandler(MainHandler):
                             print(body, 'did not match', reg)
                     pass
                 else:
-                    print('Was not mentioned', CONFIG['botname'], body)
+                    print('Was not mentioned', CONFIG['botname'], body, '|',user)
             elif installation and installation.get('account'):
                 print('we got a new installation maybe ?!', payload)
                 return self.finish()
