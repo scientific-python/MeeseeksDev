@@ -133,6 +133,7 @@ class WebHookHandler(MainHandler):
     def dispatch_action(self, type_, payload):
 
         ## new issue/PR opened
+        print('=== dispatching')
         if type_ == 'opened':
             issue = payload.get('issue', None)
             if not issue:
@@ -162,6 +163,7 @@ class WebHookHandler(MainHandler):
                     session = AUTH.session(installation_id)
                     for reg, handler in self.actions:
                         if reg.match(body):
+                            print('I match !, triggering', handler)
                             handler(session, payload)
                         else:
                             print(body, 'did not match', reg)
