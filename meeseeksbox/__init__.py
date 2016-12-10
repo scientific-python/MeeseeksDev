@@ -1,4 +1,5 @@
 import os
+import random
 import base64
 import hmac
 import tornado
@@ -93,7 +94,7 @@ def replyuser(session, payload):
     print("I'm replying to a user, look at me.")
     comment_url     = payload['issue']['comments_url']
     user            = payload['issue']['user']['login']
-    session.post_comment(comment_url, "Hello @{user}.".format(user=user))
+    session.post_comment(comment_url, "Hello @{user}. ({n})".format(user=user, n=random.randint(0,200)))
 
 @admin
 def replyadmin(session, payload):

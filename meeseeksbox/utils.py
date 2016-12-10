@@ -130,7 +130,7 @@ class Session(Authenticator):
             if response.status_code == 401:
                 print("Not authorized", response.json)
                 self.regen_token()
-            response = s.send(prepare())
+                response = s.send(prepare())
             response.raise_for_status()
             return response
 
