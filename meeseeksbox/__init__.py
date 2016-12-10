@@ -147,7 +147,7 @@ class WebHookHandler(MainHandler):
             comment = payload.get('comment', None)
             installation = payload.get('installation', None)
             if installation:
-                print('we got a new installation !')
+                print('we got a new installation !', installation)
                 return self.finish()
             elif comment:
                 user = payload['comment']['user']['login'] 
