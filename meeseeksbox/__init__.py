@@ -90,12 +90,14 @@ hello_re = re.compile(re.escape(CONFIG['at_botname'])+' hello')
 
 @everyone
 def replyuser(session, payload):
+    print("I'm replying to a user, look at me.")
     comment_url     = payload['issue']['comments_url']
     user            = payload['issue']['user']['login']
     session.post_comment(comment_url, "Hello @{user}.".format(user=user))
 
 @admin
 def replyadmin(session, payload):
+    print("I'm replying to an admin, look at me.")
     comment_url     = payload['issue']['comments_url']
     user            = payload['issue']['user']['login']
     session.post_comment(comment_url, "Hello @{user}. Waiting for your orders.".format(user=user))
