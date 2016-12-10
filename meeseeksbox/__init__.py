@@ -80,6 +80,12 @@ class MainHandler(BaseHandler):
     def get(self):
         self.finish('No')
 
+import re
+# MIGRATE_RE = re.compile(re.escape(AT_BOTNAME)+'(?P<sudo> sudo)?(?: can you)? migrate (?:this )?to (?P<org>[a-z-]+)/(?P<repo>[a-z-]+)')
+# BACKPORT_RE = re.compile(re.escape(AT_BOTNAME)+'(?: can you)? backport (?:this )?(?:on|to) ([\w.]+)')
+
+hello_re = re.compile(re.escape('hello '+CONFIG['AT_BOTNAME']))
+
 @everyone
 def replyuser(session, payload):
     comment_url     = payload['issue']['comments_url']
@@ -96,7 +102,8 @@ def replyadmin(session, payload):
  
 class WebHookHandler(MainHandler):
 
-    def initialize(self, *args, **kwargs):
+    def initialize(self, actions, *args, **kwargs):
+        self.actions = actions
         super().initialize(*args, **kwargs)
         print('Webhook initialize got', args, kwargs)
 
@@ -129,9 +136,10 @@ class WebHookHandler(MainHandler):
             if not issue:
                 print('request has no issue key:', payload)
                 return self.error('Not really good, request has no issue')
-            user = payload['issue']['user']['login']
-            if user == CONFIG['botname']:
-                return self.finish("Not responding to self")
+            if issue:
+                user = payload['issue']['user']['login']
+                if user == CONFIG['botname']:
+                    return self.finish("Not responding to self")
             # todo dispatch on on-open
 
         ## new comment created
@@ -145,9 +153,15 @@ class WebHookHandler(MainHandler):
                 user = payload['comment']['user']['login'] 
                 if user == CONFIG['botname']:
                     return self.finish("Not responding to self")
+                body = payload['comment']['body']
+                if CONFIG['BOTNAME'] in body:
 
-                if CONFIG['BOTNAME'] in payload['comment']['body']:
                     # to dispatch to commands
+                    installation_id = payload['installation']['id']
+                    session = AUTH.session(installation_id)
+                    for reg, handler in self.actions:
+                        if reg.match(body):
+                            handler(session, payload)
                     pass
             else:
                 print('not handled', payload)
@@ -156,9 +170,14 @@ class WebHookHandler(MainHandler):
 
 
 def main():
+    actions = (
+            (hello_re, replyuser),
+        )
+        
+       
     application = tornado.web.Application([
         (r"/", MainHandler),
-        (r"/webhook", WebHookHandler),
+        (r"/webhook", WebHookHandler, dict({'actions':actions}))
     ])
 
     port = int(os.environ.get('PORT', 5000))
