@@ -162,6 +162,8 @@ class WebHookHandler(MainHandler):
                     for reg, handler in self.actions:
                         if reg.match(body):
                             handler(session, payload)
+                        else:
+                            print(body, 'did not match', reg)
                     pass
             else:
                 print('not handled', payload)
