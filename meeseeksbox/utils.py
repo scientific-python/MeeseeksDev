@@ -144,6 +144,7 @@ class Session(Authenticator):
         resp.raise_for_status()
 
     def post_comment(self, comment_url, body):
+        print('### Look at me posting comment')
         self.ghrequest('POST', comment_url, json={"body":body})
 
     def get_collaborator_list(self, org, repo):

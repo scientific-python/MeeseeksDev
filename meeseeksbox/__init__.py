@@ -144,7 +144,7 @@ class WebHookHandler(MainHandler):
                 return self.error('Not really good, request has no issue')
             if issue:
                 user = payload['issue']['user']['login']
-                if user == CONFIG['botname']:
+                if user == CONFIG['botname'].lower()+'[bot]':
                     return self.finish("Not responding to self")
             # todo dispatch on on-open
 
@@ -155,7 +155,7 @@ class WebHookHandler(MainHandler):
             if comment:
                 print('Got a comment')
                 user = payload['comment']['user']['login'] 
-                if user == CONFIG['botname']:
+                if user == CONFIG['botname'].lower()+'[bot]':
                     print('Not responding to self')
                     return self.finish("Not responding to self")
                 body = payload['comment']['body']
