@@ -84,7 +84,7 @@ import re
 # MIGRATE_RE = re.compile(re.escape(AT_BOTNAME)+'(?P<sudo> sudo)?(?: can you)? migrate (?:this )?to (?P<org>[a-z-]+)/(?P<repo>[a-z-]+)')
 # BACKPORT_RE = re.compile(re.escape(AT_BOTNAME)+'(?: can you)? backport (?:this )?(?:on|to) ([\w.]+)')
 
-hello_re = re.compile(re.escape('hello '+CONFIG['AT_BOTNAME']))
+hello_re = re.compile(re.escape('hello '+CONFIG['at_botname']))
 
 @everyone
 def replyuser(session, payload):
