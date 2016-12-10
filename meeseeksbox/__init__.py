@@ -97,7 +97,7 @@ def replyadmin(session, payload):
 class WebHookHandler(MainHandler):
 
     def initialize(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().initialize(*args, **kwargs)
         print('Webhook initialize got', args, kwargs)
 
     def get(self):
