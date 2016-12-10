@@ -146,10 +146,7 @@ class WebHookHandler(MainHandler):
         elif type_ == 'created':
             comment = payload.get('comment', None)
             installation = payload.get('installation', None)
-            if installation:
-                print('we got a new installation !', installation)
-                return self.finish()
-            elif comment:
+            if comment:
                 user = payload['comment']['user']['login'] 
                 if user == CONFIG['botname']:
                     return self.finish("Not responding to self")
@@ -165,6 +162,9 @@ class WebHookHandler(MainHandler):
                         else:
                             print(body, 'did not match', reg)
                     pass
+            if installation and installation.get('account'):
+                print('we got a new installation maybe ?!', payload)
+                return self.finish()
             else:
                 print('not handled', payload)
         else :
