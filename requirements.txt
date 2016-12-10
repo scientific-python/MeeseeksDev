@@ -1,6 +1,6 @@
 tornado
 requests
-jwt
+pyjwt
 gitpython
 there
 mock
