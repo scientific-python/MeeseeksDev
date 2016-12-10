@@ -147,8 +147,10 @@ class WebHookHandler(MainHandler):
             comment = payload.get('comment', None)
             installation = payload.get('installation', None)
             if comment:
+                print('Got a comment')
                 user = payload['comment']['user']['login'] 
                 if user == CONFIG['botname']:
+                    print('Not responding to self')
                     return self.finish("Not responding to self")
                 body = payload['comment']['body']
                 if CONFIG['botname'] in body:
@@ -162,7 +164,9 @@ class WebHookHandler(MainHandler):
                         else:
                             print(body, 'did not match', reg)
                     pass
-            if installation and installation.get('account'):
+                else:
+                    print('Was not mentioned', CONFIG['botname'] )
+            elif installation and installation.get('account'):
                 print('we got a new installation maybe ?!', payload)
                 return self.finish()
             else:
