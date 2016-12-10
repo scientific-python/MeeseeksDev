@@ -4,5 +4,7 @@ pyjwt
 gitpython
 there
 mock
+cryptography
+
 
 
