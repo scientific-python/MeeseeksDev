@@ -199,4 +199,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print('====== (re) starting ======')
     main()
