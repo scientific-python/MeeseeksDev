@@ -19,7 +19,7 @@ def load_config():
 
     ### Setup integration ID ###
     integration_id = os.environ.get('GITHUB_INTEGRATION_ID')
-    if not integration_id:
+    if not integration_iu:
         raise ValueError('Please set GITHUB_INTEGRATION_ID')
 
     integration_id = int(integration_id)
@@ -94,7 +94,13 @@ def replyuser(session, payload):
     print("I'm replying to a user, look at me.")
     comment_url     = payload['issue']['comments_url']
     user            = payload['issue']['user']['login']
-    session.post_comment(comment_url, "Hello @{user}. ({n})".format(user=user, n=random.randint(0,200)))
+    c = random.choice(
+            ("Helloooo @{user}, I'm Mr. Meeseeks! Look at me!",
+            "Look at me, @{user}, I'm Mr. Meeseeks! ",
+            "I'm Mr. Meeseek, @{user}, Look at meee ! ",
+            )
+        )
+    session.post_comment(comment_url, c.format(user=user))
 
 @admin
 def replyadmin(session, payload):
@@ -155,20 +161,31 @@ class WebHookHandler(MainHandler):
             installation = payload.get('installation', None)
             if comment:
                 print('Got a comment')
-                user = payload['comment']['user']['login'] 
+                user = payload['comment']['user']['login']
                 if user == CONFIG['botname'].lower()+'[bot]':
                     print('Not responding to self')
                     return self.finish("Not responding to self")
+                if '[bot]' in user:
+                    print('Not responding to another bot')
+                    return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
                 if CONFIG['botname'] in body:
 
                     # to dispatch to commands
                     installation_id = payload['installation']['id']
+                    org = payload['organization']['login']
+                    repo = payload['repository']['name']
+
                     session = AUTH.session(installation_id)
+                    is_admin = session.is_collaborator(org, repo, user)
+
                     for reg, handler in self.actions:
                         if reg.match(body):
                             print('I match !, triggering', handler)
-                            handler(session, payload)
+                            if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
+                                request_repo = handler(session, payload)
+                            else :
+                                print('cannot do that')
                         else:
                             print(body, 'did not match', reg)
                     pass

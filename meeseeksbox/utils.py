@@ -1,7 +1,6 @@
 """
 Utility functions to work with github.
 """
-
 import jwt
 import datetime
 import json
@@ -15,7 +14,6 @@ import os
 import sys
 
 API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}'
-
 
 """
 Regular expression to relink issues/pr comments correctly.
@@ -135,13 +133,21 @@ class Session(Authenticator):
             return response
 
     def is_collaborator(self, org, repo, username):
+        """
+        Check if a user is collaborator on this repository
+        
+        Right now this is a boolean, there is a new API
+        (application/vnd.github.korra-preview) with github which allows to get
+        finer grained decision.
+        """
         get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(org=org, repo=repo, username=username)
         resp = self.ghrequest('GET', get_collaborators_query, None)
         if resp.status_code == 204:
             return True
         elif resp.status_code == 404:
             return False
-        resp.raise_for_status()
+        else:
+            resp.raise_for_status()
 
     def post_comment(self, comment_url, body):
         print('### Look at me posting comment')
@@ -323,7 +329,3 @@ class Session(Authenticator):
         new_number = new_pr.json().get('number', None)
         print('Backported as PR', new_number)
         return new_pr.json()
-
-
-
-
