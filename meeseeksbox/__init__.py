@@ -1,3 +1,4 @@
+import re
 import os
 import base64
 import hmac
@@ -5,8 +6,6 @@ import tornado
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-
-
 
 def load_config():
     """
@@ -45,11 +44,11 @@ def load_config():
 
     return config
 
-CONFIG = load_config()
+CONFIG = None 
+AUTH = None
 
 from .utils import Authenticator
 
-AUTH = Authenticator(CONFIG['integration_id'], CONFIG['key'])
 
 ### setup various regular expressions
 # import re
@@ -81,15 +80,23 @@ class MainHandler(BaseHandler):
     def get(self):
         self.finish('No')
 
-import re
 # MIGRATE_RE = re.compile(re.escape(AT_BOTNAME)+'(?P<sudo> sudo)?(?: can you)? migrate (?:this )?to (?P<org>[a-z-]+)/(?P<repo>[a-z-]+)')
 # BACKPORT_RE = re.compile(re.escape(AT_BOTNAME)+'(?: can you)? backport (?:this )?(?:on|to) ([\w.]+)')
 
-hello_re = re.compile(re.escape(CONFIG['at_botname'])+' hello')
-
+def process_mentionning_comment(body, botname):
+    """
+    Given a comment body and a bot name parse this into a tuple of (command, arguments)
+    """
+    insensitive_bot_re = re.compile('@?'+re.escape(botname)+'(?:\[bot\])?', re.IGNORECASE)
+    lines = body.splitlines()
+    lines = [l.strip() for l in lines if insensitive_bot_re.search(l)]
+    lines = [insensitive_bot_re.split(l)[-1].strip() for l in lines]
     
-
- 
+    command_args = [l.split(' ', 1) for l in lines]
+    command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
+    return command_args
+    
+    
 class WebHookHandler(MainHandler):
 
     def initialize(self, actions, *args, **kwargs):
@@ -155,19 +162,7 @@ class WebHookHandler(MainHandler):
                     repo = payload['repository']['name']
                     session = AUTH.session(installation_id)
                     is_admin = session.is_collaborator(org, repo, user)
-                    lines = body.splitlines()
-                    print(':: lines are', lines)
-                    lines = [l.strip() for l in lines if botname in l]
-                    print(':: filter by botname', lines)
-                    lines = [l.replace(botname+"[bot]", botname.lower()) for l in lines if botname.lower() in l.lower()]
-                    print(':: normalize bot name', lines)
-                    lines = [l.split(botname.lower())[1] for l in lines]
-                    print(':: remove botname', lines)
-                    
-                    command_args = [l.split(' ', 1) for l in lines]
-                    command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
-                    print(':: command and args botname', lines)
-                    
+                    command_args = process_mentionning_comment(body, botname)
                     for (command, arguments) in command_args:
                         print("    :: treating", command, arguments)
                         handler = self.actions.get(command, None)
@@ -210,7 +205,9 @@ from .commands import replyuser, zen
 
 def main():
     print('====== (re) starting ======')
-    
+    global CONFIG, AUTH
+    CONFIG = load_config()
+    AUTH = Authenticator(CONFIG['integration_id'], CONFIG['key'])
     MeeseeksBox(commands={
         'hello': replyuser,
         'zen': zen
