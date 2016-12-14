@@ -167,7 +167,9 @@ class WebHookHandler(MainHandler):
                         print("    :: treating", command, arguments)
                         handler = self.actions.get(command, None)
                         if handler:
+                            print("    :: testing who can use ", str(handler) )
                             if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
+                                print("    :: authorisation granted ", handler.scope)
                                 handler(session=session, payload=payload, arguments=arguments)
                             else :
                                 print('I Cannot let you do that')

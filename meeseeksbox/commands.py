@@ -23,6 +23,7 @@ from textwrap import dedent
     
 @everyone
 def zen(*, session, payload, arguments):
+    print('Posting the zen of Python triggered')
     comment_url     = payload['issue']['comments_url']
     session.post_comment(comment_url,
     dedent(
