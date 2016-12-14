@@ -1,12 +1,10 @@
 import os
-import random
 import base64
 import hmac
 import tornado
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-from .scopes import admin, everyone
 
 
 
@@ -19,7 +17,7 @@ def load_config():
 
     ### Setup integration ID ###
     integration_id = os.environ.get('GITHUB_INTEGRATION_ID')
-    if not integration_iu:
+    if not integration_id:
         raise ValueError('Please set GITHUB_INTEGRATION_ID')
 
     integration_id = int(integration_id)
@@ -89,25 +87,6 @@ import re
 
 hello_re = re.compile(re.escape(CONFIG['at_botname'])+' hello')
 
-@everyone
-def replyuser(session, payload):
-    print("I'm replying to a user, look at me.")
-    comment_url     = payload['issue']['comments_url']
-    user            = payload['issue']['user']['login']
-    c = random.choice(
-            ("Helloooo @{user}, I'm Mr. Meeseeks! Look at me!",
-            "Look at me, @{user}, I'm Mr. Meeseeks! ",
-            "I'm Mr. Meeseek, @{user}, Look at meee ! ",
-            )
-        )
-    session.post_comment(comment_url, c.format(user=user))
-
-@admin
-def replyadmin(session, payload):
-    print("I'm replying to an admin, look at me.")
-    comment_url     = payload['issue']['comments_url']
-    user            = payload['issue']['user']['login']
-    session.post_comment(comment_url, "Hello @{user}. Waiting for your orders.".format(user=user))
     
 
  
@@ -141,9 +120,8 @@ class WebHookHandler(MainHandler):
             print('No action available  for the webhook :', payload)
 
     def dispatch_action(self, type_, payload):
-
+        botname = CONFIG['botname']
         ## new issue/PR opened
-        print('=== dispatching')
         if type_ == 'opened':
             issue = payload.get('issue', None)
             if not issue:
@@ -162,32 +140,37 @@ class WebHookHandler(MainHandler):
             if comment:
                 print('Got a comment')
                 user = payload['comment']['user']['login']
-                if user == CONFIG['botname'].lower()+'[bot]':
+                if user == botname.lower()+'[bot]':
                     print('Not responding to self')
                     return self.finish("Not responding to self")
                 if '[bot]' in user:
                     print('Not responding to another bot')
                     return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
-                if CONFIG['botname'] in body:
+                if botname in body:
 
                     # to dispatch to commands
                     installation_id = payload['installation']['id']
                     org = payload['organization']['login']
                     repo = payload['repository']['name']
-
                     session = AUTH.session(installation_id)
                     is_admin = session.is_collaborator(org, repo, user)
-
-                    for reg, handler in self.actions:
-                        if reg.match(body):
-                            print('I match !, triggering', handler)
+                    
+                    lines = body.splitlines()
+                    lines = [l.strip() for l in lines if botname in l]
+                    lines = [l.split(botname)[1] for l in lines]
+                    command_args = [l.split(' ', 1) for l in lines]
+                    command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
+                    
+                    for (command, arguments) in command_args:
+                        handler = self.actions.get(command, None)
+                        if handler:
                             if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
-                                request_repo = handler(session, payload)
+                                handler(session=session, payload=payload, arguments=arguments)
                             else :
-                                print('cannot do that')
+                                print('I Cannot let you do that')
                         else:
-                            print(body, 'did not match', reg)
+                            print('unnknown command', command)
                     pass
                 else:
                     print('Was not mentioned', CONFIG['botname'], body, '|',user)
@@ -200,22 +183,28 @@ class WebHookHandler(MainHandler):
             print("can't deal with ", type_, "yet")
 
 
-def main():
-    actions = (
-            (hello_re, replyuser),
-        )
+class MeeseeksBox:
+    
+    def __init__(self, commands):
+        self.commands = commands
+        self.port = int(os.environ.get('PORT', 5000))
+        self.application = None
         
-       
-    application = tornado.web.Application([
-        (r"/", MainHandler),
-        (r"/webhook", WebHookHandler, dict({'actions':actions}))
-    ])
-
-    port = int(os.environ.get('PORT', 5000))
-    tornado.httpserver.HTTPServer(application).listen(port)
-    tornado.ioloop.IOLoop.instance().start()
-
+    def start(self):
+        self.application = tornado.web.Application([
+            (r"/", MainHandler),
+            (r"/webhook", WebHookHandler, dict({'actions':self.commands}))
+        ])
+        
+        tornado.httpserver.HTTPServer(self.application).listen(self.port)
+        tornado.ioloop.IOLoop.instance().start()
+        
+from .commands import replyuser, zen
 
 if __name__ == "__main__":
     print('====== (re) starting ======')
-    main()
+    
+    MeeseeksBox(actions={
+        'hello': replyuser,
+        'zen': zen
+    }).start()
