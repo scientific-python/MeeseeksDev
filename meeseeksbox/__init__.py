@@ -138,7 +138,6 @@ class WebHookHandler(MainHandler):
             comment = payload.get('comment', None)
             installation = payload.get('installation', None)
             if comment:
-                print('Got a comment')
                 user = payload['comment']['user']['login']
                 if user == botname.lower()+'[bot]':
                     print('Not responding to self')
@@ -147,6 +146,7 @@ class WebHookHandler(MainHandler):
                     print('Not responding to another bot')
                     return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
+                print('Got a comment', body)
                 if botname in body:
 
                     # to dispatch to commands
@@ -158,7 +158,9 @@ class WebHookHandler(MainHandler):
                     
                     lines = body.splitlines()
                     lines = [l.strip() for l in lines if botname in l]
+                    lines = [l.replace(botname+"[bot]", botname.lower()) for l in lines if botname.lower() in l.lower()]
                     lines = [l.split(botname)[1] for l in lines]
+                    
                     command_args = [l.split(' ', 1) for l in lines]
                     command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
                     
