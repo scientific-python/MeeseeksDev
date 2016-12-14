@@ -155,16 +155,21 @@ class WebHookHandler(MainHandler):
                     repo = payload['repository']['name']
                     session = AUTH.session(installation_id)
                     is_admin = session.is_collaborator(org, repo, user)
-                    
                     lines = body.splitlines()
+                    print(':: lines are', lines)
                     lines = [l.strip() for l in lines if botname in l]
+                    print(':: filter by botname', lines)
                     lines = [l.replace(botname+"[bot]", botname.lower()) for l in lines if botname.lower() in l.lower()]
-                    lines = [l.split(botname)[1] for l in lines]
+                    print(':: normalize bot name', lines)
+                    lines = [l.split(botname.lower())[1] for l in lines]
+                    print(':: remove botname', lines)
                     
                     command_args = [l.split(' ', 1) for l in lines]
                     command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
+                    print(':: command and args botname', lines)
                     
                     for (command, arguments) in command_args:
+                        print("    :: treating", command, arguments)
                         handler = self.actions.get(command, None)
                         if handler:
                             if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
