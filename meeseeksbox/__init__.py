@@ -201,10 +201,13 @@ class MeeseeksBox:
         
 from .commands import replyuser, zen
 
-if __name__ == "__main__":
+def main():
     print('====== (re) starting ======')
     
     MeeseeksBox(actions={
         'hello': replyuser,
         'zen': zen
     }).start()
+
+if __name__ == "__main__":
+    main()
