@@ -204,7 +204,7 @@ from .commands import replyuser, zen
 def main():
     print('====== (re) starting ======')
     
-    MeeseeksBox(actions={
+    MeeseeksBox(commands={
         'hello': replyuser,
         'zen': zen
     }).start()
