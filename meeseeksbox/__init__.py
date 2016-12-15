@@ -83,14 +83,13 @@ class MainHandler(BaseHandler):
 # MIGRATE_RE = re.compile(re.escape(AT_BOTNAME)+'(?P<sudo> sudo)?(?: can you)? migrate (?:this )?to (?P<org>[a-z-]+)/(?P<repo>[a-z-]+)')
 # BACKPORT_RE = re.compile(re.escape(AT_BOTNAME)+'(?: can you)? backport (?:this )?(?:on|to) ([\w.]+)')
 
-def process_mentionning_comment(body, botname):
+def process_mentionning_comment(body, bot_re):
     """
     Given a comment body and a bot name parse this into a tuple of (command, arguments)
     """
-    insensitive_bot_re = re.compile('@?'+re.escape(botname)+'(?:\[bot\])?', re.IGNORECASE)
     lines = body.splitlines()
-    lines = [l.strip() for l in lines if insensitive_bot_re.search(l)]
-    lines = [insensitive_bot_re.split(l)[-1].strip() for l in lines]
+    lines = [l.strip() for l in lines if bot_re.search(l)]
+    lines = [bot_re.split(l)[-1].strip() for l in lines]
     
     command_args = [l.split(' ', 1) for l in lines]
     command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
@@ -99,8 +98,10 @@ def process_mentionning_comment(body, botname):
     
 class WebHookHandler(MainHandler):
 
-    def initialize(self, actions, *args, **kwargs):
+    def initialize(self, actions, config, *args, **kwargs):
         self.actions = actions
+        self.config = config
+        
         super().initialize(*args, **kwargs)
         print('Webhook initialize got', args, kwargs)
 
@@ -113,7 +114,7 @@ class WebHookHandler(MainHandler):
 
         if not verify_signature(self.request.body,
                             self.request.headers['X-Hub-Signature'],
-                            CONFIG['webhook_secret']):
+                            self.config['webhook_secret']):
             return self.error('Cannot validate GitHub payload with ' \
                                 'provided WebHook secret')
 
@@ -127,7 +128,7 @@ class WebHookHandler(MainHandler):
             print('No action available  for the webhook :', payload)
 
     def dispatch_action(self, type_, payload):
-        botname = CONFIG['botname']
+        botname = self.config['botname']
         ## new issue/PR opened
         if type_ == 'opened':
             issue = payload.get('issue', None)
@@ -136,7 +137,7 @@ class WebHookHandler(MainHandler):
                 return self.error('Not really good, request has no issue')
             if issue:
                 user = payload['issue']['user']['login']
-                if user == CONFIG['botname'].lower()+'[bot]':
+                if user == self.config['botname'].lower()+'[bot]':
                     return self.finish("Not responding to self")
             # todo dispatch on on-open
 
@@ -155,15 +156,16 @@ class WebHookHandler(MainHandler):
                 body = payload['comment']['body']
                 print('Got a comment', body)
                 if botname in body:
-
                     # to dispatch to commands
                     installation_id = payload['installation']['id']
                     org = payload['organization']['login']
                     repo = payload['repository']['name']
                     session = AUTH.session(installation_id)
                     is_admin = session.is_collaborator(org, repo, user)
-                    command_args = process_mentionning_comment(body, botname)
+                    insensitive_bot_re = re.compile('@?'+re.escape(botname)+'(?:\[bot\])?', re.IGNORECASE)
+                    command_args = process_mentionning_comment(body, insensitive_bot_re)
                     for (command, arguments) in command_args:
+                        
                         print("    :: treating", command, arguments)
                         handler = self.actions.get(command, None)
                         if handler:
@@ -189,15 +191,16 @@ class WebHookHandler(MainHandler):
 
 class MeeseeksBox:
     
-    def __init__(self, commands):
+    def __init__(self, commands, config):
         self.commands = commands
         self.port = int(os.environ.get('PORT', 5000))
         self.application = None
+        self.config = config
         
     def start(self):
         self.application = tornado.web.Application([
             (r"/", MainHandler),
-            (r"/webhook", WebHookHandler, dict({'actions':self.commands}))
+            (r"/webhook", WebHookHandler, {'actions':self.commands, 'config':self.config})
         ])
         
         tornado.httpserver.HTTPServer(self.application).listen(self.port)
@@ -213,7 +216,7 @@ def main():
     MeeseeksBox(commands={
         'hello': replyuser,
         'zen': zen
-    }).start()
+    }, config=CONFIG).start()
 
 if __name__ == "__main__":
     main()
