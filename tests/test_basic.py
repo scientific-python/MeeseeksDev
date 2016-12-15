@@ -3,6 +3,7 @@ Test basic functionality of the MeeseeksBox system
 """
 
 from meeseeksbox import process_mentionning_comment
+import re
 
 def test_command_finding():
     """
@@ -11,6 +12,7 @@ def test_command_finding():
     """
     
     botname = 'BotName'
+    insensitive_bot_re = re.compile('[^`]@?'+re.escape(botname)+'(?:\[bot\])?[^`]', re.IGNORECASE)
     
     parsed = process_mentionning_comment("""
     botname hello
@@ -18,8 +20,6 @@ def test_command_finding():
     @botname backport to 4.x
 @botname[bot] zen
     @BotName[bot] migrate to ipython/notebook
-    """, botname)
+    """, insensitive_bot_re)
     
     assert len(parsed) == 5, 'Bot was not able to correctly detec on of the mention %s' % parsed
-    
-    

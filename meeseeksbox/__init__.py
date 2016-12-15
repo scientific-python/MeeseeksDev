@@ -7,67 +7,50 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 
+ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
+
 def load_config():
     """
     Load the configuration, for now stored in the environment
     """
     config={}
 
-
-    ### Setup integration ID ###
     integration_id = os.environ.get('GITHUB_INTEGRATION_ID')
+    botname = os.environ.get('GITHUB_BOT_NAME', None)
+    
     if not integration_id:
         raise ValueError('Please set GITHUB_INTEGRATION_ID')
 
-    integration_id = int(integration_id)
-    config['integration_id'] = integration_id
-
-
-    ### Setup bot name
-
-    botname = os.environ.get('GITHUB_BOT_NAME', None)
     if not botname:
         raise ValueError('Need to set a botnames')
-
     if "@" in botname:
         print("Don't include @ in the botname !")
 
     botname = botname.replace('@','')
     at_botname = '@'+botname
-
-    config['botname'] = botname
-    config['at_botname'] = at_botname
-
-    config['webhook_secret'] = os.environ.get('WEBHOOK_SECRET')
+    integration_id = int(integration_id)
 
     config['key'] = base64.b64decode(bytes(os.environ.get('B64KEY'), 'ASCII'))
+    config['botname'] = botname
+    config['at_botname'] = at_botname
+    config['integration_id'] = integration_id
+    config['webhook_secret'] = os.environ.get('WEBHOOK_SECRET')
 
     return config
 
-CONFIG = None 
-AUTH = None
-
 from .utils import Authenticator
 
-
-### setup various regular expressions
-# import re
-# MIGRATE_RE = re.compile(re.escape(AT_BOTNAME)+'(?P<sudo> sudo)?(?: can you)? migrate (?:this )?to (?P<org>[a-z-]+)/(?P<repo>[a-z-]+)')
-# BACKPORT_RE = re.compile(re.escape(AT_BOTNAME)+'(?: can you)? backport (?:this )?(?:on|to) ([\w.]+)')
-
-### we need to setup this header
-ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
-
-### Private KEY
-
-
 def verify_signature(payload, signature, secret):
+    """
+    Make sure hooks are encoded correctly
+    """
     expected = 'sha1=' + hmac.new(secret.encode('ascii'),
                                   payload, 'sha1').hexdigest()
 
     return hmac.compare_digest(signature, expected)
 
 class BaseHandler(tornado.web.RequestHandler):
+    
     def error(self, message):
         self.set_status(500)
         self.write({'status': 'error', 'message': message})
@@ -79,9 +62,6 @@ class MainHandler(BaseHandler):
 
     def get(self):
         self.finish('No')
-
-# MIGRATE_RE = re.compile(re.escape(AT_BOTNAME)+'(?P<sudo> sudo)?(?: can you)? migrate (?:this )?to (?P<org>[a-z-]+)/(?P<repo>[a-z-]+)')
-# BACKPORT_RE = re.compile(re.escape(AT_BOTNAME)+'(?: can you)? backport (?:this )?(?:on|to) ([\w.]+)')
 
 def process_mentionning_comment(body, bot_re):
     """
@@ -126,6 +106,12 @@ class WebHookHandler(MainHandler):
             return self.dispatch_action(action, payload)
         else:
             print('No action available  for the webhook :', payload)
+        
+    @property
+    def mentioned_bot_re(self):
+        return re.compile('@?'+re.escape(self.botname)+'(?:\[bot\])?', re.IGNORECASE)
+        
+        
 
     def dispatch_action(self, type_, payload):
         botname = self.config['botname']
@@ -155,31 +141,10 @@ class WebHookHandler(MainHandler):
                     return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
                 print('Got a comment', body)
-                if botname in body:
-                    # to dispatch to commands
-                    installation_id = payload['installation']['id']
-                    org = payload['organization']['login']
-                    repo = payload['repository']['name']
-                    session = AUTH.session(installation_id)
-                    is_admin = session.is_collaborator(org, repo, user)
-                    insensitive_bot_re = re.compile('@?'+re.escape(botname)+'(?:\[bot\])?', re.IGNORECASE)
-                    command_args = process_mentionning_comment(body, insensitive_bot_re)
-                    for (command, arguments) in command_args:
-                        
-                        print("    :: treating", command, arguments)
-                        handler = self.actions.get(command, None)
-                        if handler:
-                            print("    :: testing who can use ", str(handler) )
-                            if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
-                                print("    :: authorisation granted ", handler.scope)
-                                handler(session=session, payload=payload, arguments=arguments)
-                            else :
-                                print('I Cannot let you do that')
-                        else:
-                            print('unnknown command', command)
-                    pass
+                if self.mentioned_bot_re.findall(body):
+                    self.dispatch_on_mention(body, payload, user)
                 else:
-                    print('Was not mentioned', CONFIG['botname'], body, '|',user)
+                    print('Was not mentioned', self.config['botname'], body, '|',user)
             elif installation and installation.get('account'):
                 print('we got a new installation maybe ?!', payload)
                 return self.finish()
@@ -187,8 +152,29 @@ class WebHookHandler(MainHandler):
                 print('not handled', payload)
         else :
             print("can't deal with ", type_, "yet")
-
-
+            
+    def dispatch_on_mention(self, body, payload, user):
+        
+        # to dispatch to commands
+        installation_id = payload['installation']['id']
+        org = payload['organization']['login']
+        repo = payload['repository']['name']
+        session = self.auth.session(installation_id)
+        is_admin = session.is_collaborator(org, repo, user)
+        command_args = process_mentionning_comment(body, self.mention_bot_re)
+        for (command, arguments) in command_args:
+            print("    :: treating", command, arguments)
+            handler = self.actions.get(command, None)
+            if handler:
+                print("    :: testing who can use ", str(handler) )
+                if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
+                    print("    :: authorisation granted ", handler.scope)
+                    handler(session=session, payload=payload, arguments=arguments)
+                else :
+                    print('I Cannot let you do that')
+            else:
+                print('unnknown command', command)
+                
 class MeeseeksBox:
     
     def __init__(self, commands, config):
@@ -196,13 +182,19 @@ class MeeseeksBox:
         self.port = int(os.environ.get('PORT', 5000))
         self.application = None
         self.config = config
+        self.auth = Authenticator(self.config['integration_id'], self.config['key'])
+        print("=====================================")
+        print("==    current installations        ==")
+        print(self.auth.list_installations())
+        print("==                                 ==")
+        print("=====================================")
         
     def start(self):
         self.application = tornado.web.Application([
             (r"/", MainHandler),
             (r"/webhook", WebHookHandler, {'actions':self.commands, 'config':self.config})
         ])
-        
+
         tornado.httpserver.HTTPServer(self.application).listen(self.port)
         tornado.ioloop.IOLoop.instance().start()
         
@@ -210,13 +202,11 @@ from .commands import replyuser, zen
 
 def main():
     print('====== (re) starting ======')
-    global CONFIG, AUTH
-    CONFIG = load_config()
-    AUTH = Authenticator(CONFIG['integration_id'], CONFIG['key'])
+    config = load_config()
     MeeseeksBox(commands={
         'hello': replyuser,
         'zen': zen
-    }, config=CONFIG).start()
+    }, config=config).start()
 
 if __name__ == "__main__":
     main()

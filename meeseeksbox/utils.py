@@ -64,6 +64,33 @@ class Authenticator:
     def session(self, installation_id):
         return Session(self.integration_id, self.rsadata, installation_id)
         
+    def list_installations(self):
+        response = self._integration_authenticated_request('GET', 'https://api.github.com/integration/installations')
+        response.raise_for_status()
+        return response.json()
+        
+
+    def _integration_authenticated_request(self, method, url):
+        self.since= int(datetime.datetime.now().timestamp())
+        payload = dict({
+          'iat': self.since,
+          'exp': self.since + self.duration,
+          'iss': self.integration_id,
+        })
+
+        tok = jwt.encode(payload, key=self.rsadata, algorithm='RS256')
+
+        headers = {'Authorization': 'Bearer {}'.format(tok.decode()),
+                   'Accept' : 'application/vnd.github.machine-man-preview+json' ,
+                   'Host': 'api.github.com',
+                   'User-Agent': 'python/requests'}
+                   
+        req = requests.Request('POST', url, headers=headers)
+        prepared = req.prepare()
+        with requests.Session() as s:
+            return s.send(prepared)
+        
+        
         
 
 class Session(Authenticator):
@@ -80,36 +107,14 @@ class Session(Authenticator):
         return self._token
             
         
-
     def regen_token(self):
-  
-        self.since= int(datetime.datetime.now().timestamp())
-        payload = dict({
-          'iat': self.since,
-          'exp': self.since + self.duration,
-          'iss': self.integration_id,
-        })
-
-
-        tok = jwt.encode(payload, key=self.rsadata, algorithm='RS256')
-
-        headers = {'Authorization': 'Bearer {}'.format(tok.decode()),
-                   'Accept' : 'application/vnd.github.machine-man-preview+json' ,
-                   'Host': 'api.github.com',
-                   'User-Agent': 'python/requests'}
-
+        method = 'GET'
         url = 'https://api.github.com/installations/%s/access_tokens'%self.installation_id
-        req = requests.Request('POST',url, headers=headers)
-        prepared = req.prepare()
-
-
-        with requests.Session() as s:
-            resp = s.send(prepared)
+        resp = self._integration_authenticated_request(method, url)
         try:
             self._token = json.loads(resp.content.decode())['token']
         except:
             print(resp.content, url, payload)
-
 
     
     def ghrequest(self, method, url, json):
