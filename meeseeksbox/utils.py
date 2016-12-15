@@ -65,7 +65,7 @@ class Authenticator:
         return Session(self.integration_id, self.rsadata, installation_id)
         
     def list_installations(self):
-        response = self._integration_authenticated_request('GET', 'https://api.github.com/integration/installations')
+        response = self._integration_authenticated_request('GET', "https://api.github.com/integration/installations")
         response.raise_for_status()
         return response.json()
         
@@ -85,7 +85,7 @@ class Authenticator:
                    'Host': 'api.github.com',
                    'User-Agent': 'python/requests'}
                    
-        req = requests.Request('POST', url, headers=headers)
+        req = requests.Request(method, url, headers=headers)
         prepared = req.prepare()
         with requests.Session() as s:
             return s.send(prepared)
