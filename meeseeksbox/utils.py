@@ -90,8 +90,6 @@ class Authenticator:
         with requests.Session() as s:
             return s.send(prepared)
         
-        
-        
 
 class Session(Authenticator):
 
@@ -114,7 +112,7 @@ class Session(Authenticator):
         try:
             self._token = json.loads(resp.content.decode())['token']
         except:
-            print(resp.content, url, payload)
+            print(resp.content, url)
 
     
     def ghrequest(self, method, url, json):
