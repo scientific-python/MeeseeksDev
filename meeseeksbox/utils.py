@@ -60,6 +60,7 @@ class Authenticator:
         self._token = None
         self.integration_id = integration_id
         self.rsadata = rsadata
+        self._build_auth_id_mapping()
 
     def session(self, installation_id):
         return Session(self.integration_id, self.rsadata, installation_id)
