@@ -2,6 +2,7 @@ import re
 import os
 import base64
 import hmac
+import json
 import tornado
 import tornado.httpserver
 import tornado.ioloop
@@ -73,14 +74,14 @@ def process_mentionning_comment(body, bot_re):
     command_args = [l.split(' ', 1) for l in lines]
     command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
     return command_args
-    
-    
+
+
 class WebHookHandler(MainHandler):
 
     def initialize(self, actions, config, *args, **kwargs):
         self.actions = actions
         self.config = config
-        
+
         super().initialize(*args, **kwargs)
         print('Webhook initialize got', args, kwargs)
 
@@ -173,7 +174,6 @@ class WebHookHandler(MainHandler):
             else:
                 print('unnknown command', command)
 
-import json
 
 class MeeseeksBox:
     
@@ -204,9 +204,9 @@ def main():
     print('====== (re) starting ======')
     config = load_config()
     MeeseeksBox(commands={
-        'hello': replyuser,
-        'zen': zen
-    }, config=config).start()
+            'hello': replyuser,
+            'zen': zen
+        }, config=config).start()
 
 if __name__ == "__main__":
     main()

@@ -65,10 +65,28 @@ class Authenticator:
         return Session(self.integration_id, self.rsadata, installation_id)
         
     def list_installations(self):
-        response = self._integration_authenticated_request('GET', "https://api.github.com/integration/installations")
+        """
+        Todo: Pagination
+        """
+        response = self._integration_authenticated_request(
+            'GET', "https://api.github.com/integration/installations")
         response.raise_for_status()
         return response.json()
-        
+
+    def _build_auth_id_mapping(self):
+        """
+        Build an organisation/repo -> installation_id mappingg in order to be able
+        to do cross repository operations.
+        """
+
+        installations = self.list_installations()
+        import pprint
+        for installation in installations:
+            iid = installation['id']
+            session = self.session(iid)
+            repositories = session.ghrequest(
+                'GET', installation['repositories_url']).json()
+            pprint.pprint(repositories)
 
     def _integration_authenticated_request(self, method, url):
         self.since= int(datetime.datetime.now().timestamp())
