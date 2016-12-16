@@ -46,7 +46,6 @@ def verify_signature(payload, signature, secret):
     """
     expected = 'sha1=' + hmac.new(secret.encode('ascii'),
                                   payload, 'sha1').hexdigest()
-
     return hmac.compare_digest(signature, expected)
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -112,7 +111,6 @@ class WebHookHandler(MainHandler):
         return re.compile('@?'+re.escape(self.botname)+'(?:\[bot\])?', re.IGNORECASE)
         
         
-
     def dispatch_action(self, type_, payload):
         botname = self.config['botname']
         ## new issue/PR opened
@@ -174,7 +172,9 @@ class WebHookHandler(MainHandler):
                     print('I Cannot let you do that')
             else:
                 print('unnknown command', command)
-                
+
+import json
+
 class MeeseeksBox:
     
     def __init__(self, commands, config):
@@ -185,7 +185,7 @@ class MeeseeksBox:
         self.auth = Authenticator(self.config['integration_id'], self.config['key'])
         print("=====================================")
         print("==    current installations        ==")
-        print(self.auth.list_installations())
+        print(json.dumps(self.auth.list_installations(), indent=2))
         print("==                                 ==")
         print("=====================================")
         
