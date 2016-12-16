@@ -183,6 +183,7 @@ class MeeseeksBox:
         self.application = None
         self.config = config
         self.auth = Authenticator(self.config['integration_id'], self.config['key'])
+        self.auth._build_auth_id_mapping()
         print("=====================================")
         print("==    current installations        ==")
         print(json.dumps(self.auth.list_installations(), indent=2))
