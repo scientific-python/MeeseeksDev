@@ -85,7 +85,7 @@ class Authenticator:
             iid = installation['id']
             session = self.session(iid)
             repositories = session.ghrequest(
-                'GET', installation['repositories_url']).json()
+                'GET', installation['repositories_url'], json=None).json()
             pprint.pprint(repositories)
 
     def _integration_authenticated_request(self, method, url):
