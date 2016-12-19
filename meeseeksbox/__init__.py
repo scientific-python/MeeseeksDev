@@ -10,7 +10,8 @@ import tornado.web
 
 ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
 
-def load_config():
+
+def load_config_from_env():
     """
     Load the configuration, for now stored in the environment
     """
@@ -186,11 +187,6 @@ class MeeseeksBox:
         self.config = config
         self.auth = Authenticator(self.config['integration_id'], self.config['key'])
         self.auth._build_auth_id_mapping()
-        print("=====================================")
-        print("==    current installations        ==")
-        print(json.dumps(self.auth.list_installations(), indent=2))
-        print("==                                 ==")
-        print("=====================================")
         
     def start(self):
         self.application = tornado.web.Application([
@@ -205,7 +201,7 @@ from .commands import replyuser, zen, backport
 
 def main():
     print('====== (re) starting ======')
-    config = load_config()
+    config = load_config_from_env()
     MeeseeksBox(commands={
             'hello': replyuser,
             'zen': zen,

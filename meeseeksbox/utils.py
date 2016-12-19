@@ -54,6 +54,8 @@ class Authenticator:
         self._token = None
         self.integration_id = integration_id
         self.rsadata = rsadata
+        # TODO: this mapping is built at startup, we should update it when we
+        # have new / deleted installations
         self.idmap = {}
 
     def session(self, installation_id):
@@ -74,15 +76,14 @@ class Authenticator:
         """
 
         installations = self.list_installations()
-        print('=============================')
-        print('Here are my repositories.....')
         for installation in installations:
             iid = installation['id']
             session = self.session(iid)
             repositories = session.ghrequest(
                 'GET', installation['repositories_url'], json=None).json()
-            print(repositories)
-        print('=============================')
+            for repo in repositories['repositories']:
+                self.idmap[repo['full_name']] = iid
+
 
 
     def _integration_authenticated_request(self, method, url):
