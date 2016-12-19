@@ -70,7 +70,6 @@ class Authenticator:
         """
         response = self._integration_authenticated_request(
             'GET', "https://api.github.com/integration/installations")
-        response.raise_for_status()
         return response.json()
 
     def _build_auth_id_mapping(self):
@@ -147,7 +146,7 @@ class Session(Authenticator):
         with requests.Session() as s:
             response = s.send(prepare())
             if response.status_code == 401:
-                print("Not authorized", response.json)
+                print("Not authorized", response.json())
                 self.regen_token()
                 response = s.send(prepare())
             response.raise_for_status()
