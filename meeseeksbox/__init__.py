@@ -109,7 +109,7 @@ class WebHookHandler(MainHandler):
             print('No action available  for the webhook :', payload)
         
     @property
-    def mentioned_bot_re(self):
+    def mention_bot_re(self):
         botname = self.config['botname']
         return re.compile('@?'+re.escape(botname)+'(?:\[bot\])?', re.IGNORECASE)
         
