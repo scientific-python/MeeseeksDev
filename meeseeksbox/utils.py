@@ -79,7 +79,9 @@ class Authenticator:
         """
 
         installations = self.list_installations()
+        print('Here are my installations')
         import pprint
+        pprint.pprint(installations)
         for installation in installations:
             iid = installation['id']
             session = self.session(iid)
