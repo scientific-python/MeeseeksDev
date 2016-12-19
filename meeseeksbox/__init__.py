@@ -195,7 +195,7 @@ class MeeseeksBox:
     def start(self):
         self.application = tornado.web.Application([
             (r"/", MainHandler),
-            (r"/webhook", WebHookHandler, {'actions':self.commands, 'config':self.config, 'auth': auth})
+            (r"/webhook", WebHookHandler, {'actions':self.commands, 'config':self.config, 'auth': self.auth})
         ])
 
         tornado.httpserver.HTTPServer(self.application).listen(self.port)
