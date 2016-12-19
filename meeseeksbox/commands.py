@@ -16,7 +16,7 @@ from .scopes import admin, everyone
 def replyuser(*, session, payload, arguments):
     print("I'm replying to a user, look at me.")
     comment_url     = payload['issue']['comments_url']
-    user            = payload['issue']['user']['login']
+    user = payload['comment']['user']['login']
     c = random.choice(
             ("Helloooo @{user}, I'm Mr. Meeseeks! Look at me!",
             "Look at me, @{user}, I'm Mr. Meeseeks! ",
@@ -29,7 +29,6 @@ from textwrap import dedent
     
 @everyone
 def zen(*, session, payload, arguments):
-    print('Posting the zen of Python triggered')
     comment_url     = payload['issue']['comments_url']
     session.post_comment(comment_url,
     dedent(
@@ -63,7 +62,6 @@ def zen(*, session, payload, arguments):
 
 @admin
 def replyadmin(*, session, payload, arguments):
-    print("I'm replying to an admin, look at me.")
     comment_url     = payload['issue']['comments_url']
     user            = payload['issue']['user']['login']
     session.post_comment(comment_url, "Hello @{user}. Waiting for your orders.".format(user=user))

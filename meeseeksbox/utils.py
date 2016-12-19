@@ -54,6 +54,7 @@ class Authenticator:
         self._token = None
         self.integration_id = integration_id
         self.rsadata = rsadata
+        self.idmap = {}
 
     def session(self, installation_id):
         return Session(self.integration_id, self.rsadata, installation_id)
@@ -73,17 +74,16 @@ class Authenticator:
         """
 
         installations = self.list_installations()
-        print('Here are my installations')
-        import pprint
-        pprint.pprint(installations)
+        print('=============================')
+        print('Here are my repositories.....')
         for installation in installations:
             iid = installation['id']
             session = self.session(iid)
-            print('listing reposotories for installation', iid)
             repositories = session.ghrequest(
                 'GET', installation['repositories_url'], json=None).json()
-            print('one repo:')
-            pprint.pprint(repositories)
+            print(repositories)
+        print('=============================')
+
 
     def _integration_authenticated_request(self, method, url):
         self.since= int(datetime.datetime.now().timestamp())
@@ -99,7 +99,6 @@ class Authenticator:
                    'Accept' : 'application/vnd.github.machine-man-preview+json' ,
                    'Host': 'api.github.com',
                    'User-Agent': 'python/requests'}
-        print(':::', method, url, headers)
         req = requests.Request(method, url, headers=headers)
         prepared = req.prepare()
         with requests.Session() as s:
@@ -144,7 +143,6 @@ class Session(Authenticator):
         with requests.Session() as s:
             response = s.send(prepare())
             if response.status_code == 401:
-                print("Not authorized", response.json())
                 self.regen_token()
                 response = s.send(prepare())
             response.raise_for_status()
@@ -168,7 +166,6 @@ class Session(Authenticator):
             resp.raise_for_status()
 
     def post_comment(self, comment_url, body):
-        print('### Look at me posting comment')
         self.ghrequest('POST', comment_url, json={"body":body})
 
     def get_collaborator_list(self, org, repo):
