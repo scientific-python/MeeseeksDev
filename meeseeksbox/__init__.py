@@ -201,14 +201,15 @@ class MeeseeksBox:
         tornado.httpserver.HTTPServer(self.application).listen(self.port)
         tornado.ioloop.IOLoop.instance().start()
         
-from .commands import replyuser, zen
+from .commands import replyuser, zen, backport
 
 def main():
     print('====== (re) starting ======')
     config = load_config()
     MeeseeksBox(commands={
             'hello': replyuser,
-            'zen': zen
+            'zen': zen,
+            'backport': backport
         }, config=config).start()
 
 if __name__ == "__main__":

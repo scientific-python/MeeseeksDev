@@ -6,12 +6,6 @@ import datetime
 import json
 import requests
 import re
-import subprocess
-import git
-import mock
-import pipes
-import os
-import sys
 
 API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}'
 
@@ -264,92 +258,3 @@ class Session(Authenticator):
 
         self.post_comment(data['issue']['comments_url'], body='Done as {}/{}#{}.'.format(org, repo, new_issue['number']))
         self.ghrequest('PATCH', data['issue']['url'], json={'state':'closed'})
-
-    def backport(self, target_branch, data):
-        # collect initial data
-        prnumber = data['issue']['number']
-        prtitle  = data['issue']['title']
-        org_name = data['organization']['login']
-        repo_name = data['repository']['name']
-        
-        # collect extended data on the PR
-        print('== Collecting data on Pull-request...')
-        r = self.ghrequest('GET', 
-            'https://api.github.com/repos/{}/{}/pulls/{}'.format(org_name, repo_name, prnumber),
-            json=None)
-        pr_data = r.json()
-        merge_sha = pr_data['merge_commit_sha']
-        body = pr_data['body']
-        
-        # clone locally
-        # this process can take some time, regen token
-        self.regen_token()
-        atk = self.token()
-
-        if os.path.exists(repo_name):
-            print('== Cleaning up previsous work... ')
-            subprocess.run('rm -rf {}'.format(repo_name).split(' '))
-            print('== Done cleaning ')
-
-        print('== Cloning current repository, this can take some time..')
-        process = subprocess.run(['git', 'clone', 'https://x-access-token:{}@github.com/{}/{}'.format(atk, org_name, repo_name)])
-        print('== Cloned..')
-        process.check_returncode()
-
-        subprocess.run('git config --global user.email ipy.bot@bot.com'.split(' '))
-        subprocess.run('git config --global user.name FriendlyBot'.split(' '))
-
-        # do the backport on local filesystem
-        repo = git.Repo(repo_name)
-        print('== Fetching branch to backport on ...')
-        repo.remotes.origin.fetch('refs/heads/{}:workbranch'.format(target_branch))
-        repo.git.checkout('workbranch')
-        print('== Fetching Commits to backport...')
-        repo.remotes.origin.fetch('{mergesha}'.format(num=prnumber, mergesha=merge_sha))
-        print('== All has been fetched correctly')
-
-        # remove mentions from description, to avoid pings:
-        description = body.replace('@', ' ').replace('#', ' ')
-
-        print("Cherry-picking %s" % merge_sha)
-        args = ('-m', '1', merge_sha)
-
-        try:
-            with mock.patch.dict('os.environ', {'GIT_EDITOR': 'true'}):
-                repo.git.cherry_pick(*args)
-        except Exception as e:
-            print('\n' + e.stderr.decode('utf8', 'replace'), file=sys.stderr)
-            print('\n' + repo.git.status(), file=sys.stderr)
-            cmd = ' '.join(pipes.quote(arg) for arg in sys.argv)
-            print('\nPatch did not apply. Resolve conflicts (add, not commit), then re-run `%s`' % cmd, file=sys.stderr)
-
-        # write the commit message
-        msg = "Backport PR #%i: %s" % (prnumber, prtitle) + '\n\n' + description
-        repo.git.commit('--amend', '-m', msg)
-
-        print("== PR #%i applied, with msg:" % prnumber)
-        print()
-        print(msg)
-        print("== ")
-
-        # Push the backported work
-        remote_submit_branch = 'auto-backport-of-pr-{}'.format(prnumber)
-        print("== Pushing work....:")
-        repo.remotes.origin.push('workbranch:{}'.format(remote_submit_branch))
-        repo.git.checkout('master')
-        repo.branches.workbranch.delete(repo, 'workbranch', force=True)
-                                        
-        
-        # ToDO checkout master and get rid of branch
-        
-        # Make the PR on GitHub
-        new_pr = self.ghrequest('POST', 'https://api.github.com/repos/{}/{}/pulls'.format(org_name, repo_name), json={
-            "title": "Backport PR #%i on branch %s" % (prnumber, target_branch),
-            "body": msg,
-            "head": "{}:{}".format(org_name,remote_submit_branch),
-            "base": target_branch
-        })
-
-        new_number = new_pr.json().get('number', None)
-        print('Backported as PR', new_number)
-        return new_pr.json()
