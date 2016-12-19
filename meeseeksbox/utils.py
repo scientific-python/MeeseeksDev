@@ -83,8 +83,10 @@ class Authenticator:
         for installation in installations:
             iid = installation['id']
             session = self.session(iid)
+            print('listing reposotories for installation', iid)
             repositories = session.ghrequest(
                 'GET', installation['repositories_url'], json=None).json()
+            print('one repo:')
             pprint.pprint(repositories)
 
     def _integration_authenticated_request(self, method, url):
