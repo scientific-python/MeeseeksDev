@@ -105,7 +105,7 @@ class Authenticator:
                    'Accept' : 'application/vnd.github.machine-man-preview+json' ,
                    'Host': 'api.github.com',
                    'User-Agent': 'python/requests'}
-                   
+        print(':::', method, url, headers)
         req = requests.Request(method, url, headers=headers)
         prepared = req.prepare()
         with requests.Session() as s:
@@ -127,16 +127,16 @@ class Session(Authenticator):
             
         
     def regen_token(self):
-        method = 'GET'
+        method = 'POST'
         url = 'https://api.github.com/installations/%s/access_tokens'%self.installation_id
         resp = self._integration_authenticated_request(method, url)
         try:
             self._token = json.loads(resp.content.decode())['token']
         except:
-            print(resp.content, url)
+            raise ValueError(resp.content, url)
 
     
-    def ghrequest(self, method, url, json):
+    def ghrequest(self, method, url, json=None):
         def prepare():
             atk = self.token()
             headers = {'Authorization': 'Bearer {}'.format(atk),
