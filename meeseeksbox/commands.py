@@ -29,7 +29,7 @@ def zen(*, session, payload, arguments):
     dedent(
         """
         Zen of Pyton ([pep 20](https://www.python.org/dev/peps/pep-0020/))
-        ```python
+        ```
         >>> import this
         Beautiful is better than ugly.
         Explicit is better than implicit.
