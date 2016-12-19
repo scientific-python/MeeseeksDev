@@ -78,9 +78,10 @@ def process_mentionning_comment(body, bot_re):
 
 class WebHookHandler(MainHandler):
 
-    def initialize(self, actions, config, *args, **kwargs):
+    def initialize(self, actions, config, auth, *args, **kwargs):
         self.actions = actions
         self.config = config
+        self.auth = auth
 
         super().initialize(*args, **kwargs)
         print('Webhook initialize got', args, kwargs)
@@ -194,7 +195,7 @@ class MeeseeksBox:
     def start(self):
         self.application = tornado.web.Application([
             (r"/", MainHandler),
-            (r"/webhook", WebHookHandler, {'actions':self.commands, 'config':self.config})
+            (r"/webhook", WebHookHandler, {'actions':self.commands, 'config':self.config, 'auth': auth})
         ])
 
         tornado.httpserver.HTTPServer(self.application).listen(self.port)
