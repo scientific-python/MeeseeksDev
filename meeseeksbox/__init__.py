@@ -142,7 +142,7 @@ class WebHookHandler(MainHandler):
                     return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
                 print('Got a comment', body)
-                if self.mentioned_bot_re.findall(body):
+                if self.mention_bot_re.findall(body):
                     self.dispatch_on_mention(body, payload, user)
                 else:
                     print('Was not mentioned', self.config['botname'], body, '|',user)
