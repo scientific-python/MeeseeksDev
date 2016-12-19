@@ -5,6 +5,4 @@ gitpython
 there
 mock
 cryptography
-
-
-
+friendlyautopep8
