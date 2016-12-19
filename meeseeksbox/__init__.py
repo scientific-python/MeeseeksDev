@@ -109,7 +109,8 @@ class WebHookHandler(MainHandler):
         
     @property
     def mentioned_bot_re(self):
-        return re.compile('@?'+re.escape(self.botname)+'(?:\[bot\])?', re.IGNORECASE)
+        botname = self.config['botname']
+        return re.compile('@?'+re.escape(botname)+'(?:\[bot\])?', re.IGNORECASE)
         
         
     def dispatch_action(self, type_, payload):
