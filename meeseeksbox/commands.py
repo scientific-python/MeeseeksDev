@@ -247,6 +247,7 @@ def cross(*, session:Session, payload, arguments:str):
         target_session.post_comment(comments_url, "Seem that you can")
     
 
+@admin
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     """Todo:
 
