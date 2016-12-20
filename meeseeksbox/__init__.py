@@ -213,7 +213,7 @@ class MeeseeksBox:
         tornado.httpserver.HTTPServer(self.application).listen(self.port)
         tornado.ioloop.IOLoop.instance().start()
         
-from .commands import replyuser, zen, backport, cross
+from .commands import replyuser, zen, backport, cross, migrate_issue_request
 
 def main():
     print('====== (re) starting ======')
@@ -222,7 +222,8 @@ def main():
             'hello': replyuser,
             'zen': zen,
             'backport': backport,
-            'cross': cross
+            'cross': cross,
+            'migrate': migrate_issue_request
         }, config=config).start()
 
 if __name__ == "__main__":
