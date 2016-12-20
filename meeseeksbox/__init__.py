@@ -8,6 +8,8 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 
+from yieldbreaker import YieldBreaker
+
 ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
 
 
@@ -171,7 +173,21 @@ class WebHookHandler(MainHandler):
                 print("    :: testing who can use ", str(handler) )
                 if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
                     print("    :: authorisation granted ", handler.scope)
-                    handler(session=session, payload=payload, arguments=arguments)
+                    maybe_gen = handler(session=session, payload=payload, arguments=arguments)
+                    import types
+                    if type(maybe_gen) == types.GeneratorType:
+                        gen = YieldBreaker(maybe_gen)
+                        for org_repo in gen:
+                            torg,trepo = org_repo
+                            session_id = self.auth.idmap.get(org_repo)
+                            if session_id:
+                                target_session = self.auth.session(session_id)
+                                if target_session.is_collaborator(torg, trepo, user):
+                                    gen.send(target_session)
+                                else:
+                                    gen.send(None)    
+                            else:
+                                gen.send(None)
                 else :
                     print('I Cannot let you do that')
             else:

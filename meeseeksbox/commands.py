@@ -9,6 +9,9 @@ import git
 import pipes
 import mock
 import sys
+from friendlyautopep8 import run_on_cwd
+
+from utils import Session
 
 from .scopes import admin, everyone
 
@@ -68,16 +71,88 @@ def replyadmin(*, session, payload, arguments):
 
 
 @admin
+def pep8ify(*, session, payload, arguments):
+    target_branch = arguments
+    # collect initial payload
+    prnumber = payload['issue']['number']
+    prtitle = payload['issue']['title']
+    org_name = payload['organization']['login']
+    repo_name = payload['repository']['name']
+
+    # collect extended payload on the PR
+    print('== Collecting data on Pull-request...')
+    r = session.ghrequest('GET',
+                          'https://api.github.com/repos/{}/{}/pulls/{}'.format(
+                              org_name, repo_name, prnumber),
+                          json=None)
+    pr_data = r.json()
+    merge_sha = pr_data['merge_commit_sha']
+    body = pr_data['body']
+
+    # clone locally
+    # this process can take some time, regen token
+    atk = session.token()
+
+    if os.path.exists(repo_name):
+        print('== Cleaning up previsous work... ')
+        subprocess.run('rm -rf {}'.format(repo_name).split(' '))
+        print('== Done cleaning ')
+
+    print('== Cloning current repository, this can take some time..')
+    process = subprocess.run(
+        ['git', 'clone', 'https://x-access-token:{}@github.com/{}/{}'.format(atk, org_name, repo_name)])
+    print('== Cloned..')
+    process.check_returncode()
+
+    subprocess.run('git config --global user.email ipy.bot@bot.com'.split(' '))
+    subprocess.run('git config --global user.name FriendlyBot'.split(' '))
+
+    # do the backport on local filesystem
+    repo = git.Repo(repo_name)
+    print('== Fetching branch to backport on ...')
+    repo.remotes.origin.fetch('refs/heads/{}:workbranch'.format(target_branch))
+    repo.git.checkout('workbranch')
+    print('== Fetching Commits to backport...')
+    repo.remotes.origin.fetch('{mergesha}'.format(
+        num=prnumber, mergesha=merge_sha))
+    print('== All has been fetched correctly')
+
+    # write the commit message
+    msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + '\n\n' 
+    repo.git.commit('-m', msg)
+
+    # Push the backported work
+    remote_submit_branch = 'auto-backport-of-pr-{}'.format(prnumber)
+    print("== Pushing work....:")
+    repo.remotes.origin.push('workbranch:{}'.format(remote_submit_branch))
+    repo.git.checkout('master')
+    repo.branches.workbranch.delete(repo, 'workbranch', force=True)
+
+    # ToDO checkout master and get rid of branch
+
+    # Make the PR on GitHub
+    new_pr = session.ghrequest('POST', 'https://api.github.com/repos/{}/{}/pulls'.format(org_name, repo_name), json={
+        "title": "Backport PR #%i on branch %s" % (prnumber, target_branch),
+        "body": msg,
+        "head": "{}:{}".format(org_name, remote_submit_branch),
+        "base": target_branch
+    })
+
+    new_number = new_pr.json().get('number', None)
+    print('Backported as PR', new_number)
+    return new_pr.json()
+    
+
+@admin
 def backport(session, payload, arguments):
     target_branch = arguments
-    data = payload
-    # collect initial data
-    prnumber = data['issue']['number']
-    prtitle = data['issue']['title']
-    org_name = data['organization']['login']
-    repo_name = data['repository']['name']
+    # collect initial payload
+    prnumber = payload['issue']['number']
+    prtitle = payload['issue']['title']
+    org_name = payload['organization']['login']
+    repo_name = payload['repository']['name']
 
-    # collect extended data on the PR
+    # collect extended payload on the PR
     print('== Collecting data on Pull-request...')
     r = session.ghrequest('GET',
                           'https://api.github.com/repos/{}/{}/pulls/{}'.format(
@@ -160,3 +235,14 @@ def backport(session, payload, arguments):
     new_number = new_pr.json().get('number', None)
     print('Backported as PR', new_number)
     return new_pr.json()
+
+
+@admin
+def cross(*, session:Session, payload, arguments:str):
+    print('will yield', arguments)
+    target_session = yield arguments
+    if target_session:
+        print('got target_session', session._installation_id)
+        comments_url     = payload['issue']['comments_url']
+        target_session.post_comment(comments_url, "Seem that you can")
+    
