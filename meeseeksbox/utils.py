@@ -42,7 +42,7 @@ def fix_comment_body(body, original_poster, original_url, original_org, original
 
     body = RELINK_RE.sub('{org}/{repo}\\1'.format(org=original_org, repo=original_repo), body)
     
-    return """`@{op}` [commented]({original_url}):{body}""".format(op=original_poster, original_url=original_url, body=body)
+    return """[`@{op}` commented]({original_url}): {body}""".format(op=original_poster, original_url=original_url, body=body)
 
 class Authenticator:
     
