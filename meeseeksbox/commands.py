@@ -11,7 +11,7 @@ import mock
 import sys
 from friendlyautopep8 import run_on_cwd
 
-from utils import Session
+from .utils import Session
 
 from .scopes import admin, everyone
 
