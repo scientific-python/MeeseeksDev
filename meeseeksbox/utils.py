@@ -116,9 +116,7 @@ class Session(Authenticator):
         now = datetime.datetime.now().timestamp()
         if (now > self.since + self.duration-60) or (self._token is None):
             self.regen_token()
-            
         return self._token
-            
         
     def regen_token(self):
         method = 'POST'
@@ -129,7 +127,6 @@ class Session(Authenticator):
         except:
             raise ValueError(resp.content, url)
 
-    
     def ghrequest(self, method, url, json=None):
         def prepare():
             atk = self.token()
@@ -139,7 +136,6 @@ class Session(Authenticator):
                        'User-Agent': 'python/requests'}
             req = requests.Request(method, url, headers=headers, json=json)
             return req.prepare()
-
 
         with requests.Session() as s:
             response = s.send(prepare())
@@ -177,10 +173,9 @@ class Session(Authenticator):
         else:
             resp.raise_for_status()
 
-
     def create_issue(self, org:str, repo:str , title:str, body:str, *, labels=None, assignees=None):
         arguments = {
-            "title": title, 
+            "title": title,
             "body": body,
         }
         
@@ -196,63 +191,5 @@ class Session(Authenticator):
             else:
                 raise ValueError('Assignees must be a list or a tuple')
             
-        return self.ghrequest('POST', 'https://api.github.com/repos/{}/{}/issues'.format(org, repo), 
+        return self.ghrequest('POST', 'https://api.github.com/repos/{}/{}/issues'.format(org, repo),
                     json=arguments)
-
-    def migrate_issue_request(self, data, org, repo):
-        """Todo:
-
-        - Works through pagination of comments
-        - Works through pagination of labels
-
-        Link to non-migrated labels.
-
-        """
-
-
-
-        issue_title = data['issue']['title']
-        issue_body = data['issue']['body']
-        original_org = data['organization']['login']
-        original_repo = data['repository']['name']
-        original_poster = data['issue']['user']['login']
-        original_number = data['issue']['number']
-        migration_requester = data['comment']['user']['login']
-        request_id = data['comment']['id']
-        original_labels =  [l['name'] for l in data['issue']['labels']]
-
-        if original_labels:
-            available_labels = self.ghrequest('GET', 
-                    'https://api.github.com/repos/{org}/{repo}/labels'.format(org=org, repo=repo),
-                    None).json()
-
-            available_labels = [l['name'] for l in available_labels]
-
-        migrate_labels = [l for l in original_labels if l in available_labels]
-        not_set_labels = [l for l in original_labels if l not in available_labels]
-        
-        response = self.create_issue(org, repo , issue_title,
-                            fix_issue_body(issue_body, original_poster, original_repo, original_org, original_number, migration_requester),
-                            labels=migrate_labels
-                            )
-        
-        new_issue = response.json()
-        comment_url = new_issue['comments_url']
-        
-        original_comments = self.ghrequest('GET', data['issue']['comments_url'], None).json()
-        
-        for comment in original_comments:
-            if comment['id'] == request_id:
-                continue
-            body = comment['body']
-            op = comment['user']['login']
-            url = comment['html_url']
-            self.post_comment(comment_url, body=fix_comment_body(body, op, url, original_org, original_repo))
-
-        if not_set_labels:
-            body ="I was not able to apply the following label(s): %s " % ','.join( not_set_labels)
-            self.post_comment(comment_url, body=body )
-
-
-        self.post_comment(data['issue']['comments_url'], body='Done as {}/{}#{}.'.format(org, repo, new_issue['number']))
-        self.ghrequest('PATCH', data['issue']['url'], json={'state':'closed'})

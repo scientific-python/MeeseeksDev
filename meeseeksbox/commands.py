@@ -236,17 +236,6 @@ def backport(session, payload, arguments):
     print('Backported as PR', new_number)
     return new_pr.json()
 
-
-@admin
-def cross(*, session:Session, payload, arguments:str):
-    print('will yield', arguments)
-    target_session = yield arguments
-    if target_session:
-        print('got target_session', session.installation_id)
-        comments_url     = payload['issue']['comments_url']
-        target_session.post_comment(comments_url, "Seem that you can")
-    
-
 @admin
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     """Todo:
@@ -287,7 +276,8 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
 
     new_response = target_session.create_issue(org, repo, issue_title,
                                                fix_issue_body(
-                                                   issue_body, original_poster, original_repo, original_org, original_number, migration_requester),
+                                                   issue_body, original_poster, original_repo, original_org,
+                                                   original_number, migration_requester),
                                                labels=migrate_labels
                                                )
 
