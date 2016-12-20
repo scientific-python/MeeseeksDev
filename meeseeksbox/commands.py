@@ -242,7 +242,7 @@ def cross(*, session:Session, payload, arguments:str):
     print('will yield', arguments)
     target_session = yield arguments
     if target_session:
-        print('got target_session', session._installation_id)
+        print('got target_session', session.installation_id)
         comments_url     = payload['issue']['comments_url']
         target_session.post_comment(comments_url, "Seem that you can")
     
