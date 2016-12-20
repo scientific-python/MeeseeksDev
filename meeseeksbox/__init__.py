@@ -178,14 +178,14 @@ class WebHookHandler(MainHandler):
                     if type(maybe_gen) == types.GeneratorType:
                         gen = YieldBreaker(maybe_gen)
                         for org_repo in gen:
-                            torg,trepo = org_repo
+                            torg,trepo = org_repo.split('/')
                             session_id = self.auth.idmap.get(org_repo)
                             if session_id:
                                 target_session = self.auth.session(session_id)
                                 if target_session.is_collaborator(torg, trepo, user):
                                     gen.send(target_session)
                                 else:
-                                    gen.send(None)    
+                                    gen.send(None)
                             else:
                                 gen.send(None)
                 else :
