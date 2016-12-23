@@ -19,7 +19,7 @@ operations.
 
 Respond with
 
-> Hello {use} look at me, I'm Mr Meeseeks
+> Hello {user} look at me, I'm Mr Meeseeks
 
 To test whether a Meeseeks understand you.
 
