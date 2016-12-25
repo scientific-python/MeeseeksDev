@@ -124,6 +124,10 @@ class WebHookHandler(MainHandler):
 
         payload = tornado.escape.json_decode(self.request.body)
         action = payload.get("action", None)
+        if payload.get('commits'):
+            # TODO
+            print("commits were likely pushed....")
+            return
 
         if action:
             print('## dispatching request', self.request.headers.get('X-GitHub-Delivery'))
