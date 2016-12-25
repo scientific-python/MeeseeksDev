@@ -115,6 +115,7 @@ class WebHookHandler(MainHandler):
     def post(self):
         if not 'X-Hub-Signature' in self.request.headers:
             return self.error('WebHook not configured with secret')
+        # TODO: Extract fom X-GitHub-Event
 
         if not verify_signature(self.request.body,
                             self.request.headers['X-Hub-Signature'],
@@ -238,7 +239,7 @@ class MeeseeksBox:
         tornado.httpserver.HTTPServer(self.application).listen(self.port)
         tornado.ioloop.IOLoop.instance().start()
         
-from .commands import replyuser, zen, backport, migrate_issue_request
+from .commands import replyuser, zen, backport, migrate_issue_request, tag, untag
 
 def main():
     print('====== (re) starting ======')
@@ -247,7 +248,9 @@ def main():
             'hello': replyuser,
             'zen': zen,
             'backport': backport,
-            'migrate': migrate_issue_request
+            'migrate': migrate_issue_request,
+            'tag': tag,
+            'untag': untag
         }, config=config).start()
 
 if __name__ == "__main__":

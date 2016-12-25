@@ -9,7 +9,7 @@ import git
 import pipes
 import mock
 import sys
-from friendlyautopep8 import run_on_cwd
+#from friendlyautopep8 import run_on_cwd
 
 from .utils import Session, fix_issue_body, fix_comment_body
 
@@ -87,7 +87,7 @@ def pep8ify(*, session, payload, arguments):
                           json=None)
     pr_data = r.json()
     merge_sha = pr_data['merge_commit_sha']
-    body = pr_data['body']
+    # body = pr_data['body']
 
     # clone locally
     # this process can take some time, regen token
@@ -235,6 +235,28 @@ def backport(session, payload, arguments):
     new_number = new_pr.json().get('number', None)
     print('Backported as PR', new_number)
     return new_pr.json()
+
+
+@admin
+def tag(*, session, payload, arguments):
+    org = payload['organization']['login']
+    repo = payload['repository']['name']
+    num = payload.get('issue').get('number')
+    url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(**locals())
+    tags = [arg.strip() for arg in arguments.split(',')]
+    session.ghrequest('POST', url, json=tags)
+
+
+@admin
+def untag(*, session, payload, arguments):
+    org = payload['organization']['login']
+    repo = payload['repository']['name']
+    num = payload.get('issue').get('number')
+    tags = [arg.strip() for arg in arguments.split(',')]
+    name = '{name}'
+    url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels/{name}".format(**locals())
+    for tag in tags:
+        session.ghrequest('DELETE', url.format(name=tag))
 
 @admin
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
