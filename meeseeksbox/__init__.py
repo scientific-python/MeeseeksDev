@@ -12,6 +12,27 @@ from yieldbreaker import YieldBreaker
 ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
 
 
+class Config:
+    botname = None
+    integration_id = None
+    key = None
+    botname = None
+    at_botname = None
+    integration_id = None
+    webhook_secret = None
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def validate(self):
+        missing = [attr for attr in dir(self) if not attr.startswith(
+            '_') and getattr(self, attr) is None]
+        if missing:
+            raise ValueError(
+                'The followingg configuration options are missing : {}'.format(missing))
+        return self
+
+
 def load_config_from_env():
     """
     Load the configuration, for now stored in the environment
@@ -25,7 +46,7 @@ def load_config_from_env():
         raise ValueError('Please set GITHUB_INTEGRATION_ID')
 
     if not botname:
-        raise ValueError('Need to set a botnames')
+        raise ValueError('Need to set a botname')
     if "@" in botname:
         print("Don't include @ in the botname !")
 
@@ -39,7 +60,7 @@ def load_config_from_env():
     config['integration_id'] = integration_id
     config['webhook_secret'] = os.environ.get('WEBHOOK_SECRET')
 
-    return config
+    return Config(**config).validate()
 
 from .utils import Authenticator
 
@@ -97,7 +118,7 @@ class WebHookHandler(MainHandler):
 
         if not verify_signature(self.request.body,
                             self.request.headers['X-Hub-Signature'],
-                            self.config['webhook_secret']):
+                                self.config.webhook_secret):
             return self.error('Cannot validate GitHub payload with ' \
                                 'provided WebHook secret')
 
@@ -112,12 +133,12 @@ class WebHookHandler(MainHandler):
         
     @property
     def mention_bot_re(self):
-        botname = self.config['botname']
+        botname = self.config.botname
         return re.compile('@?'+re.escape(botname)+'(?:\[bot\])?', re.IGNORECASE)
         
         
     def dispatch_action(self, type_, payload):
-        botname = self.config['botname']
+        botname = self.config.botname
         ## new issue/PR opened
         if type_ == 'opened':
             issue = payload.get('issue', None)
@@ -126,7 +147,7 @@ class WebHookHandler(MainHandler):
                 return self.error('Not really good, request has no issue')
             if issue:
                 user = payload['issue']['user']['login']
-                if user == self.config['botname'].lower()+'[bot]':
+                if user == self.config.botname.lower() + '[bot]':
                     return self.finish("Not responding to self")
             # todo dispatch on on-open
 
@@ -147,7 +168,8 @@ class WebHookHandler(MainHandler):
                 if self.mention_bot_re.findall(body):
                     self.dispatch_on_mention(body, payload, user)
                 else:
-                    print('Was not mentioned', self.config['botname'], body, '|',user)
+                    print('Was not mentioned',
+                          self.config.botname, body, '|', user)
             elif installation and installation.get('account'):
                 print('we got a new installation maybe ?!', payload)
                 return self.finish()
@@ -200,7 +222,7 @@ class MeeseeksBox:
         self.port = int(os.environ.get('PORT', 5000))
         self.application = None
         self.config = config
-        self.auth = Authenticator(self.config['integration_id'], self.config['key'])
+        self.auth = Authenticator(self.config.integration_id, self.config.key)
         self.auth._build_auth_id_mapping()
         
     def start(self):
