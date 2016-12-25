@@ -94,6 +94,16 @@ class WebHookHandler(MainHandler):
                               'provided WebHook secret')
 
         payload = tornado.escape.json_decode(self.request.body)
+        org = payload.get('repository', {}).get('owner', {}).get('login')
+        if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
+            print('Non allowed orgg:', org)
+            self.error('Not allowed org.')
+        sender = payload.get('sender', {}).get('login', {})
+        if hasattr(self.config, 'user_whitelist') and (sender not in self.config.user_whitelist):
+            print('Not allowed user:', sender)
+            self.error('Not allowed user.')
+
+
         action = payload.get("action", None)
         if payload.get('commits'):
             # TODO
