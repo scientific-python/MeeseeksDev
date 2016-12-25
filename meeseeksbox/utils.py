@@ -8,6 +8,7 @@ import requests
 import re
 
 API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}'
+ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
 
 """
 Regular expression to relink issues/pr comments correctly.
@@ -95,7 +96,7 @@ class Authenticator:
         tok = jwt.encode(payload, key=self.rsadata, algorithm='RS256')
 
         headers = {'Authorization': 'Bearer {}'.format(tok.decode()),
-                   'Accept' : 'application/vnd.github.machine-man-preview+json' ,
+                   'Accept': ACCEPT_HEADER,
                    'Host': 'api.github.com',
                    'User-Agent': 'python/requests'}
         req = requests.Request(method, url, headers=headers)
@@ -129,7 +130,7 @@ class Session(Authenticator):
         def prepare():
             atk = self.token()
             headers = {'Authorization': 'Bearer {}'.format(atk),
-                       'Accept' : 'application/vnd.github.machine-man-preview+json' ,
+                       'Accept': ACCEPT_HEADER,
                        'Host': 'api.github.com',
                        'User-Agent': 'python/requests'}
             req = requests.Request(method, url, headers=headers, json=json)
