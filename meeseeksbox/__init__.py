@@ -1,6 +1,9 @@
 import os
 import base64
 from .core import Config
+from .core import MeeseeksBox
+
+__version__ = '0.0.1'
 
 def load_config_from_env():
     """
@@ -30,21 +33,3 @@ def load_config_from_env():
     config['webhook_secret'] = os.environ.get('WEBHOOK_SECRET')
 
     return Config(**config).validate()
-
-from .core import MeeseeksBox
-from .commands import replyuser, zen, backport, migrate_issue_request, tag, untag
-
-def main():
-    print('====== (re) starting ======')
-    config = load_config_from_env()
-    MeeseeksBox(commands={
-            'hello': replyuser,
-            'zen': zen,
-            'backport': backport,
-            'migrate': migrate_issue_request,
-            'tag': tag,
-            'untag': untag
-        }, config=config).start()
-
-if __name__ == "__main__":
-    main()
