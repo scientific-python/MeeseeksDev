@@ -1,9 +1,20 @@
+"""
+MeeseeksBox
+
+Base of a framework to write stateless bots on GitHub.
+
+Mainly writte to use the (currently Beta) new GitHub "Integration" API, and
+handle authencation of user.
+"""
+
 import os
 import base64
 from .core import Config
 from .core import MeeseeksBox
 
-__version__ = '0.0.1'
+version_info = (0,0,1)
+
+__version__ = '.'.join(map(str,version_info))
 
 def load_config_from_env():
     """
