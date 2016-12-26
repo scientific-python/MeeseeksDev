@@ -1,6 +1,6 @@
 import os
 import base64
-from core import Config
+from .core import Config
 
 def load_config_from_env():
     """
