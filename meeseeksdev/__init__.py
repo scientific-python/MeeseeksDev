@@ -1,6 +1,9 @@
 import os
 import base64
 
+org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython']
+usr_whitelist = ['Carreau', 'gnestor', 'fperez', 'michaelpacer', 'minrk', 'takluyver']
+
 def load_config_from_env():
     """
     Load the configuration, for now stored in the environment
@@ -37,6 +40,8 @@ from meeseeksbox.commands import replyuser, zen, backport, migrate_issue_request
 def main():
     print('====== (re) starting ======')
     config = load_config_from_env()
+    config.org_whitelist = org_whitelist
+    config.user_whitelist = usr_whitelist
     MeeseeksBox(commands={
             'hello': replyuser,
             'zen': zen,
