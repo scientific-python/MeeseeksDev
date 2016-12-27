@@ -1,9 +1,1 @@
-tornado
-requests
-pyjwt
-gitpython
-there
-mock
-cryptography
-friendlyautopep8
-yieldbreaker
+meeseeksbox

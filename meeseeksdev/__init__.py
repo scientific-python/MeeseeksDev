@@ -1,6 +1,5 @@
 import os
 import base64
-from .core import Config
 
 def load_config_from_env():
     """
@@ -31,8 +30,9 @@ def load_config_from_env():
 
     return Config(**config).validate()
 
-from .core import MeeseeksBox
-from .commands import replyuser, zen, backport, migrate_issue_request, tag, untag
+from meeseeksbox import MeeseeksBox
+from meeseeksbox.core import Config
+from meeseeksbox.commands import replyuser, zen, backport, migrate_issue_request, tag, untag
 
 def main():
     print('====== (re) starting ======')

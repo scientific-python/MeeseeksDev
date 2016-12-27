@@ -1,1 +1,1 @@
-web: python -m meeseeksbox
+web: python -m meeseeksdev
