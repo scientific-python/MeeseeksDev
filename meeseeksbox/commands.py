@@ -274,6 +274,9 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     org, repo = arguments.split('/')
 
     target_session = yield org_repo
+    if not target_session:
+        session.post_comment(payload['issue']['comments_url'], "It appears that I can't do that")
+        return 
 
     issue_title = payload['issue']['title']
     issue_body = payload['issue']['body']
