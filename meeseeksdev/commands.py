@@ -11,9 +11,9 @@ import mock
 import sys
 #from friendlyautopep8 import run_on_cwd
 
-from .utils import Session, fix_issue_body, fix_comment_body
+from meeseeksbox.utils import Session, fix_issue_body, fix_comment_body
 
-from .scopes import admin, everyone
+from meeseeksbox.scopes import admin, everyone
 
 @everyone
 def replyuser(*, session, payload, arguments):
@@ -258,6 +258,17 @@ def untag(*, session, payload, arguments):
     for tag in tags:
         session.ghrequest('DELETE', url.format(name=tag))
 
+
+@admin
+def close(*, session, payload, arguments):
+    session.ghrequest('PATCH', payload['issue']
+                      ['url'], json={'state': 'closed'})
+
+
+@admin
+def open(*, session, payload, arguments):
+    session.ghrequest('PATCH', payload['issue']['url'], json={'state': 'open'})
+
 @admin
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     """Todo:
@@ -274,6 +285,13 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     org, repo = arguments.split('/')
 
     target_session = yield org_repo
+    if not target_session:
+        session.post_comment(
+            payload['issue']['comments_url'], body="I'm afraid I can't do that."
+        )
+
+        return
+
 
     issue_title = payload['issue']['title']
     issue_body = payload['issue']['body']

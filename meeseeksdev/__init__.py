@@ -2,7 +2,8 @@ import os
 import base64
 
 org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython']
-usr_whitelist = ['Carreau', 'gnestor', 'fperez', 'michaelpacer', 'minrk', 'takluyver']
+usr_whitelist = ['Carreau', 'gnestor', 'fperez',
+                 'michaelpacer', 'minrk', 'takluyver', 'sylvaincorlay']
 
 def load_config_from_env():
     """
@@ -35,7 +36,8 @@ def load_config_from_env():
 
 from meeseeksbox import MeeseeksBox
 from meeseeksbox.core import Config
-from meeseeksbox.commands import replyuser, zen, backport, migrate_issue_request, tag, untag
+from meeseeksbox.commands import replyuser, zen, backport, tag, untag
+from .commands import close, open as _open, migrate_issue_request
 
 def main():
     print('====== (re) starting ======')
@@ -48,7 +50,9 @@ def main():
             'backport': backport,
             'migrate': migrate_issue_request,
             'tag': tag,
-            'untag': untag
+            'untag': untag,
+            'open': _open,
+            'close': close,
         }, config=config).start()
 
 if __name__ == "__main__":
