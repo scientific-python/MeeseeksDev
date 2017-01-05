@@ -7,8 +7,8 @@ import json
 import requests
 import re
 
-API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}'
-ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
+API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}/permission'
+ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json,application/vnd.github.korra-preview'
 
 """
 Regular expression to relink issues/pr comments correctly.
@@ -154,12 +154,9 @@ class Session(Authenticator):
         """
         get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(org=org, repo=repo, username=username)
         resp = self.ghrequest('GET', get_collaborators_query, None)
-        if resp.status_code == 204:
-            return True
-        elif resp.status_code == 404:
-            return False
-        else:
-            resp.raise_for_status()
+        resp.raise_for_status()
+        return resp.json()['permission'] in ('admin', 'write')
+
 
     def post_comment(self, comment_url, body):
         self.ghrequest('POST', comment_url, json={"body":body})
