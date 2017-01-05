@@ -1,11 +1,13 @@
 import re
 import os
 import hmac
+import types
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 
 from .utils import Authenticator
+from .scope import Permission
 
 from yieldbreaker import YieldBreaker
 
@@ -171,18 +173,17 @@ class WebHookHandler(MainHandler):
         org = payload['organization']['login']
         repo = payload['repository']['name']
         session = self.auth.session(installation_id)
-        is_admin = session.is_collaborator(org, repo, user)
+        permission_level = session._get_permission(org, repo, user)
         command_args = process_mentionning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
             handler = self.actions.get(command, None)
             if handler:
                 print("    :: testing who can use ", str(handler))
-                if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
+                if (handler.scope.value >= permission_level.value):
                     print("    :: authorisation granted ", handler.scope)
                     maybe_gen = handler(
                         session=session, payload=payload, arguments=arguments)
-                    import types
                     if type(maybe_gen) == types.GeneratorType:
                         gen = YieldBreaker(maybe_gen)
                         for org_repo in gen:
@@ -190,7 +191,7 @@ class WebHookHandler(MainHandler):
                             session_id = self.auth.idmap.get(org_repo)
                             if session_id:
                                 target_session = self.auth.session(session_id)
-                                if target_session.is_collaborator(torg, trepo, user):
+                                if target_session.has_permission(torg, trepo, user, Permission.write):
                                     gen.send(target_session)
                                 else:
                                     gen.send(None)

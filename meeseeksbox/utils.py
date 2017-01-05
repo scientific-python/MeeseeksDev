@@ -7,6 +7,8 @@ import json
 import requests
 import re
 
+from .scope import Permission
+
 API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}/permission'
 ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json,application/vnd.github.korra-preview'
 
@@ -158,6 +160,20 @@ class Session(Authenticator):
         resp.raise_for_status()
         return resp.json()['permission'] in ('admin', 'write')
 
+    def _get_permission(self, org, repo, username):
+        get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(
+            org=org, repo=repo, username=username)
+        resp = self.ghrequest('GET', get_collaborators_query, None)
+        resp.raise_for_status()
+        return resp.json()['permission'].value
+
+    def has_permission(self, org, repo, username, level=None):
+        """
+        """
+        if not level:
+            level = Permission.none
+
+        return self._get_permission(org, repo, username) >= level.value
 
     def post_comment(self, comment_url, body):
         self.ghrequest('POST', comment_url, json={"body":body})
