@@ -56,9 +56,10 @@ class Authenticator:
         # TODO: this mapping is built at startup, we should update it when we
         # have new / deleted installations
         self.idmap = {}
+        self._session_class = Session
 
     def session(self, installation_id):
-        return Session(self.integration_id, self.rsadata, installation_id)
+        return self._session_class(self.integration_id, self.rsadata, installation_id)
         
     def list_installations(self):
         """
