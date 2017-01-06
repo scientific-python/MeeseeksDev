@@ -152,7 +152,9 @@ class Session(Authenticator):
             org=org, repo=repo, username=username)
         resp = self.ghrequest('GET', get_collaborators_query, None)
         resp.raise_for_status()
-        return resp.json()['permission'].value
+        permission = resp.json()['permission']
+        print("found permission", permission  , "for user ", user, "on ", org, repo)
+        return permission.value
 
     def has_permission(self, org, repo, username, level=None):
         """
