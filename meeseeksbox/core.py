@@ -7,7 +7,7 @@ import tornado.httpserver
 import tornado.ioloop
 
 from .utils import Authenticator
-from .scope import Permission
+from .scopes import Permission
 
 from yieldbreaker import YieldBreaker
 

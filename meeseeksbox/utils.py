@@ -7,7 +7,7 @@ import json
 import requests
 import re
 
-from .scope import Permission
+from .scopes import Permission
 
 API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}/permission'
 ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json,application/vnd.github.korra-preview'
@@ -153,7 +153,7 @@ class Session(Authenticator):
         resp = self.ghrequest('GET', get_collaborators_query, None)
         resp.raise_for_status()
         permission = resp.json()['permission']
-        print("found permission", permission  , "for user ", user, "on ", org, repo)
+        print("found permission", permission  , "for user ", username, "on ", org, repo)
         return permission.value
 
     def has_permission(self, org, repo, username, level=None):
