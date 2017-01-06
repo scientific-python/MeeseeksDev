@@ -147,19 +147,6 @@ class Session(Authenticator):
             response.raise_for_status()
             return response
 
-    def is_collaborator(self, org, repo, username):
-        """
-        Check if a user is collaborator on this repository
-        
-        Right now this is a boolean, there is a new API
-        (application/vnd.github.korra-preview) with github which allows to get
-        finer grained decision.
-        """
-        get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(org=org, repo=repo, username=username)
-        resp = self.ghrequest('GET', get_collaborators_query, None)
-        resp.raise_for_status()
-        return resp.json()['permission'] in ('admin', 'write')
-
     def _get_permission(self, org, repo, username):
         get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(
             org=org, repo=repo, username=username)
