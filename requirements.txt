@@ -1,1 +1,9 @@
-meeseeksbox>=0.0.4
+tornado
+requests
+pyjwt
+gitpython
+there
+mock
+cryptography
+friendlyautopep8
+yieldbreaker
