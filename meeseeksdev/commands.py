@@ -43,11 +43,10 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     target_session = yield org_repo
     if not target_session:
         session.post_comment(
-            payload['issue']['comments_url'], body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?"
-            "click here to do that: https://github.com/integrations/{botname}/installations/new ".format(botname='meeseeksdev')
+            payload['issue']['comments_url'], body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
+            "Click [here](@meeseeksdev[bot] migrate to carreau/ipython) to do that.".format(botname='meeseeksdev')
 
         )
-
         return
 
 
