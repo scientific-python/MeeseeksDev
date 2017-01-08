@@ -1,9 +1,22 @@
 import os
 import base64
 
-org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython']
-usr_whitelist = ['Carreau', 'gnestor', 'fperez',
-                 'michaelpacer', 'minrk', 'takluyver', 'sylvaincorlay']
+org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab']
+
+usr_whitelist = [
+        'Carreau',
+        'gnestor',
+        'fperez',
+        'michaelpacer',
+        'minrk',
+        'takluyver',
+        'sylvaincorlay',
+        'ellisonbg',
+        'blink107']
+
+# https://github.com/integrations/meeseeksdev/installations/new
+# already ? https://github.com/organizations/MeeseeksBox/settings/installations/4268
+# https://github.com/integration/meeseeksdev
 
 def load_config_from_env():
     """
