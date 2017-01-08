@@ -11,9 +11,9 @@ import mock
 import sys
 #from friendlyautopep8 import run_on_cwd
 
-from meeseeksbox.utils import Session, fix_issue_body, fix_comment_body
+from .meeseeksbox.utils import Session, fix_issue_body, fix_comment_body
 
-from meeseeksbox.scopes import admin, everyone
+from .meeseeksbox.scopes import admin, everyone
 
 @everyone
 def replyuser(*, session, payload, arguments):

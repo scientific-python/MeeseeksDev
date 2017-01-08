@@ -34,9 +34,9 @@ def load_config_from_env():
 
     return Config(**config).validate()
 
-from meeseeksbox.core import MeeseeksBox
-from meeseeksbox.core import Config
-from meeseeksbox.commands import replyuser, zen, backport, tag, untag
+from .meeseeksbox.core import MeeseeksBox
+from .meeseeksbox.core import Config
+from .meeseeksbox.commands import replyuser, zen, backport, tag, untag
 from .commands import close, open as _open, migrate_issue_request
 
 def main():
