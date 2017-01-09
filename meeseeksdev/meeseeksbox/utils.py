@@ -7,8 +7,11 @@ import json
 import requests
 import re
 
-API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}'
-ACCEPT_HEADER = 'application/vnd.github.machine-man-preview+json'
+from .scopes import Permission
+
+API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}/permission'
+ACCEPT_HEADER = 'application/vnd.github.machine-man-preview'
+ACCEPT_HEADER_KORA = 'json,application/vnd.github.korra-preview'
 
 """
 Regular expression to relink issues/pr comments correctly.
@@ -56,9 +59,10 @@ class Authenticator:
         # TODO: this mapping is built at startup, we should update it when we
         # have new / deleted installations
         self.idmap = {}
+        self._session_class = Session
 
     def session(self, installation_id):
-        return Session(self.integration_id, self.rsadata, installation_id)
+        return self._session_class(self.integration_id, self.rsadata, installation_id)
         
     def list_installations(self):
         """
@@ -70,7 +74,7 @@ class Authenticator:
 
     def _build_auth_id_mapping(self):
         """
-        Build an organisation/repo -> installation_id mapping in order to be able
+        Build an organisation/repo -> installation_id mappingg in order to be able
         to do cross repository operations.
         """
 
@@ -81,8 +85,6 @@ class Authenticator:
             repositories = session.ghrequest(
                 'GET', installation['repositories_url'], json=None).json()
             for repo in repositories['repositories']:
-                if repo['full_name'] not in self.idmap:
-                    print('found new repository:', repo['full_name'])
                 self.idmap[repo['full_name']] = iid
 
 
@@ -128,11 +130,14 @@ class Session(Authenticator):
         except:
             raise ValueError(resp.content, url)
 
-    def ghrequest(self, method, url, json=None):
+    def ghrequest(self, method, url, json=None, *, override_accept_header=None):
+        accept = ACCEPT_HEADER
+        if override_accept_header:
+            accept = override_accept_header
         def prepare():
             atk = self.token()
             headers = {'Authorization': 'Bearer {}'.format(atk),
-                       'Accept': ACCEPT_HEADER,
+                       'Accept': accept,
                        'Host': 'api.github.com',
                        'User-Agent': 'python/requests'}
             req = requests.Request(method, url, headers=headers, json=json)
@@ -146,22 +151,22 @@ class Session(Authenticator):
             response.raise_for_status()
             return response
 
-    def is_collaborator(self, org, repo, username):
+    def _get_permission(self, org, repo, username):
+        get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(
+            org=org, repo=repo, username=username)
+        resp = self.ghrequest('GET', get_collaborators_query, None, override_accept_header=ACCEPT_HEADER_KORA)
+        resp.raise_for_status()
+        permission = resp.json()['permission']
+        print("found permission", permission  , "for user ", username, "on ", org, repo)
+        return getattr(Permission, permission)
+
+    def has_permission(self, org, repo, username, level=None):
         """
-        Check if a user is collaborator on this repository
-        
-        Right now this is a boolean, there is a new API
-        (application/vnd.github.korra-preview) with github which allows to get
-        finer grained decision.
         """
-        get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(org=org, repo=repo, username=username)
-        resp = self.ghrequest('GET', get_collaborators_query, None)
-        if resp.status_code == 204:
-            return True
-        elif resp.status_code == 404:
-            return False
-        else:
-            resp.raise_for_status()
+        if not level:
+            level = Permission.none
+
+        return self._get_permission(org, repo, username).value >= level.value
 
     def post_comment(self, comment_url, body):
         self.ghrequest('POST', comment_url, json={"body":body})

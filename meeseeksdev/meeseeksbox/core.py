@@ -7,6 +7,7 @@ import tornado.httpserver
 import tornado.ioloop
 
 from .utils import Authenticator
+from .scopes import Permission
 
 from yieldbreaker import YieldBreaker
 
@@ -187,14 +188,14 @@ class WebHookHandler(MainHandler):
         org = payload['organization']['login']
         repo = payload['repository']['name']
         session = self.auth.session(installation_id)
-        is_admin = session.is_collaborator(org, repo, user)
+        permission_level = session._get_permission(org, repo, user)
         command_args = process_mentionning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
             handler = self.actions.get(command, None)
             if handler:
                 print("    :: testing who can use ", str(handler))
-                if ((handler.scope == 'admin') and is_admin) or (handler.scope == 'everyone'):
+                if (handler.scope.value >= permission_level.value):
                     print("    :: authorisation granted ", handler.scope)
                     maybe_gen = handler(
                         session=session, payload=payload, arguments=arguments)
@@ -209,7 +210,7 @@ class WebHookHandler(MainHandler):
                                 # we may need to also check allow edit from maintainer and provide
                                 # another decorator for safety.
                                 # @access_original_branch.
-                                if target_session.is_collaborator(torg, trepo, user):
+                                if target_session.has_permission(torg, trepo, user, Permission.write):
                                     gen.send(target_session)
                                 else:
                                     gen.send(None)
