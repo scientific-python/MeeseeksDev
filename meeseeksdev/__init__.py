@@ -55,8 +55,8 @@ from .commands import close, open as _open, migrate_issue_request
 def main():
     print('====== (re) starting ======')
     config = load_config_from_env()
-    config.org_whitelist = org_whitelist
-    config.user_whitelist = usr_whitelist
+    config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
+    config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
     MeeseeksBox(commands={
             'hello': replyuser,
             'zen': zen,
