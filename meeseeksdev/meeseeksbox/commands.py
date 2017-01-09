@@ -145,7 +145,7 @@ def pep8ify(*, session, payload, arguments):
     print("== Pushing work....:")
     repo.remotes.origin.push('workbranch:{}'.format(branch))
     repo.git.checkout('master')
-    repo.branches.workbranch.delete(repo, 'workbranch')
+    repo.branches.workbranch.delete(repo, 'workbranch', force=True)
 
     
 

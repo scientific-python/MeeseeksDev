@@ -116,7 +116,7 @@ class WebHookHandler(MainHandler):
             return self.dispatch_action(action, payload)
         else:
             print('No action available  for the webhook :',
-                  self.request.headers.get('X-GitHub-Delivery'),  ':', payload)
+                  self.request.headers.get('X-GitHub-Event'),  ':', payload)
 
     @property
     def mention_bot_re(self):
