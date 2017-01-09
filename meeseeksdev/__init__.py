@@ -12,7 +12,11 @@ usr_whitelist = [
         'takluyver',
         'sylvaincorlay',
         'ellisonbg',
-        'blink107']
+        'blink1073',
+        'damianavila',
+        'jdfreder',
+        'rgbkrk',
+        ]
 
 # https://github.com/integrations/meeseeksdev/installations/new
 # already ? https://github.com/organizations/MeeseeksBox/settings/installations/4268
