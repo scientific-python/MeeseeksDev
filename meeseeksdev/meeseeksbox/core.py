@@ -115,6 +115,12 @@ class WebHookHandler(MainHandler):
                   self.request.headers.get('X-GitHub-Delivery'))
             return self.dispatch_action(action, payload)
         else:
+            event_type = self.request.headers.get('X-GitHub-Event')
+
+            if event_type in {'status'}:
+                print('Not handeling event type', event_type,'yet.')
+                return self.finish()
+
             print('No action available  for the webhook :',
                   self.request.headers.get('X-GitHub-Event'),  ':', payload)
 
