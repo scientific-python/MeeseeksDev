@@ -72,6 +72,9 @@ def replyadmin(*, session, payload, arguments):
 
 @admin
 def pep8ify(*, session, payload, arguments):
+    print('===== pe8ifying =====')
+    print(payload)
+    print('===== ========= =====')
     target_branch = arguments
     # collect initial payload
     prnumber = payload['issue']['number']
@@ -90,15 +93,17 @@ def pep8ify(*, session, payload, arguments):
     head_sha = pr_data['head']['sha']
     base_sha = pr_data['base']['sha']
     branch = pr_data['head']['ref']
-    author_login = pr_data['repo']['owner']['login']
-    repo_name = pr_data['repo']['name']
+    author_login = pr_data['head']['repo']['owner']['login']
+    repo_name = pr_data['head']['repo']['name']
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to commiter repo.
     target_session = yield '{}/{}'.format(author_login, repo_name)
     if not target_session:
-        pass
-        # That's todo
+        comment_url     = payload['issue']['comments_url']
+        session.post_comment(comment_url, body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
+            "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(botname='meeseeksdev')
+)
 
     # clone locally
     # this process can take some time, regen token
