@@ -2,7 +2,7 @@
 
 A base for stateless GitHub Bot. 
 
-See what is a [MrMeeseeks and a MeeseeksBox](https://www.youtube.com/watch?v=qUYvIAP3qQk)
+See what is a [MeeseeksDev and a MeeseeksBox](https://www.youtube.com/watch?v=qUYvIAP3qQk)
 
 ## Hosted for you
 
@@ -15,7 +15,7 @@ operations.
 
 ## What can a MeeseeksBox do ?
 
-### @MrMeeseeks Hello
+### @MeeseeksDev Hello
 
 Respond with
 
@@ -23,7 +23,7 @@ Respond with
 
 To test whether a Meeseeks understand you.
 
-### @MrMeeseeks backport [to] <branch>
+### @MeeseeksDev backport [to] {branch}
 
 If issued from a  PR which is merged, attempt to backport (cherry-pick the
 merge commit) on an older branch and submit a PR with this backport (on said branch)
@@ -32,25 +32,45 @@ No option to push directly.
 
 Repo admins only
 
-### @MrMeeseeks pep8ify
+### @MeeseeksDev pep8ify
 
 (in progress)
 
 If issued from a PR, will apply autopep8 to the current lines changed by this
 PR, and push an extra commit to it that fixes pep8. 
 
-Code in progress and due to GitHub API limitation only works if MrMeeseeks also
-available on Source repo of the PR. 
+Code in progress and due to GitHub API limitation only works if MeeseeksDev
+also available on Source repo of the PR. 
 
 Repo admins only, plan to make it available to PR author as well. 
 
-### @MrMeeseeks migrate [to] <target org/repo>
+MeeseeksDev Bot need to be installed on the PR source repository for this to work.
+If it's not it will ask you to do so. 
+
+### @MeeseeksDev migrate [to] {target org/repo}
 
 Needs MeeseeksBox to be installed on both current and target repo. Command
 issuer to be admin on both. 
 
-MrMeeseeks will open a similar issue, replicate all comments with links to
+MeeseeksDev will open a similar issue, replicate all comments with links to
 first, migrate labels (if possible). 
+
+
+### @MeeseeksDev close
+
+Close the issue. Useful when replying by mail
+
+### @MeeseeksDev open
+
+Reopen the issue.
+
+### @MeeseeksDev tag bug, question, Need Contributor
+
+Tag with said tags if availlable (comma separated, need to be exact match)
+
+### @MeeseeksDev untag bug, question, Need Contributor
+
+Remove said tags if present (comma separated, need to be exact match)
 
 
 ## Simple extension.
@@ -114,3 +134,13 @@ These are the environment variable that need to be set.
    `@`, and with the `[bot]`. This is used for the bot to react to his own name, and not reply to itself...
 
    TODO
+
+# Warnings
+
+This is still alpha software, user and org that can use it are still hardcoded.
+If you want access open an issue for me to whitelist your org and users.
+
+Because of GitHub API limitation, MeeseeksBox can not yet make the distinction
+between read-only and read-write collaborators.
+
+
