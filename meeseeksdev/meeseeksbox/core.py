@@ -158,6 +158,7 @@ class WebHookHandler(MainHandler):
                           self.config.botname, body, '|', user)
             elif installation and installation.get('account'):
                 print('we got a new installation maybe ?!', payload)
+                self.auth._build_auth_id_mapping()
                 return self.finish()
             else:
                 print('not handled', payload)

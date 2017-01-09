@@ -103,7 +103,8 @@ def pep8ify(*, session, payload, arguments):
         comment_url     = payload['issue']['comments_url']
         session.post_comment(comment_url, body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
             "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(botname='meeseeksdev')
-)
+        )
+        return
 
     # clone locally
     # this process can take some time, regen token

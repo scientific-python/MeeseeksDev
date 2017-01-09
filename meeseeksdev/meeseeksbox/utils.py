@@ -70,7 +70,7 @@ class Authenticator:
 
     def _build_auth_id_mapping(self):
         """
-        Build an organisation/repo -> installation_id mappingg in order to be able
+        Build an organisation/repo -> installation_id mapping in order to be able
         to do cross repository operations.
         """
 
@@ -81,6 +81,8 @@ class Authenticator:
             repositories = session.ghrequest(
                 'GET', installation['repositories_url'], json=None).json()
             for repo in repositories['repositories']:
+                if repo['full_name'] not in self.idmap:
+                    print('found new repository:', repo['full_name'])
                 self.idmap[repo['full_name']] = iid
 
 
