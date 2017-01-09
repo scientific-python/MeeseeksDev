@@ -1,6 +1,7 @@
 import re
 import os
 import hmac
+import types
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
@@ -197,7 +198,6 @@ class WebHookHandler(MainHandler):
                     print("    :: authorisation granted ", handler.scope)
                     maybe_gen = handler(
                         session=session, payload=payload, arguments=arguments)
-                    import types
                     if type(maybe_gen) == types.GeneratorType:
                         gen = YieldBreaker(maybe_gen)
                         for org_repo in gen:
@@ -205,6 +205,10 @@ class WebHookHandler(MainHandler):
                             session_id = self.auth.idmap.get(org_repo)
                             if session_id:
                                 target_session = self.auth.session(session_id)
+                                # TODO, if PR, admin and request is on source repo, allows anyway.
+                                # we may need to also check allow edit from maintainer and provide
+                                # another decorator for safety.
+                                # @access_original_branch.
                                 if target_session.is_collaborator(torg, trepo, user):
                                     gen.send(target_session)
                                 else:
