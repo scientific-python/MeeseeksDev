@@ -137,6 +137,14 @@ class WebHookHandler(MainHandler):
                     return self.finish("Not responding to self")
             # todo dispatch on on-open
 
+        elif type_ == 'added':
+            installation = payload.get('installation', None)
+            if installation and installation.get('account'):
+                print('we got a new installation.')
+                self.auth._build_auth_id_mapping()
+                return self.finish()
+            else:
+                print("can't deal with this kind of payload yet", payload)
         # new comment created
         elif type_ == 'created':
             comment = payload.get('comment', None)
@@ -157,7 +165,7 @@ class WebHookHandler(MainHandler):
                     print('Was not mentioned',
                           self.config.botname, body, '|', user)
             elif installation and installation.get('account'):
-                print('we got a new installation maybe ?!', payload)
+                print('we got a new installation.')
                 self.auth._build_auth_id_mapping()
                 return self.finish()
             else:

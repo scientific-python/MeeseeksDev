@@ -75,7 +75,6 @@ def pep8ify(*, session, payload, arguments):
     print('===== pe8ifying =====')
     print(payload)
     print('===== ========= =====')
-    target_branch = arguments
     # collect initial payload
     prnumber = payload['issue']['number']
     prtitle = payload['issue']['title']
@@ -128,16 +127,14 @@ def pep8ify(*, session, payload, arguments):
     # do the backport on local filesystem
     repo = git.Repo(repo_name)
     print('== Fetching branch to backport on ...')
-    repo.remotes.origin.fetch('refs/{}:workbranch'.format(target_branch))
+    repo.remotes.origin.fetch('{}:workbranch'.format(branch))
     repo.git.checkout('workbranch')
     print('== Fetching Commits to backport...')
-    repo.remotes.origin.fetch('{head_sha}'.format(
-        num=prnumber, head_sha=head_sha))
+    repo.remotes.origin.fetch('{head_sha}'.format(head_sha=head_sha))
     print('== All has been fetched correctly')
 
-    import os
     os.chdir(repo_name)
-    subprocess.run('pep8radius --in-place'.split(' ' + base_sha))
+    subprocess.run('pep8radius --in-place'.split(' ') + [base_sha])
     os.chdir('..')
 
     # write the commit message
