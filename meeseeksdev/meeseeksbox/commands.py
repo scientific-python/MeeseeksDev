@@ -79,6 +79,7 @@ def pep8ify(*, session, payload, arguments):
     org_name = payload['organization']['login']
     repo_name = payload['repository']['name']
 
+
     # collect extended payload on the PR
     print('== Collecting data on Pull-request...')
     r = session.ghrequest('GET',
@@ -86,12 +87,22 @@ def pep8ify(*, session, payload, arguments):
                               org_name, repo_name, prnumber),
                           json=None)
     pr_data = r.json()
-    merge_sha = pr_data['merge_commit_sha']
-    # body = pr_data['body']
+    head_sha = pr_data['head']['sha']
+    base_sha = pr_data['base']['sha']
+    branch = pr_data['head']['ref']
+    author_login = pr_data['repo']['owner']['login']
+    repo_name = pr_data['repo']['name']
+
+    # that will likely fail, as if PR, we need to bypass the fact that the
+    # requester has technically no access to commiter repo.
+    target_session = yield '{}/{}'.format(author_login, repo_name)
+    if not target_session:
+        pass
+        # That's todo
 
     # clone locally
     # this process can take some time, regen token
-    atk = session.token()
+    atk = target_session.token()
 
     if os.path.exists(repo_name):
         print('== Cleaning up previsous work... ')
@@ -100,47 +111,39 @@ def pep8ify(*, session, payload, arguments):
 
     print('== Cloning current repository, this can take some time..')
     process = subprocess.run(
-        ['git', 'clone', 'https://x-access-token:{}@github.com/{}/{}'.format(atk, org_name, repo_name)])
+        ['git', 'clone', 'https://x-access-token:{}@github.com/{}/{}'.format(atk, author_login, repo_name)])
     print('== Cloned..')
     process.check_returncode()
 
-    subprocess.run('git config --global user.email ipy.bot@bot.com'.split(' '))
+    subprocess.run(
+        'git config --global user.email meeseeksbot@jupyter.org'.split(' '))
     subprocess.run('git config --global user.name FriendlyBot'.split(' '))
 
     # do the backport on local filesystem
     repo = git.Repo(repo_name)
     print('== Fetching branch to backport on ...')
-    repo.remotes.origin.fetch('refs/heads/{}:workbranch'.format(target_branch))
+    repo.remotes.origin.fetch('refs/{}:workbranch'.format(target_branch))
     repo.git.checkout('workbranch')
     print('== Fetching Commits to backport...')
-    repo.remotes.origin.fetch('{mergesha}'.format(
-        num=prnumber, mergesha=merge_sha))
+    repo.remotes.origin.fetch('{head_sha}'.format(
+        num=prnumber, head_sha=head_sha))
     print('== All has been fetched correctly')
 
+    import os
+    os.chdir(repo_name)
+    subprocess.run('pep8radius --in-place'.split(' ' + base_sha))
+    os.chdir('..')
+
     # write the commit message
-    msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + '\n\n' 
-    repo.git.commit('-m', msg)
+    msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + '\n\n'
+    repo.git.commit('-am', msg)
 
     # Push the backported work
-    remote_submit_branch = 'auto-backport-of-pr-{}'.format(prnumber)
     print("== Pushing work....:")
-    repo.remotes.origin.push('workbranch:{}'.format(remote_submit_branch))
+    repo.remotes.origin.push('workbranch:{}'.format(branch))
     repo.git.checkout('master')
-    repo.branches.workbranch.delete(repo, 'workbranch', force=True)
+    repo.branches.workbranch.delete(repo, 'workbranch')
 
-    # ToDO checkout master and get rid of branch
-
-    # Make the PR on GitHub
-    new_pr = session.ghrequest('POST', 'https://api.github.com/repos/{}/{}/pulls'.format(org_name, repo_name), json={
-        "title": "Backport PR #%i on branch %s" % (prnumber, target_branch),
-        "body": msg,
-        "head": "{}:{}".format(org_name, remote_submit_branch),
-        "base": target_branch
-    })
-
-    new_number = new_pr.json().get('number', None)
-    print('Backported as PR', new_number)
-    return new_pr.json()
     
 
 @admin
