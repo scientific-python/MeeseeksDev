@@ -187,6 +187,7 @@ class WebHookHandler(MainHandler):
         installation_id = payload['installation']['id']
         org = payload['organization']['login']
         repo = payload['repository']['name']
+        pull_request = payload['issue'].get('pull_request')
         session = self.auth.session(installation_id)
         permission_level = session._get_permission(org, repo, user)
         command_args = process_mentionning_comment(body, self.mention_bot_re)
@@ -218,7 +219,7 @@ class WebHookHandler(MainHandler):
                                 print('org/repo not found', org_repo, self.auth.idmap)
                                 gen.send(None)
                 else:
-                    print('I Cannot let you do that')
+                    print('I Cannot let you do that: requires', handler.scope.value , ' you have', permission_level.value)
             else:
                 print('unnknown command', command)
 
