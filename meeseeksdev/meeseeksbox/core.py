@@ -196,7 +196,7 @@ class WebHookHandler(MainHandler):
             handler = self.actions.get(command, None)
             if handler:
                 print("    :: testing who can use ", str(handler))
-                if (handler.scope.value >= permission_level.value):
+                if (permission_level.value >= handler.scope.value):
                     print("    :: authorisation granted ", handler.scope)
                     maybe_gen = handler(
                         session=session, payload=payload, arguments=arguments)
