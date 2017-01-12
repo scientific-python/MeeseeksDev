@@ -77,9 +77,7 @@ class WebHookHandler(MainHandler):
         self.actions = actions
         self.config = config
         self.auth = auth
-
         super().initialize(*args, **kwargs)
-        print('Webhook initialize got', args, kwargs)
 
     def get(self):
         self.getfinish("Webhook alive and listening")
@@ -181,14 +179,67 @@ class WebHookHandler(MainHandler):
         else:
             print("can't deal with ", type_, "yet")
 
+    # def _action_allowed(args):
+    #     """
+    #     determine if an action requester can make an action
+
+    #     Typically only
+    #       - the requester have a permission higher than the required permission.
+
+    #     Or:
+    #       - If pull-request, the requester is the author.
+    #     """
+
     def dispatch_on_mention(self, body, payload, user):
+        """
+        Core of the logic that let people require actions from the bot.
+
+        Logic is relatively strait forward at the base,
+        let `user` only trigger action it has sufficient permissions to do.
+
+        Typically an action can be done if you are at least:
+            - owner
+            - admin
+            - have write permissin
+            - read permissions
+            - no permission.
+
+        It is a bit trickier in the following case.
+
+            - You are a PR author (and owner of the branch you require to be merged)
+
+              The bot should still let you do these actions
+
+            - You request permission to multiple repo, agreed only if you have
+              at least write permission to the other repo.
+
+            - You are a maintainer and request access to a repo from which a PR
+              is coming.
+
+        """
 
         # to dispatch to commands
         installation_id = payload['installation']['id']
         org = payload['organization']['login']
         repo = payload['repository']['name']
         pull_request = payload['issue'].get('pull_request')
+        pr_author = None
+        pr_origin_org_repo = None
+        allow_edit_from_maintainer = None
         session = self.auth.session(installation_id)
+        if pull_request:
+            # The PR author _may_ not have access to origin branch
+            pr_author = payload['issue']['user']['login']
+            pr = session.ghrequest('GET', pull_request['url']).json()
+            pr_origin_org_repo = pr['head']['repo']['full_name']
+            origin_repo_org = pr['head']['user']['login']
+            allow_edit_from_maintainer = pr['maintainer_can_modify']
+
+        # might want to just look at whether the commenter has permission over said branch.
+        # you _may_ have multiple contributors to a PR.
+        is_legitimate_author = (pr_author == user) and (
+            pr_author == origin_repo_org)
+
         permission_level = session._get_permission(org, repo, user)
         command_args = process_mentionning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
@@ -196,7 +247,8 @@ class WebHookHandler(MainHandler):
             handler = self.actions.get(command, None)
             if handler:
                 print("    :: testing who can use ", str(handler))
-                if (permission_level.value >= handler.scope.value):
+                if (permission_level.value >= handler.scope.value) or \
+                        (is_legitimate_author and getattr(handler, 'let_author')):
                     print("    :: authorisation granted ", handler.scope)
                     maybe_gen = handler(
                         session=session, payload=payload, arguments=arguments)
@@ -211,7 +263,8 @@ class WebHookHandler(MainHandler):
                                 # we may need to also check allow edit from maintainer and provide
                                 # another decorator for safety.
                                 # @access_original_branch.
-                                if target_session.has_permission(torg, trepo, user, Permission.write):
+                                if target_session.has_permission(torg, trepo, user, Permission.write) or \
+                                        (pr_origin_org_repo == org_repo and allow_edit_from_maintainer):
                                     gen.send(target_session)
                                 else:
                                     gen.send(None)

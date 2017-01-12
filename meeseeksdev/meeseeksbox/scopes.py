@@ -31,3 +31,6 @@ def everyone(function):
     return function
 
 
+def pr_author(function):
+    function.let_author = True
+    return function
