@@ -220,7 +220,7 @@ class WebHookHandler(MainHandler):
 
         # to dispatch to commands
         installation_id = payload['installation']['id']
-        org = payload.get('organization', payload['user'])['login']
+        org = payload['sender']['login']
         repo = payload['repository']['name']
         pull_request = payload['issue'].get('pull_request')
         pr_author = None
