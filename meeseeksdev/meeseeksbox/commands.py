@@ -244,7 +244,7 @@ def backport(session, payload, arguments):
 
 
 @admin
-def tag(*, session, payload, arguments):
+def tag(session, payload, arguments):
     org = payload['organization']['login']
     repo = payload['repository']['name']
     num = payload.get('issue').get('number')
@@ -254,7 +254,7 @@ def tag(*, session, payload, arguments):
 
 
 @admin
-def untag(*, session, payload, arguments):
+def untag(session, payload, arguments):
     org = payload['organization']['login']
     repo = payload['repository']['name']
     num = payload.get('issue').get('number')
