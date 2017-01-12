@@ -95,10 +95,11 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
                       'url'], json={'state': 'closed'})
 
 
-from .meeseeksbox.scopes import pr_author
+from .meeseeksbox.scopes import pr_author, write
 from .meeseeksbox.commands import tag, untag
 
 @pr_author
+@write
 def ready(*, session, payload, arguments):
     tag(session, payload, 'need review')
     untag(session, payload, 'waiting for author')
