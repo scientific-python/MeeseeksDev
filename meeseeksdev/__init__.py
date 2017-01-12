@@ -1,7 +1,8 @@
 import os
 import base64
 
-org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab']
+org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab', 'Carreau',
+        'matplotlib', 'scikit-learn']
 
 usr_whitelist = [
         'Carreau',

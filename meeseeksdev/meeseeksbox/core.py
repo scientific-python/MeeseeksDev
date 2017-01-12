@@ -98,10 +98,12 @@ class WebHookHandler(MainHandler):
         if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
             print('Non allowed org:', org)
             self.error('Not allowed org.')
+            return
         sender = payload.get('sender', {}).get('login', {})
         if hasattr(self.config, 'user_whitelist') and (sender not in self.config.user_whitelist):
             print('Not allowed user:', sender)
             self.error('Not allowed user.')
+            return
 
 
         action = payload.get("action", None)
