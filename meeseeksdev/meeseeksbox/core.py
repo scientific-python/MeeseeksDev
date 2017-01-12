@@ -239,6 +239,8 @@ class WebHookHandler(MainHandler):
         # you _may_ have multiple contributors to a PR.
         is_legitimate_author = (pr_author == user) and (
             pr_author == origin_repo_org)
+        if is_legitimate_author: 
+            print(user, 'is legitimate author of this PR, letting commands go through')
 
         permission_level = session._get_permission(org, repo, user)
         command_args = process_mentionning_comment(body, self.mention_bot_re)

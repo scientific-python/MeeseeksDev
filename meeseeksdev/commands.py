@@ -93,3 +93,14 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
                          'comments_url'], body='Done as {}/{}#{}.'.format(org, repo, new_issue['number']))
     session.ghrequest('PATCH', payload['issue'][
                       'url'], json={'state': 'closed'})
+
+
+from .meeseeksbox.scopes import pr_author
+from .meeseeksbox.commands import tag, untag
+
+@pr_author
+def ready(*, session, payload, arguments):
+    tag(session, payload, 'need review')
+    untag(session, payload, 'waiting for author')
+
+    
