@@ -170,6 +170,8 @@ def backport(session, payload, arguments):
     merge_sha = pr_data['merge_commit_sha']
     body = pr_data['body']
     milestone_number = pr_data['milestone']['number']
+    if milestone_number:
+        milestone_number = int(milestone_number)
     try:
         labels_names = [l['name'] for l in payload['issue']['labels']]
     except KeyError:
@@ -239,6 +241,7 @@ def backport(session, payload, arguments):
     # ToDO checkout master and get rid of branch
 
     # Make the PR on GitHub
+    print('try to create PR with milestone', milestone_number, 'and labels', labels_names)
     new_pr = session.ghrequest('POST', 'https://api.github.com/repos/{}/{}/pulls'.format(org_name, repo_name), json={
         "title": "Backport PR #%i on branch %s" % (prnumber, target_branch),
         "body": msg,
