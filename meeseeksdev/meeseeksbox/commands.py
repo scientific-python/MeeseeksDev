@@ -124,12 +124,12 @@ def pep8ify(*, session, payload, arguments):
         'git config --global user.email meeseeksbot@jupyter.org'.split(' '))
     subprocess.run('git config --global user.name FriendlyBot'.split(' '))
 
-    # do the backport on local filesystem
+    # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
-    print('== Fetching branch to backport on ...')
+    print('== Fetching branch to pep8ify on ...')
     repo.remotes.origin.fetch('{}:workbranch'.format(branch))
     repo.git.checkout('workbranch')
-    print('== Fetching Commits to backport...')
+    print('== Fetching Commits to pep8ify...')
     repo.remotes.origin.fetch('{head_sha}'.format(head_sha=head_sha))
     print('== All has been fetched correctly')
 
@@ -141,7 +141,7 @@ def pep8ify(*, session, payload, arguments):
     msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + '\n\n'
     repo.git.commit('-am', msg)
 
-    # Push the backported work
+    # Push the pep8ify work
     print("== Pushing work....:")
     repo.remotes.origin.push('workbranch:{}'.format(branch))
     repo.git.checkout('master')
@@ -185,8 +185,8 @@ def backport(session, payload, arguments):
     print('== Cloned..')
     process.check_returncode()
 
-    subprocess.run('git config --global user.email ipy.bot@bot.com'.split(' '))
-    subprocess.run('git config --global user.name FriendlyBot'.split(' '))
+    subprocess.run('git config --global user.email meeseeksdevbot@jupyter.org'.split(' '))
+    subprocess.run('git config --global user.name MeeseeksDev[bot]'.split(' '))
 
     # do the backport on local filesystem
     repo = git.Repo(repo_name)
