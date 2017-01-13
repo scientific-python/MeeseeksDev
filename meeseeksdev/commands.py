@@ -109,6 +109,12 @@ def ready(*, session, payload, arguments):
 @write
 def merge(*, session, payload, arguments, method='merge'):
     print('===== merging =====')
+    if arguments:
+        if arguments not in {'merge', 'squash', 'rebase'}:
+            print("don't know how to merge with methods", arguments)
+            return
+        else:
+            method = arguments
     prnumber = payload['issue']['number']
     org_name = payload['repository']['owner']['login']
     repo_name = payload['repository']['name']
@@ -126,7 +132,8 @@ def merge(*, session, payload, arguments, method='merge'):
     if mergeable:
 
         resp = session.ghrequest('PUT', 'http://api.github.com/repos/{}/{}/pulls/{}/merge'.format(org_name, repo_name, prnumber),
-                json={'sha': head_sha},
+                                 json={'sha': head_sha,
+                                       'merge_method': method},
                 override_accept_header='application/vnd.github.polaris-preview+json',
                 )
         print('------------')
