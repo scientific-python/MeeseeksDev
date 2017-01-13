@@ -78,7 +78,7 @@ def pep8ify(*, session, payload, arguments):
     # collect initial payload
     prnumber = payload['issue']['number']
     prtitle = payload['issue']['title']
-    org_name = payload['issue']['repository']['owner']['login']
+    org_name = payload['repository']['owner']['login']
     repo_name = payload['repository']['name']
 
 
@@ -247,7 +247,7 @@ def backport(session, payload, arguments):
 
 @admin
 def tag(session, payload, arguments):
-    org = payload['issue']['repository']['owner']['login']
+    org = payload['repository']['owner']['login']
     repo = payload['repository']['name']
     num = payload.get('issue').get('number')
     url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(**locals())
@@ -257,7 +257,7 @@ def tag(session, payload, arguments):
 
 @admin
 def untag(session, payload, arguments):
-    org = payload['issue']['repository']['owner']['login']
+    org = payload['repository']['owner']['login']
     repo = payload['repository']['name']
     num = payload.get('issue').get('number')
     tags = [arg.strip() for arg in arguments.split(',')]
@@ -288,7 +288,7 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
 
     issue_title = payload['issue']['title']
     issue_body = payload['issue']['body']
-    original_org = payload['issue']['repository']['owner']['login']
+    original_org = payload['repository']['owner']['login']
     original_repo = payload['repository']['name']
     original_poster = payload['issue']['user']['login']
     original_number = payload['issue']['number']
