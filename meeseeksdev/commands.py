@@ -122,12 +122,11 @@ def merge(*, session, payload, arguments, method='merge'):
     pr_data = r.json()
     head_sha = pr_data['head']['sha']
     mergeable = pr_data['mergeable'] == 'true'
-    merges_url = pr_data['merges_url']
     repo_name = pr_data['head']['repo']['name']
     if mergeable:
-        resp = session.ghrequest('PUT', merges_url, json={'sha': head_sha})
+        resp = session.ghrequest('PUT', 'http://api.github.com/repos/{}/{}/merges'.format(org_name, repo_name), json={'sha': head_sha})
     else:
-        print('')
+        print('Not mergeable')
 
     print(resp.json())
     resp.raise_for_status()
