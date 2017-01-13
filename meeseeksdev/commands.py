@@ -124,8 +124,14 @@ def merge(*, session, payload, arguments, method='merge'):
     mergeable = pr_data['mergeable']
     repo_name = pr_data['head']['repo']['name']
     if mergeable:
-        resp = session.ghrequest('PUT', 'http://api.github.com/repos/{}/{}/pulls/{}/merges'.format(org_name, repo_name, prnumber), json={'sha': head_sha})
+
+        resp = session.ghrequest('PUT', 'http://api.github.com/repos/{}/{}/pulls/{}/merges'.format(org_name, repo_name, prnumber),
+                json={'sha': head_sha},
+                override_accept_header='application/vnd.github.polaris-preview+json',
+                )
+        print('------------')
         print(resp.json())
+        print('------------')
         resp.raise_for_status()
     else:
         print('Not mergeable', pr_data['mergeable'])
