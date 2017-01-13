@@ -169,6 +169,8 @@ def backport(session, payload, arguments):
     pr_data = r.json()
     merge_sha = pr_data['merge_commit_sha']
     body = pr_data['body']
+    milestone_number = pr_data['milestone']['number']
+    labels_names = [l['name'] for l in pr_data['labels']]
 
     # clone locally
     # this process can take some time, regen token
@@ -237,7 +239,9 @@ def backport(session, payload, arguments):
         "title": "Backport PR #%i on branch %s" % (prnumber, target_branch),
         "body": msg,
         "head": "{}:{}".format(org_name, remote_submit_branch),
-        "base": target_branch
+        "base": target_branch,
+        "milestone" : milestone_number,
+        "labels": labels_names,
     })
 
     new_number = new_pr.json().get('number', None)
