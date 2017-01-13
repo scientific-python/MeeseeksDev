@@ -119,7 +119,7 @@ class WebHookHandler(MainHandler):
         else:
             event_type = self.request.headers.get('X-GitHub-Event')
 
-            if event_type in {'status','fork','deployment_status', 'deployment'}:
+            if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete'}:
                 print('Not handeling event type', event_type,'yet.')
                 return self.finish()
 

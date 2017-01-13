@@ -249,16 +249,17 @@ def backport(session, payload, arguments):
         "base": target_branch,
     }).json()
 
-    resp = session.ghrequest('PATCH', new_pr.get('url'), json={
-        "milestone": milestone_number,
-        "labels": labels_names,
-    })
+    new_number = new_pr['number']
+    resp = session.ghrequest('PATCH', 'https://api.github.com/repos/{}/{}/issues/{}'.format(org_name, repo_name, new_number),
+        json={
+            "milestone": milestone_number,
+            "labels": labels_names,
+        })
+    print(resp.json())
     resp.raise_for_status()
 
-    new_number = new_pr.get('number', None)
     print('Backported as PR', new_number)
-    return new_pr.json()
-
+    return new_pr
 
 @admin
 def tag(session, payload, arguments):
