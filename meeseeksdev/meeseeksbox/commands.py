@@ -170,7 +170,11 @@ def backport(session, payload, arguments):
     merge_sha = pr_data['merge_commit_sha']
     body = pr_data['body']
     milestone_number = pr_data['milestone']['number']
-    labels_names = [l['name'] for l in pr_data['labels']]
+    try:
+        labels_names = [l['name'] for l in pr_data['labels']]
+    except KeyError:
+        print('Did not find labels|',pr_data)
+        return 
 
     # clone locally
     # this process can take some time, regen token
