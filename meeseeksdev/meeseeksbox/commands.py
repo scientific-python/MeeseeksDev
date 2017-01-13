@@ -152,6 +152,8 @@ def pep8ify(*, session, payload, arguments):
 @admin
 def backport(session, payload, arguments):
     target_branch = arguments
+    if target_branch.startswith('to '):
+        target_branch = target_branch[3:].strip()
     # collect initial payload
     prnumber = payload['issue']['number']
     prtitle = payload['issue']['title']
