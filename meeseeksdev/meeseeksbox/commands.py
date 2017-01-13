@@ -247,11 +247,15 @@ def backport(session, payload, arguments):
         "body": msg,
         "head": "{}:{}".format(org_name, remote_submit_branch),
         "base": target_branch,
-        "milestone" : milestone_number,
+    }).json()
+
+    resp = session.ghrequest('PATCH', new_pr.get('url'), json={
+        "milestone": milestone_number,
         "labels": labels_names,
     })
+    resp.raise_for_status()
 
-    new_number = new_pr.json().get('number', None)
+    new_number = new_pr.get('number', None)
     print('Backported as PR', new_number)
     return new_pr.json()
 
