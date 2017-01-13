@@ -157,7 +157,7 @@ def backport(session, payload, arguments):
     # collect initial payload
     prnumber = payload['issue']['number']
     prtitle = payload['issue']['title']
-    org_name = payload['sender']['login']
+    org_name = payload['repository']['owner']['login']
     repo_name = payload['repository']['name']
 
     # collect extended payload on the PR
