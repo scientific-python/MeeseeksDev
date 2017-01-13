@@ -171,7 +171,7 @@ def backport(session, payload, arguments):
     body = pr_data['body']
     milestone_number = pr_data['milestone']['number']
     try:
-        labels_names = [l['name'] for l in pr_data['labels']]
+        labels_names = [l['name'] for l in payload['issue']['labels']]
     except KeyError:
         print('Did not find labels|',pr_data)
         return 
