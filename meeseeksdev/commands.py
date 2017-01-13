@@ -4,15 +4,16 @@ Define a few commands
 
 from .meeseeksbox.utils import Session, fix_issue_body, fix_comment_body
 
-from .meeseeksbox.scopes import admin
+from .meeseeksbox.scopes import admin, write
 
-@admin
+
+@write
 def close(*, session, payload, arguments):
     session.ghrequest('PATCH', payload['issue']
                       ['url'], json={'state': 'closed'})
 
 
-@admin
+@write
 def open(*, session, payload, arguments):
     session.ghrequest('PATCH', payload['issue']['url'], json={'state': 'open'})
 
@@ -105,3 +106,28 @@ def ready(*, session, payload, arguments):
     untag(session, payload, 'waiting for author')
 
     
+@write
+def merge(*, session, payload, arguments, method='merge'):
+    print('===== merging =====')
+    prnumber = payload['issue']['number']
+    org_name = payload['repository']['owner']['login']
+    repo_name = payload['repository']['name']
+
+    # collect extended payload on the PR
+    print('== Collecting data on Pull-request...')
+    r = session.ghrequest('GET',
+                          'https://api.github.com/repos/{}/{}/pulls/{}'.format(
+                              org_name, repo_name, prnumber),
+                          json=None)
+    pr_data = r.json()
+    head_sha = pr_data['head']['sha']
+    mergeable = pr_data['mergeable'] == 'true'
+    merges_url = pr_data['merges_url']
+    repo_name = pr_data['head']['repo']['name']
+    if mergeable:
+        resp = session.ghrequest('PUT', merges_url, json={'sha': head_sha})
+    else:
+        print('')
+
+    print(resp.json())
+    resp.raise_for_status()
