@@ -248,7 +248,7 @@ class WebHookHandler(MainHandler):
         command_args = process_mentionning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
-            handler = self.actions.get(command, None)
+            handler = self.actions.get(command.lower(), None)
             if handler:
                 print("    :: testing who can use ", str(handler))
                 if (permission_level.value >= handler.scope.value) or \
