@@ -1,19 +1,40 @@
 # MeeseeksBox
 
-A base for stateless GitHub Bot. 
+A base for stateless GitHub Bot,and one hosted implementation thereof.
 
-See what is a [MeeseeksDev and a MeeseeksBox](https://www.youtube.com/watch?v=qUYvIAP3qQk)
+See what is a [Meeseeks and a MeeseeksBox](https://www.youtube.com/watch?v=qUYvIAP3qQk).
 
 ## Hosted for you
 
-We host MeeseeksBoxes and will expose them as GitHub Integrations so you don't
-have to host and run your own, but you can if you want, it should be pretty
+We host MeeseeksBox(es) and will expose them as GitHub Integrations so you don't
+have to host and run your own. You can if you want, it should be pretty
 simple. 
 
 The advantage of having One and only one box, is to do cross repository
-operations.
+operations (and fix security bugs). 
+
+The drawback is if there is a security issue, then we're screwed.
+
+## Activate on your Repo 
+
+1) Head [there](https://github.com/integration/meeseeksdev/) and activate
+MeeseeksDev on repos you have access to. 
+
+2) On a repository with MeeseeksDev installed say: `@MeeseeksDev Hello` to be
+sure MeeseeksDev is correctly installed.
+
+3) Enjoy
+
+Beta Phase: During Beta phase repository/users need to be vetted/whitelisted
+open an issue if you wish to participate. 
 
 ## What can a MeeseeksBox do ?
+
+Comment on a Pr or issue.
+
+You _may_ put multiple commands, one per line. 
+
+MrMeeseeks _may_ not like what you ask, and just ignore you. 
 
 ### @MeeseeksDev hello
 
@@ -28,9 +49,17 @@ To test whether a Meeseeks understand you.
 If issued from a  PR which is merged, attempt to backport (cherry-pick the
 merge commit) on an older branch and submit a PR with this backport (on said branch)
 
-No option to push directly. 
+Apply origin-pr labels and milestone to backport. 
+
+- No option to push directly (yet), if implemented should apply only with clean backport. 
+- Investigate what to do in case of conflict
+    - likely commit with conflict, and let maintainers resolve conflict
 
 Repo admins only
+
+Note: Cloning can take a long-time. So expect MrMeeseeks to be busy while this
+happen. Also heroku as a 2min deadline and other limitations, so MrMeeseeks can
+likely be killed. I haven't implemented a queue yet. 
 
 ### @MeeseeksDev pep8ify
 
@@ -64,13 +93,19 @@ Close the issue. Useful when replying by mail
 
 Reopen the issue.
 
-### @MeeseeksDev tag bug, question, Need Contributor
+### @MeeseeksDev tag {comma, separated, case sensitive, taglist}
 
 Tag with said tags if availlable (comma separated, need to be exact match)
 
-### @MeeseeksDev untag bug, question, Need Contributor
+### @MeeseeksDev untag {comma, separated, case sensitive, taglist}
 
 Remove said tags if present (comma separated, need to be exact match)
+
+### @MeeseeksDev merge [merge|squash|rebase]
+
+Issuer needs at least write permission. 
+
+If Mergeable, Merge current PR using said methods (`merge` if no arguments)
 
 
 ## Simple extension.
@@ -117,11 +152,10 @@ def foo(*, session, payload, argument):
 
 # Why do you request so much permission ?
 
-GitHub API does not allow to change permissions once given. We don't want you
-to go though the process of reinstalling all integrations.
+GitHub API does not allow to change permissions once given (yet). We don't want
+you to go though the process of reinstalling all integrations.
 
 We would like to request less permission if necessary. 
-
 
 
 # Setup.
@@ -142,5 +176,3 @@ If you want access open an issue for me to whitelist your org and users.
 
 Because of GitHub API limitation, MeeseeksBox can not yet make the distinction
 between read-only and read-write collaborators.
-
-
