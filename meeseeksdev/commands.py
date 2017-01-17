@@ -131,7 +131,7 @@ def merge(*, session, payload, arguments, method='merge'):
     repo_name = pr_data['head']['repo']['name']
     if mergeable:
 
-        resp = session.ghrequest('PUT', 'http://api.github.com/repos/{}/{}/pulls/{}/merge'.format(org_name, repo_name, prnumber),
+        resp = session.ghrequest('PUT', 'https://api.github.com/repos/{}/{}/pulls/{}/merge'.format(org_name, repo_name, prnumber),
                                  json={'sha': head_sha,
                                        'merge_method': method},
                 override_accept_header='application/vnd.github.polaris-preview+json',
@@ -143,3 +143,16 @@ def merge(*, session, payload, arguments, method='merge'):
     else:
         print('Not mergeable', pr_data['mergeable'])
 
+def _lock_primitive(meth,*, session, payload, arguments):
+    number = payload['issue']['number']
+    org_name = payload['repository']['owner']['login']
+    repo_name = payload['repository']['name']
+    session.ghrequest('PUT', 'https://api.github.com/repos/{}/{}/issues/{}/lock'.format(org_name, repo_name, number))
+
+@admin
+def lock(**kwargs):
+    _lock_primitive('PUT', **kwargs)
+
+@admin
+def unlock(**kwargs):
+    _lock_primitive('DELETE', **kwargs)
