@@ -376,3 +376,16 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
                          'comments_url'], body='Done as {}/{}#{}.'.format(org, repo, new_issue['number']))
     session.ghrequest('PATCH', payload['issue'][
                       'url'], json={'state': 'closed'})
+
+
+@admin
+def quote(*, session, payload, arguments):
+    if arguments.lower() == 'over the world':
+        comment_url     = payload['issue']['comments_url']
+        user            = payload['issue']['user']['login']
+    session.post_comment(comment_url, 
+"""
+> MeeseeksDev: Gee, {user}, what do you want to do tonight?
+{user}: The same thing we do every night, MeeseeksDev - try to take over the world!
+""".format(user=user))
+
