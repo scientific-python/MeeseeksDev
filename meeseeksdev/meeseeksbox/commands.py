@@ -218,11 +218,21 @@ def backport(session, payload, arguments):
     except git.GitCommandError as e:
         if ('git commit --allow-empty' in e.stderr) or ('git commit --allow-empty' in e.stdout):
             session.post_comment(payload['issue']['comments_url'],
-                    "It seem like this is already backported (commit is empty). I wont' do anything")
+                    "Can't Dooooo.... It seem like this is already backported (commit is empty)."
+                    "I won't do anything. MrMeeseeks out.")
+            print(e.stderr)
+            print('----')
+            print(e.stdout)
+            print('----')
+
             return
         else:
             session.post_comment(payload['issue']['comments_url'],
                     "Oops, something went wrong applying the patch... Please have  a look at my logs.")
+            print(e.stderr)
+            print('----')
+            print(e.stdout)
+            print('----')
             return
     except Exception as e:
         print('\n' + e.stderr.decode('utf8', 'replace'), file=sys.stderr)
