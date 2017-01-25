@@ -143,16 +143,20 @@ def merge(*, session, payload, arguments, method='merge'):
     else:
         print('Not mergeable', pr_data['mergeable'])
 
-def _lock_primitive(meth,*, session, payload, arguments):
-    number = payload['issue']['number']
-    org_name = payload['repository']['owner']['login']
-    repo_name = payload['repository']['name']
-    session.ghrequest('PUT', 'https://api.github.com/repos/{}/{}/issues/{}/lock'.format(org_name, repo_name, number))
 
-@admin
-def lock(**kwargs):
-    _lock_primitive('PUT', **kwargs)
-
-@admin
-def unlock(**kwargs):
-    _lock_primitive('DELETE', **kwargs)
+###
+# Lock and Unlock are not yet available for integration.
+###
+# def _lock_primitive(meth,*, session, payload, arguments):
+#     number = payload['issue']['number']
+#     org_name = payload['repository']['owner']['login']
+#     repo_name = payload['repository']['name']
+#     session.ghrequest('PUT', 'https://api.github.com/repos/{}/{}/issues/{}/lock'.format(org_name, repo_name, number))
+# 
+# @admin
+# def lock(**kwargs):
+#     _lock_primitive('PUT', **kwargs)
+# 
+# @admin
+# def unlock(**kwargs):
+#     _lock_primitive('DELETE', **kwargs)

@@ -215,12 +215,24 @@ def backport(session, payload, arguments):
     try:
         with mock.patch.dict('os.environ', {'GIT_EDITOR': 'true'}):
             repo.git.cherry_pick(*args)
+    except git.GitCommandError as e:
+        if ('git commit --allow-empty' in e.stderr) or ('git commit --allow-empty' in e.stdout):
+            session.post_comment(payload['issue']['comments_url'],
+                    "It seem like this is already backported (commit is empty). I wont' do anything")
+            return
+        else:
+            session.post_comment(payload['issue']['comments_url'],
+                    "Oops, something went wrong applying the patch... Please have  a look at my logs.")
+            return
     except Exception as e:
         print('\n' + e.stderr.decode('utf8', 'replace'), file=sys.stderr)
         print('\n' + repo.git.status(), file=sys.stderr)
         cmd = ' '.join(pipes.quote(arg) for arg in sys.argv)
         print('\nPatch did not apply. Resolve conflicts (add, not commit), then re-run `%s`' %
               cmd, file=sys.stderr)
+        session.post_comment(payload['issue']['comments_url'],
+               "Oops, something went wrong applying the patch... Please have  a look at my logs.")
+        return
 
     # write the commit message
     msg = "Backport PR #%i: %s" % (prnumber, prtitle) + '\n\n' + description

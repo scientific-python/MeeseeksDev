@@ -59,7 +59,7 @@ def load_config_from_env():
 from .meeseeksbox.core import MeeseeksBox
 from .meeseeksbox.core import Config
 from .meeseeksbox.commands import replyuser, zen, backport, tag, untag, pep8ify
-from .commands import close, open as _open, migrate_issue_request, ready, merge, lock, unlock
+from .commands import close, open as _open, migrate_issue_request, ready, merge
 
 def main():
     print('====== (re) starting ======')
@@ -78,8 +78,6 @@ def main():
             'autopep8': pep8ify,
             'ready': ready,
             'merge': merge,
-            'lock': lock,
-            'unlock' : unlock,
         }, config=config).start()
 
 if __name__ == "__main__":
