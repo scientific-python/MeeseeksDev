@@ -20,7 +20,8 @@ usr_whitelist = [
         'tacaswell',
         'willingc',
         'jhamrick',
-        'lgpage'
+        'lgpage',
+        'jasongrout'
         ]
 
 # https://github.com/integrations/meeseeksdev/installations/new
