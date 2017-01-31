@@ -13,7 +13,7 @@ import sys
 
 from .utils import Session, fix_issue_body, fix_comment_body
 
-from .scopes import admin, everyone
+from .scopes import admin, everyone, write
 
 @everyone
 def replyuser(*, session, payload, arguments):
@@ -378,7 +378,7 @@ def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
                       'url'], json={'state': 'closed'})
 
 
-@admin
+@write
 def quote(*, session, payload, arguments):
     if arguments.lower() == 'over the world':
         comment_url     = payload['issue']['comments_url']
