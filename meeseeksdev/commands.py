@@ -8,9 +8,20 @@ from .meeseeksbox.scopes import admin, write, everyone
 
 from textwrap import dedent
 
+def _format_doc(function, name):
+    if not function.__doc__:
+        doc = '  '
+    else:
+        doc = function.__doc__.splitlines()
+    first, other = doc[0], '\n'.join(doc[1:])
+    return '`@meeseeksdev {} {}` ({}) \n{}  '.format(name, first, function.scope, other)
+
+
+
 def help_make(commands):
 
-    data = '\n - '.join(['({}) <mention> {} {}'.format(v.scope, k, v.__doc__ if v.__doc__ else '') for k, v in commands.items()])
+    data = '\n'.join([_format_doc(v, k) for  k, v in commands.items()])
+
 
     @everyone
     def help(*, session, payload, arguments):
@@ -38,7 +49,7 @@ def open(*, session, payload, arguments):
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     """[to] {org}/{repo} 
 
-        Need to be admin on target repo. 
+Need to be admin on target repo. Replicate all comments on target repo and close current on.
     """
 
     """Todo:
@@ -124,6 +135,9 @@ from .meeseeksbox.commands import tag, untag
 @pr_author
 @write
 def ready(*, session, payload, arguments):
+    """
+
+    """
     tag(session, payload, 'need review')
     untag(session, payload, 'waiting for author')
 
