@@ -174,6 +174,13 @@ def backport(session, payload, arguments):
     print('----------------------------------------')
     print('milestone data :', pr_data['milestone'])
     print('----------------------------------------')
+    if not target_branch.strip():
+        milestone_title = pr_data['milestone']['title']
+        parts = milestone_title.split('.')
+        parts[-1] = 'x'
+        infered_target_branch = '.'.join('.')
+        print('inferring branch....', infered_target_branch)
+        target_branch = infered_target_branch
 
     if milestone_number:
         milestone_number = int(milestone_number)
