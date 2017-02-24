@@ -180,7 +180,7 @@ def backport(session, payload, arguments):
         milestone_title = pr_data['milestone']['title']
         parts = milestone_title.split('.')
         parts[-1] = 'x'
-        infered_target_branch = '.'.join('.')
+        infered_target_branch = '.'.join(parts)
         print('inferring branch....', infered_target_branch)
         target_branch = infered_target_branch
 
