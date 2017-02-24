@@ -4,8 +4,28 @@ Define a few commands
 
 from .meeseeksbox.utils import Session, fix_issue_body, fix_comment_body
 
-from .meeseeksbox.scopes import admin, write
+from .meeseeksbox.scopes import admin, write, everyone
 
+from textwrap import dedent
+
+def help_make(commands):
+
+    data = '\n - '.join(['{} ({}) '.format(k, v.scope) for k, v in commands.items()])
+
+    @everyone
+    def help(*, session, payload, arguments):
+        comment_url = payload['issue']['comments_url']
+        session.post_comment(comment_url,
+            dedent(
+                """
+                The following commands are available:
+
+                {}
+                """.format(data)
+            )
+        )
+
+    return help
 
 @write
 def close(*, session, payload, arguments):

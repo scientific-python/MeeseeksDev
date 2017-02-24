@@ -60,27 +60,29 @@ def load_config_from_env():
 from .meeseeksbox.core import MeeseeksBox
 from .meeseeksbox.core import Config
 from .meeseeksbox.commands import replyuser, zen, backport, tag, untag, pep8ify, quote
-from .commands import close, open as _open, migrate_issue_request, ready, merge
+from .commands import close, open as _open, migrate_issue_request, ready, merge, help_make
 
 def main():
     print('====== (re) starting ======')
     config = load_config_from_env()
     config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
     config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
-    MeeseeksBox(commands={
-            'hello': replyuser,
-            'zen': zen,
-            'backport': backport,
-            'migrate': migrate_issue_request,
-            'tag': tag,
-            'untag': untag,
-            'open': _open,
-            'close': close,
-            'autopep8': pep8ify,
-            'ready': ready,
-            'merge': merge,
-            'take' : quote,
-        }, config=config).start()
+    commands = {
+        'hello': replyuser,
+        'zen': zen,
+        'backport': backport,
+        'migrate': migrate_issue_request,
+        'tag': tag,
+        'untag': untag,
+        'open': _open,
+        'close': close,
+        'autopep8': pep8ify,
+        'ready': ready,
+        'merge': merge,
+        'take' : quote,
+    }
+    commands['help'] = help_make(commands)
+    MeeseeksBox(commands=commands, config=config).start()
 
 if __name__ == "__main__":
     main()
