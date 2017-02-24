@@ -7,6 +7,7 @@ org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab', 'Carreau',
 usr_whitelist = [
         'Carreau',
         'gnestor',
+        'ivanov',
         'fperez',
         'michaelpacer',
         'minrk',
