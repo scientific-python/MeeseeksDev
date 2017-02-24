@@ -135,8 +135,10 @@ from .meeseeksbox.commands import tag, untag
 @pr_author
 @write
 def ready(*, session, payload, arguments):
-    """
+    """{no arguments}
 
+    Remove "waiting for author" tag, adds "need review" tag. Can also be issued
+    if you are the current PR author even if you are not admin. 
     """
     tag(session, payload, 'need review')
     untag(session, payload, 'waiting for author')
