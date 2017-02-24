@@ -152,6 +152,8 @@ def pep8ify(*, session, payload, arguments):
 @admin
 def backport(session, payload, arguments):
     """[to] {branch}"""
+    if arguments is None:
+        arguments = ''
     target_branch = arguments
     if target_branch.startswith('to '):
         target_branch = target_branch[3:].strip()
