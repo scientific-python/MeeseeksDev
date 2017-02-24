@@ -10,17 +10,14 @@ from textwrap import dedent
 
 def help_make(commands):
 
-    data = '\n - '.join(['{} ({}) '.format(k, v.scope) for k, v in commands.items()])
+    data = '\n - '.join(['({}) <mention> {} {}'.format(v.scope, k, v.__doc__ if v.__doc__ else '') for k, v in commands.items()])
 
     @everyone
     def help(*, session, payload, arguments):
         comment_url = payload['issue']['comments_url']
         session.post_comment(comment_url,
             dedent(
-                """
-                The following commands are available:
-
-                {}
+                """The following commands are available:\n\n{}
                 """.format(data)
             )
         )
@@ -39,6 +36,11 @@ def open(*, session, payload, arguments):
 
 @admin
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
+    """[to] {org}/{repo} 
+
+        Need to be admin on target repo. 
+    """
+
     """Todo:
 
     - Works through pagination of comments

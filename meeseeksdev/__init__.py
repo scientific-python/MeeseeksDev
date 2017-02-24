@@ -79,7 +79,6 @@ def main():
         'autopep8': pep8ify,
         'ready': ready,
         'merge': merge,
-        'take' : quote,
     }
     commands['help'] = help_make(commands)
     MeeseeksBox(commands=commands, config=config).start()
