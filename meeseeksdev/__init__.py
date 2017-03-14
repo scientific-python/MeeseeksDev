@@ -9,7 +9,7 @@ usr_whitelist = [
         'gnestor',
         'ivanov',
         'fperez',
-        'michaelpacer',
+        'mpacer',
         'minrk',
         'takluyver',
         'sylvaincorlay',
