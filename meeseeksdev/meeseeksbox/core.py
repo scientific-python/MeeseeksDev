@@ -1,7 +1,7 @@
 import re
 import os
 import hmac
-import types
+import inspect
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
@@ -254,9 +254,10 @@ class WebHookHandler(MainHandler):
                 if (permission_level.value >= handler.scope.value) or \
                         (is_legitimate_author and getattr(handler, 'let_author')):
                     print("    :: authorisation granted ", handler.scope)
+                    is_gen = inspect.isgeneratorfunction(handler)
                     maybe_gen = handler(
                         session=session, payload=payload, arguments=arguments)
-                    if type(maybe_gen) == types.GeneratorType:
+                    if is_gen:
                         gen = YieldBreaker(maybe_gen)
                         for org_repo in gen:
                             torg, trepo = org_repo.split('/')
