@@ -256,6 +256,13 @@ def backport(session, payload, arguments):
               cmd, file=sys.stderr)
         session.post_comment(payload['issue']['comments_url'],
                "Oops, something went wrong applying the patch... Please have  a look at my logs.")
+        org = payload['repository']['owner']['login']
+        repo = payload['repository']['name']
+        num = payload.get('issue').get('number')
+        url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(**locals())
+        session.ghrequest('POST', url, json=["Still Needs Manual Backport"])
+
+
         return
 
     # write the commit message
