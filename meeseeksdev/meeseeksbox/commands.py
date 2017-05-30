@@ -260,7 +260,10 @@ def backport(session, payload, arguments):
         repo = payload['repository']['name']
         num = payload.get('issue').get('number')
         url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(**locals())
-        session.ghrequest('POST', url, json=["Still Needs Manual Backport"])
+        print('trying to apply still needs manual backport')
+        reply = session.ghrequest('POST', url, json=["Still Needs Manual Backport"])
+        print('Should be applied:', reply)
+
 
 
         return
