@@ -238,7 +238,19 @@ def backport(session, payload, arguments):
             print('----')
             print(e.stdout)
             print('----')
-
+            return
+        elif "after resolving the conflicts" in e.stderr:
+            cmd = ' '.join(pipes.quote(arg) for arg in sys.argv)
+            print('\nPatch did not apply. Resolve conflicts (add, not commit), then re-run `%s`' % cmd, file=sys.stderr)
+            session.post_comment(payload['issue']['comments_url'],
+                   "There seem to be a conflict, please backport manually")
+            org = payload['repository']['owner']['login']
+            repo = payload['repository']['name']
+            num = payload.get('issue').get('number')
+            url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(**locals())
+            print('trying to apply still needs manual backport')
+            reply = session.ghrequest('POST', url, json=["Still Needs Manual Backport"])
+            print('Should be applied:', reply)
             return
         else:
             session.post_comment(payload['issue']['comments_url'],
@@ -249,21 +261,12 @@ def backport(session, payload, arguments):
             print('----')
             return
     except Exception as e:
+        session.post_comment(payload['issue']['comments_url'],
+                    "Hum, I actually crashed, that should not have happened.")
         print('\n' + e.stderr.decode('utf8', 'replace'), file=sys.stderr)
         print('\n' + repo.git.status(), file=sys.stderr)
-        cmd = ' '.join(pipes.quote(arg) for arg in sys.argv)
-        print('\nPatch did not apply. Resolve conflicts (add, not commit), then re-run `%s`' %
-              cmd, file=sys.stderr)
-        session.post_comment(payload['issue']['comments_url'],
-               "Oops, something went wrong applying the patch... Please have  a look at my logs.")
-        org = payload['repository']['owner']['login']
-        repo = payload['repository']['name']
-        num = payload.get('issue').get('number')
-        url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(**locals())
-        print('trying to apply still needs manual backport')
-        reply = session.ghrequest('POST', url, json=["Still Needs Manual Backport"])
-        print('Should be applied:', reply)
-
+        
+        
 
 
         return
