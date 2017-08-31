@@ -1,7 +1,9 @@
 import re
 import os
 import hmac
+import json
 import inspect
+
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
@@ -83,7 +85,7 @@ class WebHookHandler(MainHandler):
         self.getfinish("Webhook alive and listening")
 
     def post(self):
-        if not 'X-Hub-Signature' in self.request.headers:
+        if 'X-Hub-Signature' not in self.request.headers:
             return self.error('WebHook not configured with secret')
         # TODO: Extract from X-GitHub-Event
 
@@ -118,13 +120,17 @@ class WebHookHandler(MainHandler):
             return self.dispatch_action(action, payload)
         else:
             event_type = self.request.headers.get('X-GitHub-Event')
+            if event_type == 'pull_request':
+
+                print('Something happend with a pull-request', json.dumps(payload, indent=2))
+                return self.finish()
 
             if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete'}:
-                print('Not handeling event type', event_type,'yet.')
+                print('Not handling event type', event_type,'yet.')
                 return self.finish()
 
             print('No action available  for the webhook :',
-                  self.request.headers.get('X-GitHub-Event'),  ':', payload)
+                  self.request.headers.get('X-GitHub-Event'), ':', payload)
 
     @property
     def mention_bot_re(self):
