@@ -126,7 +126,7 @@ class WebHookHandler(MainHandler):
                 return self.finish()
 
             if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete'}:
-                print('Not handling event type', event_type,'yet.')
+                # print('Not handling event type', event_type,'yet.')
                 return self.finish()
 
             print('No action available  for the webhook :',
