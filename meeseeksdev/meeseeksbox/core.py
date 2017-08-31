@@ -126,7 +126,7 @@ class WebHookHandler(MainHandler):
                 return self.finish()
 
             if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete'}:
-                # print('Not handling event type', event_type,'yet.')
+                print('Not handling event type', event_type,'yet.')
                 return self.finish()
 
             print('No action available  for the webhook :',
@@ -185,7 +185,7 @@ class WebHookHandler(MainHandler):
             else:
                 print('not handled', payload)
         else:
-            print("can't deal with ", type_, "yet")
+            print("can't deal with ", type_, "yet", json.dumps(payload, indent=2))
 
     # def _action_allowed(args):
     #     """
