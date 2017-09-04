@@ -183,6 +183,8 @@ def backport(session, payload, arguments):
         infered_target_branch = '.'.join(parts)
         print('inferring branch....', infered_target_branch)
         target_branch = infered_target_branch
+        if org_name == 'matplotlib' and repo_name == 'matplotlib':
+            target_branch = 'v'+target_branch
 
     if milestone_number:
         milestone_number = int(milestone_number)
