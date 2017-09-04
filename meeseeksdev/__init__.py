@@ -22,7 +22,15 @@ usr_whitelist = [
         'willingc',
         'jhamrick',
         'lgpage',
-        'jasongrout'
+        'jasongrout',
+        #matplotlib people
+        'tacaswell',
+        'QuLogic',
+        'anntzer',
+        'NelleV',
+        'dstansby',
+        'efiring',
+        'choldgraf,
         ]
 
 # https://github.com/integrations/meeseeksdev/installations/new
