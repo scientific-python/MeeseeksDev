@@ -122,6 +122,7 @@ class WebHookHandler(MainHandler):
             event_type = self.request.headers.get('X-GitHub-Event')
             if event_type == 'pull_request':
 
+
                 print('Something happend with a pull-request', json.dumps(payload, indent=2))
                 return self.finish()
 
@@ -185,7 +186,18 @@ class WebHookHandler(MainHandler):
             else:
                 print('not handled', payload)
         else:
-            print("can't deal with ", type_, "yet", json.dumps(payload, indent=2))
+            if type_ == 'closed':
+                is_pr =  payload.get('pull_request', {})
+                if is_pr:
+                    merged_by = is_pr.get('merged_by')
+                    if merged_by:
+                        print('The pr', is_pr.get('url'), 'seam to have been merged by ', json.dumps(merged_by, indent=2))
+                    else:
+                        print('Hum, closed, PR but not merged', json.dumps(payload, indent=2) )
+                else:
+                    print("can't deal with ", type_, "(for issues) yet", json.dumps(payload, indent=2))
+            else:
+                print("can't deal with ", type_, "yet", json.dumps(payload, indent=2))
 
     # def _action_allowed(args):
     #     """
