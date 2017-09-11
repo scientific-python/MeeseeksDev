@@ -194,10 +194,11 @@ class WebHookHandler(MainHandler):
                         print('The pr', is_pr.get('url'), 'seam to have been merged by ', json.dumps(merged_by, indent=2))
                         repo = payload.get('repository',{}).get('full_name')
                         if repo == 'ipython/ipython':
-                            print('This is IPython/IPython, maybe I shoudl backport') 
+                            print('This is IPython/IPython, maybe I should Backport') 
                         milestone = is_pr.get('milestone',{}).get('title')
                         if milestone and milestone.startswith('5.') : 
-                            print('this is set to milestone', milestone, 'I should decide to backport')
+                            print('this is set to milestone', milestone, 'I should decide to Backport')
+                            self.dispatch_on_mention('@meeseeksdev backport', payload, merged_by['login'])
                         
                     else:
                         print('Hum, closed, PR but not merged', json.dumps(payload, indent=2) )
