@@ -194,8 +194,6 @@ def backport(session, payload, arguments):
         labels_names = [l['name'] for l in payload['issue']['labels']]
     except KeyError:
         print('Did not find labels|', pr_data)
-        return
-
     # clone locally
     # this process can take some time, regen token
     atk = session.token()
