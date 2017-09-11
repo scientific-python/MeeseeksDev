@@ -250,14 +250,14 @@ class WebHookHandler(MainHandler):
         installation_id = payload['installation']['id']
         org = payload['repository']['owner']['login']
         repo = payload['repository']['name']
-        pull_request = payload['issue'].get('pull_request')
+        pull_request = payload.get('issue', payload).get('pull_request')
         pr_author = None
         pr_origin_org_repo = None
         allow_edit_from_maintainer = None
         session = self.auth.session(installation_id)
         if pull_request:
             # The PR author _may_ not have access to origin branch
-            pr_author = payload['issue']['user']['login']
+            pr_author = payload.get('issue',{'user':{'login': None}})['user']['login']
             pr = session.ghrequest('GET', pull_request['url']).json()
             pr_origin_org_repo = pr['head']['repo']['full_name']
             origin_repo_org = pr['head']['user']['login']
