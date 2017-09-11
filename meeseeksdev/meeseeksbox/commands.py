@@ -249,7 +249,7 @@ def backport(session, payload, arguments):
                    "There seem to be a conflict, please backport manually")
             org = payload['repository']['owner']['login']
             repo = payload['repository']['name']
-            num = payload.get('issue').get('number')
+            num = payload.get('issue', payload).get('number')
             url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(**locals())
             print('trying to apply still needs manual backport')
             reply = session.ghrequest('POST', url, json=["Still Needs Manual Backport"])
