@@ -160,8 +160,8 @@ def backport(session, payload, arguments):
     # collect initial payload
     if 'issue' not in payload:
         print('debug autobackport', payload)
-    prnumber = payload.get('number', payload['issue']['number'])
-    prtitle = payload.get('title', payload['issue']['title'])
+    prnumber = payload.get('issue', payload).get('number')
+    prtitle = payload.get('issue',payload).get('title')
     org_name = payload['repository']['owner']['login']
     repo_name = payload['repository']['name']
 
@@ -230,7 +230,7 @@ def backport(session, payload, arguments):
     print("Cherry-picking %s" % merge_sha)
     args = ('-m', '1', merge_sha)
 
-    comment_url = payload.get('comments_url', payload['issue']['comments_url'])
+    comment_url = payload.get('issue', payload)['comments_url']
     try:
         with mock.patch.dict('os.environ', {'GIT_EDITOR': 'true'}):
             repo.git.cherry_pick(*args)
