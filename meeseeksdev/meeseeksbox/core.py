@@ -192,6 +192,13 @@ class WebHookHandler(MainHandler):
                     merged_by = is_pr.get('merged_by')
                     if merged_by:
                         print('The pr', is_pr.get('url'), 'seam to have been merged by ', json.dumps(merged_by, indent=2))
+                        repo = payload.get('repository',{}).get('full_name')
+                        if repo == 'ipython/ipython':
+                            print('This is IPython/IPython, maybe I shoudl backport') 
+                        milestone = payload.get('milestone')
+                        if milestone : 
+                            print('this is set to milestone', milestone, 'I should decide to backport')
+                        
                     else:
                         print('Hum, closed, PR but not merged', json.dumps(payload, indent=2) )
                 else:
