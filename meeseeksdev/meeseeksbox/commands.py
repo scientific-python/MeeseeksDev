@@ -158,8 +158,8 @@ def backport(session, payload, arguments):
     if target_branch.startswith('to '):
         target_branch = target_branch[3:].strip()
     # collect initial payload
-    prnumber = payload['issue']['number']
-    prtitle = payload['issue']['title']
+    prnumber = payload.get('number', payload['issue']['number'])
+    prtitle = payload.get('title', payload['issue']['title'])
     org_name = payload['repository']['owner']['login']
     repo_name = payload['repository']['name']
 
@@ -228,12 +228,13 @@ def backport(session, payload, arguments):
     print("Cherry-picking %s" % merge_sha)
     args = ('-m', '1', merge_sha)
 
+    comment_url = payload.get('comments_url', payload['issue']['comments_url'])
     try:
         with mock.patch.dict('os.environ', {'GIT_EDITOR': 'true'}):
             repo.git.cherry_pick(*args)
     except git.GitCommandError as e:
         if ('git commit --allow-empty' in e.stderr) or ('git commit --allow-empty' in e.stdout):
-            session.post_comment(payload['issue']['comments_url'],
+            session.post_comment(comment_url,
                     "Can't Dooooo.... It seem like this is already backported (commit is empty)."
                     "I won't do anything. MrMeeseeks out.")
             print(e.stderr)
@@ -244,7 +245,7 @@ def backport(session, payload, arguments):
         elif "after resolving the conflicts" in e.stderr:
             cmd = ' '.join(pipes.quote(arg) for arg in sys.argv)
             print('\nPatch did not apply. Resolve conflicts (add, not commit), then re-run `%s`' % cmd, file=sys.stderr)
-            session.post_comment(payload['issue']['comments_url'],
+            session.post_comment(comment_url,
                    "There seem to be a conflict, please backport manually")
             org = payload['repository']['owner']['login']
             repo = payload['repository']['name']
@@ -255,7 +256,7 @@ def backport(session, payload, arguments):
             print('Should be applied:', reply)
             return
         else:
-            session.post_comment(payload['issue']['comments_url'],
+            session.post_comment(comment_url,
                     "Oops, something went wrong applying the patch... Please have  a look at my logs.")
             print(e.stderr)
             print('----')
@@ -263,7 +264,7 @@ def backport(session, payload, arguments):
             print('----')
             return
     except Exception as e:
-        session.post_comment(payload['issue']['comments_url'],
+        session.post_comment(comment_url,
                     "Hum, I actually crashed, that should not have happened.")
         print('\n' + e.stderr.decode('utf8', 'replace'), file=sys.stderr)
         print('\n' + repo.git.status(), file=sys.stderr)
