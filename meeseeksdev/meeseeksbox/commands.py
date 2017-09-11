@@ -158,6 +158,8 @@ def backport(session, payload, arguments):
     if target_branch.startswith('to '):
         target_branch = target_branch[3:].strip()
     # collect initial payload
+    if 'issue' not in payload:
+        print('debug autobackport', payload)
     prnumber = payload.get('number', payload['issue']['number'])
     prtitle = payload.get('title', payload['issue']['title'])
     org_name = payload['repository']['owner']['login']
