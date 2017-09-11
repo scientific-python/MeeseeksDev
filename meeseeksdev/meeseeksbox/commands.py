@@ -228,7 +228,7 @@ def backport(session, payload, arguments):
     print("Cherry-picking %s" % merge_sha)
     args = ('-m', '1', merge_sha)
 
-    comment_url = payload.get('issue', payload)['comments_url']
+    comment_url = payload.get('issue', payload.get('pull_request'))['comments_url']
     try:
         with mock.patch.dict('os.environ', {'GIT_EDITOR': 'true'}):
             repo.git.cherry_pick(*args)
