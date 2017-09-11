@@ -195,8 +195,8 @@ class WebHookHandler(MainHandler):
                         repo = payload.get('repository',{}).get('full_name')
                         if repo == 'ipython/ipython':
                             print('This is IPython/IPython, maybe I shoudl backport') 
-                        milestone = payload.get('milestone')
-                        if milestone : 
+                        milestone = is_pr.get('milestone',{}).get('title')
+                        if milestone and milestone.startswith('5.') : 
                             print('this is set to milestone', milestone, 'I should decide to backport')
                         
                     else:
