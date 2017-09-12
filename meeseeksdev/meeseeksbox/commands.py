@@ -190,6 +190,7 @@ def backport(session, payload, arguments):
 
     if milestone_number:
         milestone_number = int(milestone_number)
+    labels_names = []
     try:
         labels_names = [l['name'] for l in payload['issue']['labels']]
     except KeyError:
