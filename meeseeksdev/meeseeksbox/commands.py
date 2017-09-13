@@ -161,7 +161,7 @@ def backport(session, payload, arguments):
     if 'issue' not in payload:
         print('debug autobackport', payload)
     prnumber = payload.get('issue', payload).get('number')
-    prtitle = payload.get('issue',payload).get('title')
+    prtitle = payload.get('issue',payload.get('pull_request', {})).get('title')
     org_name = payload['repository']['owner']['login']
     repo_name = payload['repository']['name']
 
