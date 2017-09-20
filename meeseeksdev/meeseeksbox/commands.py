@@ -149,7 +149,7 @@ def pep8ify(*, session, payload, arguments):
 
     
 
-@admin
+@write
 def backport(session, payload, arguments):
     """[to] {branch}"""
     if arguments is None:
