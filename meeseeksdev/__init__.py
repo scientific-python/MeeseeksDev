@@ -30,7 +30,8 @@ usr_whitelist = [
         'NelleV',
         'dstansby',
         'efiring',
-        'choldgraf'
+        'choldgraf',
+        'dstansby'
         ]
 
 # https://github.com/integrations/meeseeksdev/installations/new
