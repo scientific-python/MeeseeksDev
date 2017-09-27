@@ -31,7 +31,8 @@ usr_whitelist = [
         'dstansby',
         'efiring',
         'choldgraf',
-        'dstansby'
+        'dstansby',
+        'dopplershift'
         ]
 
 # https://github.com/integrations/meeseeksdev/installations/new
