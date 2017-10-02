@@ -196,7 +196,12 @@ class WebHookHandler(MainHandler):
                     if merged_by:
                         print('The pr', is_pr.get('url'), 'seem to have been merged by ', json.dumps(merged_by, indent=2))
                         repo = payload.get('repository',{}).get('full_name')
-                        print('description:', is_pr.get('milestone',{}).get('description'))
+                        description = is_pr.get('milestone',{}).get('description')
+                        if 'on-merge:' in description:
+                            for l in description.splitlines():
+                                if l.startswith('on-merge:'):
+                                    todo = l[len('on-merge:'):]
+                                    print('After Merged should:', todo)
                         if repo in ('ipython/ipython',):
                             print('This is ', repo ,' I should Backport')
                             milestone = is_pr.get('milestone',{}).get('title')
