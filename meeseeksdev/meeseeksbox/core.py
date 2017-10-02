@@ -185,14 +185,18 @@ class WebHookHandler(MainHandler):
                 return self.finish()
             else:
                 print('not handled', payload)
+        elif type_ == 'submitted':
+            print('ignoring submission')
+            pass
         else:
             if type_ == 'closed':
                 is_pr =  payload.get('pull_request', {})
                 if is_pr:
                     merged_by = is_pr.get('merged_by')
                     if merged_by:
-                        print('The pr', is_pr.get('url'), 'seam to have been merged by ', json.dumps(merged_by, indent=2))
+                        print('The pr', is_pr.get('url'), 'seem to have been merged by ', json.dumps(merged_by, indent=2))
                         repo = payload.get('repository',{}).get('full_name')
+                        print('description:', is_pr.get('milestone',{}).get('description'))
                         if repo in ('ipython/ipython',):
                             print('This is ', repo ,' I should Backport')
                             milestone = is_pr.get('milestone',{}).get('title')
