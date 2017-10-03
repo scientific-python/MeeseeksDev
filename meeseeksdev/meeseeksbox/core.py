@@ -87,7 +87,6 @@ class WebHookHandler(MainHandler):
     def post(self):
         if 'X-Hub-Signature' not in self.request.headers:
             return self.error('WebHook not configured with secret')
-        # TODO: Extract from X-GitHub-Event
 
         if not verify_signature(self.request.body,
                                 self.request.headers['X-Hub-Signature'],
@@ -98,12 +97,10 @@ class WebHookHandler(MainHandler):
         payload = tornado.escape.json_decode(self.request.body)
         org = payload.get('repository', {}).get('owner', {}).get('login')
         if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
-            print('Non allowed org:', org, payload.get('repository', {}).get('url'))
             self.error('Not allowed org.')
             return
         sender = payload.get('sender', {}).get('login', {})
         if hasattr(self.config, 'user_whitelist') and (sender not in self.config.user_whitelist):
-            print('Not allowed user:', sender)
             self.error('Not allowed user.')
             return
 
@@ -121,9 +118,6 @@ class WebHookHandler(MainHandler):
         else:
             event_type = self.request.headers.get('X-GitHub-Event')
             if event_type == 'pull_request':
-
-
-                print('Something happend with a pull-request', json.dumps(payload, indent=2))
                 return self.finish()
 
             if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete'}:
@@ -131,7 +125,7 @@ class WebHookHandler(MainHandler):
                 return self.finish()
 
             print('No action available  for the webhook :',
-                  self.request.headers.get('X-GitHub-Event'), ':', payload)
+                  self.request.headers.get('X-GitHub-Event'))
 
     @property
     def mention_bot_re(self):
