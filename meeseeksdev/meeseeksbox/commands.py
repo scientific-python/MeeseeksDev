@@ -27,6 +27,12 @@ def replyuser(*, session, payload, arguments):
             )
         )
     session.post_comment(comment_url, c.format(user=user))
+
+@write
+def say(*, session, payload, arguments):
+    comment_url     = payload['issue']['comments_url']
+    user = payload['comment']['user']['login']
+    session.post_comment(comment_url, c)
     
 from textwrap import dedent
     
