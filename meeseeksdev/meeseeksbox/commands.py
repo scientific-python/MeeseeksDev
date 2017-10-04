@@ -9,6 +9,7 @@ import git
 import pipes
 import mock
 import sys
+from textwrap import dedent
 #from friendlyautopep8 import run_on_cwd
 
 from .utils import Session, fix_issue_body, fix_comment_body
@@ -31,10 +32,8 @@ def replyuser(*, session, payload, arguments):
 @write
 def say(*, session, payload, arguments):
     comment_url     = payload['issue']['comments_url']
-    user = payload['comment']['user']['login']
-    session.post_comment(comment_url, c)
+    session.post_comment(comment_url, ' '.join(arguments))
     
-from textwrap import dedent
     
 @everyone
 def zen(*, session, payload, arguments):
