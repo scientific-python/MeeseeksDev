@@ -281,7 +281,7 @@ def backport(session, payload, arguments):
         return
 
     # write the commit message
-    msg = "Backport PR #%i: %s" % (prnumber, prtitle) + '\n\n' + description
+    msg = "Backport PR #%i: %s" % (prnumber, prtitle) # + '\n\n' + description.splitlines()
     repo.git.commit('--amend', '-m', msg)
 
     print("== PR #%i applied, with msg:" % prnumber)
