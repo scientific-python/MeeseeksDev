@@ -32,7 +32,7 @@ def replyuser(*, session, payload, arguments):
 @write
 def say(*, session, payload, arguments):
     comment_url     = payload['issue']['comments_url']
-    session.post_comment(comment_url, ' '.join(arguments))
+    session.post_comment(comment_url, ''.join(arguments))
     
     
 @everyone
