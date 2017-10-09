@@ -153,7 +153,8 @@ class WebHookHandler(MainHandler):
                 self.auth._build_auth_id_mapping()
                 return self.finish()
             else:
-                print("can't deal with this kind of payload yet", payload)
+                pass
+                # print("can't deal with this kind of payload yet", payload)
         # new comment created
         elif type_ == 'created':
             comment = payload.get('comment', None)
@@ -205,9 +206,9 @@ class WebHookHandler(MainHandler):
                     else:
                         print('Hum, closed, PR but not merged', json.dumps(payload, indent=2) )
                 else:
-                    print("can't deal with ", type_, "(for issues) yet", json.dumps(payload, indent=2))
+                    print("can't deal with ", type_, "(for issues) yet")
             else:
-                print("can't deal with ", type_, "yet", json.dumps(payload, indent=2))
+                print("can't deal with ", type_, "yet")
 
     # def _action_allowed(args):
     #     """
