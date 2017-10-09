@@ -138,7 +138,7 @@ class WebHookHandler(MainHandler):
         if type_ == 'opened':
             issue = payload.get('issue', None)
             if not issue:
-                print('request has no issue key:', payload)
+                print('request has no issue key.')
                 return self.error('Not really good, request has no issue')
             if issue:
                 user = payload['issue']['user']['login']
@@ -188,7 +188,6 @@ class WebHookHandler(MainHandler):
                 if is_pr:
                     merged_by = is_pr.get('merged_by')
                     if merged_by:
-                        print('The pr', is_pr.get('url'), 'seem to have been merged by ', json.dumps(merged_by, indent=2))
                         repo = payload.get('repository',{}).get('full_name')
                         description = is_pr.get('milestone',{}).get('description')
                         if 'on-merge:' in description and is_pr['base']['ref'] == 'master':
@@ -204,7 +203,7 @@ class WebHookHandler(MainHandler):
                                 print('this is set to milestone', milestone, 'I should decide to Backport')
                                 self.dispatch_on_mention('@meeseeksdev backport', payload, merged_by['login'])
                     else:
-                        print('Hum, closed, PR but not merged', json.dumps(payload, indent=2) )
+                        print('Hum, closed, PR but not merged')
                 else:
                     print("can't deal with ", type_, "(for issues) yet")
             else:
