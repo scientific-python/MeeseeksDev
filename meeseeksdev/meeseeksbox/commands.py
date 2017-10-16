@@ -34,7 +34,14 @@ def say(*, session, payload, arguments):
     comment_url     = payload['issue']['comments_url']
     session.post_comment(comment_url, ''.join(arguments))
     
-    
+   
+@everyone
+def party(*, session, payload, arguments):
+    comment_url     = payload['issue']['comments_url']
+    parrot = "![party parrot](http://cultofthepartyparrot.com/parrots/hd/parrot.gif)"
+    session.post_comment(comment_url, parrot*10)
+
+
 @everyone
 def zen(*, session, payload, arguments):
     comment_url     = payload['issue']['comments_url']

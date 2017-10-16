@@ -70,7 +70,7 @@ def load_config_from_env():
 
 from .meeseeksbox.core import MeeseeksBox
 from .meeseeksbox.core import Config
-from .meeseeksbox.commands import replyuser, zen, backport, tag, untag, pep8ify, quote, say
+from .meeseeksbox.commands import replyuser, zen, backport, tag, untag, pep8ify, quote, say, party
 from .commands import close, open as _open, migrate_issue_request, ready, merge, help_make
 
 def main():
@@ -90,7 +90,8 @@ def main():
         'autopep8': pep8ify,
         'ready': ready,
         'merge': merge,
-        'say': say
+        'say': say, 
+        'party': party,
     }
     commands['help'] = help_make(commands)
     MeeseeksBox(commands=commands, config=config).start()
