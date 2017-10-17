@@ -287,6 +287,11 @@ class WebHookHandler(MainHandler):
         command_args = process_mentionning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
+            keen.add_event({
+                'mention':{'user':'user',
+                           'repository':'{}{}'.format(org, repo),
+                           'command':'command'}
+            })
             handler = self.actions.get(command.lower(), None)
             if handler:
                 print("    :: testing who can use ", str(handler))
