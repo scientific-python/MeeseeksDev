@@ -102,14 +102,14 @@ class WebHookHandler(MainHandler):
             keen.add_event("post", {
                 "reject_organisation": org
             })
-            self.error('Not allowed org.')
+            self.finish('Not allowed org.')
             return
         sender = payload.get('sender', {}).get('login', {})
         if hasattr(self.config, 'user_whitelist') and (sender not in self.config.user_whitelist):
             keen.add_event("post", {
                 "reject_user": sender
             })
-            self.error('Not allowed user.')
+            self.finish('Not allowed user.')
             return
 
 
@@ -150,7 +150,7 @@ class WebHookHandler(MainHandler):
             issue = payload.get('issue', None)
             if not issue:
                 print('request has no issue key.')
-                return self.error('Not really good, request has no issue')
+                return self.finish('Not really good, request has no issue')
             if issue:
                 user = payload['issue']['user']['login']
                 if user == self.config.botname.lower() + '[bot]':
