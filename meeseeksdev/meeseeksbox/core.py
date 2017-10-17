@@ -2,6 +2,8 @@ import re
 import os
 import hmac
 import json
+import keen
+import datetime
 import inspect
 
 import tornado.web
@@ -313,6 +315,10 @@ class WebHookHandler(MainHandler):
 class MeeseeksBox:
 
     def __init__(self, commands, config):
+
+        keen.add_event("started", {
+              "timestamp": int(datetime.datetime.now().timestamp())
+        })
         self.commands = commands
         self.port = int(os.environ.get('PORT', 5000))
         self.application = None
