@@ -99,15 +99,24 @@ class WebHookHandler(MainHandler):
         payload = tornado.escape.json_decode(self.request.body)
         org = payload.get('repository', {}).get('owner', {}).get('login')
         if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
+            keen.add_event("post", {
+                "reject.organisation": org
+            })
             self.error('Not allowed org.')
             return
         sender = payload.get('sender', {}).get('login', {})
         if hasattr(self.config, 'user_whitelist') and (sender not in self.config.user_whitelist):
+            keen.add_event("post", {
+                "reject.user": sender
+            })
             self.error('Not allowed user.')
             return
 
 
         action = payload.get("action", None)
+        keen.add_event("post", {
+                "accepted.action": action
+        })
         if payload.get('commits'):
             # TODO
             print("commits were likely pushed....")
