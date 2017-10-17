@@ -176,3 +176,9 @@ If you want access open an issue for me to whitelist your org and users.
 
 Because of GitHub API limitation, MeeseeksBox can not yet make the distinction
 between read-only and read-write collaborators.
+
+## Addons
+
+```
+heroku addons:create keen
+```
