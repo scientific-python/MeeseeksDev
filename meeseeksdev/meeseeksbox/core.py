@@ -287,7 +287,7 @@ class WebHookHandler(MainHandler):
         command_args = process_mentionning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
-            keen.add_event({
+            keen.add_event('dispatch', {
                 'mention':{'user':'user',
                            'repository':'{}{}'.format(org, repo),
                            'command':'command'}
