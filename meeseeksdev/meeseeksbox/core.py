@@ -200,7 +200,11 @@ class WebHookHandler(MainHandler):
                     merged_by = is_pr.get('merged_by')
                     if merged_by:
                         repo = payload.get('repository',{}).get('full_name')
-                        description = is_pr.get('milestone',{}).get('description')
+                        milestone = is_pr.get('milestone',{})
+                        if milestone:
+                            description = milestone.get('description')
+                        else:
+                            description = ''
                         if 'on-merge:' in description and is_pr['base']['ref'] == 'master':
                             for l in description.splitlines():
                                 if l.startswith('on-merge:'):
