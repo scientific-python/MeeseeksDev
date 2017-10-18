@@ -288,9 +288,10 @@ class WebHookHandler(MainHandler):
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
             keen.add_event('dispatch', {
-                'mention':{'user':'user',
-                           'repository':'{}{}'.format(org, repo),
-                           'command':'command'}
+                'mention':{'user':user,
+                           'organisation': org,
+                           'repository':'{}/{}'.format(org, repo),
+                           'command':command}
             })
             handler = self.actions.get(command.lower(), None)
             if handler:
