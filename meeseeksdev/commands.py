@@ -45,7 +45,7 @@ def close(*, session, payload, arguments):
 def open(*, session, payload, arguments):
     session.ghrequest('PATCH', payload['issue']['url'], json={'state': 'open'})
 
-@admin
+@write
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     """[to] {org}/{repo} 
 

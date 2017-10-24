@@ -349,7 +349,7 @@ def untag(session, payload, arguments):
     for tag in tags:
         session.ghrequest('DELETE', url.format(name=tag))
 
-@admin
+@write
 def migrate_issue_request(*, session:Session, payload:dict, arguments:str):
     """Todo:
 
