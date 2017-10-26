@@ -337,8 +337,8 @@ class MeeseeksBox:
 
     def __init__(self, commands, config):
 
-        keen.add_event("started", {
-              "timestamp": int(datetime.datetime.now().timestamp())
+        keen.add_event("status", {
+              "state": "starting"
         })
         self.commands = commands
         self.port = int(os.environ.get('PORT', 5000))
@@ -348,9 +348,9 @@ class MeeseeksBox:
         self.auth._build_auth_id_mapping()
 
     def sig_handler(self, sig, frame):
-        print('Caught signal: %s, Shutting down...', sig)
-        keen.add_event("stopping", {
-               "timestamp": int(datetime.datetime.now().timestamp())
+        print('Caught signal: %s, Shutting down...' % sig)
+        keen.add_event("status", {
+              "state": "stopping"
         })
         tornado.ioloop.IOLoop.instance().add_callback(self.shutdown)
 
