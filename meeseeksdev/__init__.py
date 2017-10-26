@@ -1,5 +1,6 @@
 import os
 import base64
+import signal
 
 org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab', 'Carreau',
         'matplotlib', 'scikit-learn']
@@ -95,7 +96,13 @@ def main():
         'party': party,
     }
     commands['help'] = help_make(commands)
-    MeeseeksBox(commands=commands, config=config).start()
+    box = MeeseeksBox(commands=commands, config=config)
+
+    signal.signal(signal.SIGTERM, box.sig_handler)
+    signal.signal(signal.SIGINT, box.sig_handler)
+
+    box.start()
+
 
 if __name__ == "__main__":
     main()

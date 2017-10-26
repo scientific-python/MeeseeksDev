@@ -1,10 +1,11 @@
 import re
 import os
 import hmac
-import json
-import keen
+import time
 import datetime
 import inspect
+
+import keen
 
 import tornado.web
 import tornado.httpserver
@@ -331,6 +332,7 @@ class WebHookHandler(MainHandler):
                 print('unnknown command', command)
 
 
+
 class MeeseeksBox:
 
     def __init__(self, commands, config):
@@ -345,6 +347,31 @@ class MeeseeksBox:
         self.auth = Authenticator(self.config.integration_id, self.config.key)
         self.auth._build_auth_id_mapping()
 
+    def sig_handler(self, sig, frame):
+        print('Caught signal: %s, Shutting down...', sig)
+        keen.add_event("stopping", {
+               "timestamp": int(datetime.datetime.now().timestamp())
+        })
+        tornado.ioloop.IOLoop.instance().add_callback(self.shutdown)
+
+    def shutdown(self):
+        self.server.stop()
+
+        io_loop = tornado.ioloop.IOLoop.instance()
+
+        deadline = time.time() + 10
+
+        def stop_loop():
+            now = time.time()
+            if now < deadline and (io_loop._callbacks or io_loop._timeouts):
+                print('delay stop...')
+                io_loop.add_timeout(now + 1, stop_loop)
+            else:
+                print('stopping now...')
+                io_loop.stop()
+        stop_loop()
+
+
     def start(self):
         self.application = tornado.web.Application([
             (r"/", MainHandler),
@@ -352,5 +379,7 @@ class MeeseeksBox:
              {'actions': self.commands, 'config': self.config, 'auth': self.auth})
         ])
 
-        tornado.httpserver.HTTPServer(self.application).listen(self.port)
+        self.server = tornado.httpserver.HTTPServer(self.application)
+
+        self.server.listen(self.port)
         tornado.ioloop.IOLoop.instance().start()
