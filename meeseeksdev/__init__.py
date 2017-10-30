@@ -34,7 +34,8 @@ usr_whitelist = [
         'choldgraf',
         'dstansby',
         'dopplershift',
-        'jklymak'
+        'jklymak',
+        'weathergod'
         ]
 
 # https://github.com/integrations/meeseeksdev/installations/new
@@ -49,7 +50,7 @@ def load_config_from_env():
 
     integration_id = os.environ.get('GITHUB_INTEGRATION_ID')
     botname = os.environ.get('GITHUB_BOT_NAME', None)
-    
+
     if not integration_id:
         raise ValueError('Please set GITHUB_INTEGRATION_ID')
 
@@ -92,7 +93,7 @@ def main():
         'autopep8': pep8ify,
         'ready': ready,
         'merge': merge,
-        'say': say, 
+        'say': say,
         'party': party,
     }
     commands['help'] = help_make(commands)
