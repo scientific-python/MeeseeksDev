@@ -253,7 +253,7 @@ def backport(session, payload, arguments):
                 repo.git.cherry_pick(*args)
             except git.GitCommandError as e:
                 if ('is not a merge.' in e.stderr):
-                    args = (merge_sha)
+                    args = (merge_sha,)
                     repo.git.cherry_pick(*args)
                 else:
                     raise
