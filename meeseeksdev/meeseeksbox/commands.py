@@ -244,7 +244,15 @@ def backport(session, payload, arguments):
     comment_url = payload.get('issue', payload.get('pull_request'))['comments_url']
     try:
         with mock.patch.dict('os.environ', {'GIT_EDITOR': 'true'}):
-            repo.git.cherry_pick(*args)
+            try:
+                repo.git.cherry_pick(*args)
+            except git.GitCommandError as e:
+                if ('is not a merge.' in e.stderr):
+                    args = (merge_sha)
+                    repo.git.cherry_pick(*args)
+                else:
+                    raise
+
     except git.GitCommandError as e:
         if ('git commit --allow-empty' in e.stderr) or ('git commit --allow-empty' in e.stdout):
             session.post_comment(comment_url,
