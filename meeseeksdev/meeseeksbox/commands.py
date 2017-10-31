@@ -186,7 +186,12 @@ def backport(session, payload, arguments):
     pr_data = r.json()
     merge_sha = pr_data['merge_commit_sha']
     body = pr_data['body']
-    milestone_number = pr_data.get('milestone', {}).get('number', None)
+    milestone = pr_data['milestone']
+    if milestone:
+        milestone_number = pr_data['milestone'].get('number', None)
+    else:
+        milestone_number = None
+
     print('----------------------------------------')
     print('milestone data :', pr_data['milestone'])
     print('----------------------------------------')
