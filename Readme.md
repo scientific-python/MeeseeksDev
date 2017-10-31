@@ -182,3 +182,7 @@ between read-only and read-write collaborators.
 ```
 heroku addons:create keen
 ```
+
+## Changelog
+
+ Oct 31st, Backport now support squash-merge
