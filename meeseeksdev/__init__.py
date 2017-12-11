@@ -3,7 +3,7 @@ import base64
 import signal
 
 org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab', 'Carreau',
-        'matplotlib', 'scikit-learn']
+        'matplotlib', 'scikit-learn', 'pandas-dev']
 
 usr_whitelist = [
         'Carreau',
@@ -35,7 +35,12 @@ usr_whitelist = [
         'dstansby',
         'dopplershift',
         'jklymak',
-        'weathergod'
+        'weathergod',
+        #pandas-dev
+        'jreback',
+        'jorisvandenbossche',
+        'gfyoung',
+        'TomAugspurger',
         ]
 
 # https://github.com/integrations/meeseeksdev/installations/new
