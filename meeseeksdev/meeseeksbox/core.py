@@ -215,6 +215,8 @@ class WebHookHandler(MainHandler):
                         elif repo in ('ipython/ipython',):
                             print('This is ', repo ,' I should Backport')
                             milestone = is_pr.get('milestone',{}).get('title')
+                            if not milestone:
+                                milestone = {}
                             if milestone and milestone.startswith('5.') and is_pr['base']['ref'] == 'master':
                                 print('this is set to milestone', milestone, 'I should decide to Backport')
                                 self.dispatch_on_mention('@meeseeksdev backport', payload, merged_by['login'])
