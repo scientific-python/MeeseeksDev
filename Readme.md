@@ -28,6 +28,14 @@ sure MeeseeksDev is correctly installed.
 Beta Phase: During Beta phase repository/users need to be vetted/whitelisted
 open an issue if you wish to participate. 
 
+You might also want to tell your CI-integration (like travis-ci) **not** to test the **push** __and__ **the merge**. 
+To do so use:
+```
+branches:
+  except:
+    - /^auto-backport-of-pr-[0-9]+$/
+```
+
 ## What can a MeeseeksBox do ?
 
 Comment on a Pr or issue.
