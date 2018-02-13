@@ -24,6 +24,7 @@ usr_whitelist = [
         'jhamrick',
         'lgpage',
         'jasongrout',
+        'ian-r-rose',
         #matplotlib people
         'tacaswell',
         'QuLogic',
