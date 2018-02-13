@@ -196,17 +196,21 @@ class WebHookHandler(MainHandler):
             pass
         else:
             if type_ == 'closed':
+                print('[DEBUG] dealing with close event')
                 is_pr =  payload.get('pull_request', {})
+                print('[DEBUG] is_pr:', is_pr)
                 if is_pr:
                     merged_by = is_pr.get('merged_by')
+                    print('[DEBUG] merged_by:', merged_by)
                     if merged_by:
-                        repo = payload.get('repository',{}).get('full_name')
                         milestone = is_pr.get('milestone',{})
                         if milestone:
                             description = milestone.get('description')
                         else:
                             description = ''
+                        print('[DEBUG] description:', description)
                         if 'on-merge:' in description and is_pr['base']['ref'] == 'master':
+                            print('[DEBUG] on merge detected')
                             for l in description.splitlines():
                                 if l.startswith('on-merge:'):
                                     todo = l[len('on-merge:'):].strip()
