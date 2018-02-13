@@ -209,6 +209,7 @@ class WebHookHandler(MainHandler):
                         else:
                             description = ''
                         print('[DEBUG] description:', description)
+                        print('[DEBUG] base ref:', is_pr['base']['ref'])
                         if 'on-merge:' in description and is_pr['base']['ref'] == 'master':
                             print('[DEBUG] on merge detected')
                             for l in description.splitlines():

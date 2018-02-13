@@ -36,6 +36,7 @@ usr_whitelist = [
         'dopplershift',
         'jklymak',
         'weathergod',
+        'timhoffm',
         #pandas-dev
         'jreback',
         'jorisvandenbossche',
