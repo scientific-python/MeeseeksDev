@@ -116,6 +116,15 @@ class WebHookHandler(MainHandler):
         #     self.finish('Not allowed user.')
         #     return
 
+        sender = payload.get('sender', {}).get('login', {})
+        if hasattr(self.config, 'user_blacklist') and (sender in self.config.user_blacklist):
+            keen.add_event("post", {
+                "blocked_user": sender
+            })
+            self.finish('Blocked user.')
+            return
+
+
 
         action = payload.get("action", None)
         keen.add_event("post", {

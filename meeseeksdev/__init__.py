@@ -5,6 +5,8 @@ import signal
 org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab', 'Carreau',
         'matplotlib', 'scikit-learn', 'pandas-dev', 'scikit-image']
 
+usr_blacklist = []
+
 usr_whitelist = [
         'Carreau',
         'gnestor',
@@ -88,6 +90,7 @@ def main():
     config = load_config_from_env()
     config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
     config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
+    config.user_blacklist = usr_blacklist + [u.lower() for u in usr_blacklist]
     commands = {
         'hello': replyuser,
         'zen': zen,
