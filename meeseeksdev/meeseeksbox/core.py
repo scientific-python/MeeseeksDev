@@ -105,13 +105,16 @@ class WebHookHandler(MainHandler):
             })
             self.finish('Not allowed org.')
             return
-        sender = payload.get('sender', {}).get('login', {})
-        if hasattr(self.config, 'user_whitelist') and (sender not in self.config.user_whitelist):
-            keen.add_event("post", {
-                "reject_user": sender
-            })
-            self.finish('Not allowed user.')
-            return
+        # Let's take some risk and remove user whitelist, we'll still only allow 
+        # repo's contributors.
+
+        # sender = payload.get('sender', {}).get('login', {})
+        # if hasattr(self.config, 'user_whitelist') and (sender not in self.config.user_whitelist):
+        #     keen.add_event("post", {
+        #         "reject_user": sender
+        #     })
+        #     self.finish('Not allowed user.')
+        #     return
 
 
         action = payload.get("action", None)
