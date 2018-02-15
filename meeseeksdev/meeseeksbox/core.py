@@ -211,16 +211,21 @@ class WebHookHandler(MainHandler):
                             description = milestone.get('description')
                         else:
                             description = ''
-                        print('[DEBUG] description:', description)
+                        print('[DEBUG] description:', repr(description))
                         print('[DEBUG] base ref:', is_pr['base']['ref'])
                         if 'on-merge:' in description and is_pr['base']['ref'] == 'master':
                             print('[DEBUG] on merge detected')
+                            did_backport = False
                             for l in description.splitlines():
                                 print('[DEBUG] testing line...:{}'.format(l))
                                 if l.startswith('on-merge:'):
                                     todo = l[len('on-merge:'):].strip()
                                     print('After Merged in master; should:', todo)
                                     self.dispatch_on_mention('@meeseeksdev '+todo, payload, merged_by['login'])
+                                    did_backport = True
+                            if not did_backport:
+                                print('"on-merge:" found in milestone description, but unable to parse command.',
+                                      'Is "on-merge:" on a separate line?')
                     else:
                         print('Hum, closed, PR but not merged')
                 else:
