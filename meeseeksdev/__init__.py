@@ -3,7 +3,7 @@ import base64
 import signal
 
 org_whitelist = ['MeeseeksBox', 'Jupyter', 'IPython', 'JupyterLab', 'Carreau',
-        'matplotlib', 'scikit-learn', 'pandas-dev']
+        'matplotlib', 'scikit-learn', 'pandas-dev', 'scikit-image']
 
 usr_whitelist = [
         'Carreau',
