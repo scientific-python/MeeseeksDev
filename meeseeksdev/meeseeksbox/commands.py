@@ -338,12 +338,14 @@ def backport(session, payload, arguments):
                 "labels": labels_names,
             })
         print(resp.json())
-    except Exception:
+    except Exception as e:
         session.post_comment(comment_url,
                         "Something went wrong ... Please have  a look at my logs.")
         keen.add_event("error", {
                             "unknown_crash": 1
                     })
+        print(e)
+        raise
 
 
     resp.raise_for_status()
