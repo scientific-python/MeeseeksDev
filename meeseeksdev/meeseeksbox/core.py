@@ -25,6 +25,8 @@ class Config:
     at_botname = None
     integration_id = None
     webhook_secret = None
+    personnal_account_name = None
+    personnal_account_token = None
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)

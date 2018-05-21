@@ -78,6 +78,13 @@ def load_config_from_env():
     config['integration_id'] = integration_id
     config['webhook_secret'] = os.environ.get('WEBHOOK_SECRET')
 
+    ## Despite their names, this are not __your__ account, but an account created 
+    # for some functionalities of mr-meeseeks. Indeed, github does not allow
+    # cross repositories pull-requests with Applications, so I use a peronal
+    # account just for that.
+    config['personal_account_name'] = os.environ.get('PERSONAL_ACCOUNT_NAME')
+    config['personal_account_token'] = os.environ.get('PERSONAL_ACCOUNT_TOKEN')
+
     return Config(**config).validate()
 
 from .meeseeksbox.core import MeeseeksBox
