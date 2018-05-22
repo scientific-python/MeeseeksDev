@@ -135,10 +135,12 @@ class Session(Authenticator):
         except:
             raise ValueError(resp.content, url)
 
-    def personal_request(self, method, url, json):
+    def personal_request(self, method, url, json=None):
         """
         Does a request but using the personal account name and token
         """
+        if not json:
+            json = {}
         def prepare():
             headers = {'Authorization': 'token {}'.format(self.personnal_account_token),
                        'Host': 'api.github.com',
