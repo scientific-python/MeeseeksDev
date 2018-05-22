@@ -410,7 +410,7 @@ def safe_backport(session, payload, arguments):
         atk = session.token()
 
         # FORK it. 
-        frk = session.personal_request('POST', f'https://api.github.com/repos/{org_name}/{repo_name}/forks')
+        frk = session.personal_request('POST', f'https://api.github.com/repos/{org_name}/{repo_name}/forks').json()
 
         for i in range(5):
             ff = session.personal_request('GET', frk['url'])
