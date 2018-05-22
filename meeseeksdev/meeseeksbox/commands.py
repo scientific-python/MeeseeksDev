@@ -434,7 +434,8 @@ def safe_backport(session, payload, arguments):
         )
         process = subprocess.run(
             ['git', 'remote', 'add' ,session.personnal_account_name,
-             f'https://x-access-token:{session.personnal_account_token}@github.com/{session.personnal_account_name}/{repo_name}']
+             f'https://x-access-token:{session.personnal_account_token}@github.com/{session.personnal_account_name}/{repo_name}'], 
+            cwd=repo_name
         )
         print('== Cloned..')
         process.check_returncode()
