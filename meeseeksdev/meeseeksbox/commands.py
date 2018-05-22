@@ -410,8 +410,18 @@ def safe_backport(session, payload, arguments):
         atk = session.token()
 
         # FORK it. 
+        frk = session.personal_request('POST', f'https://api.github.com/repos/{org_name}/{repo_name}/forks')
 
-        session.personal_request('POST', 'https://api.github.com/repos/{org_name}/{repo_name}/forks')
+        for i in range(5):
+            ff = session.personal_request('GET', frk['url'])
+            if ff.status_code == 200:
+                keen.add_event("fork_wait", {
+                            "n": i
+                })
+                break
+            import time
+            time.sleep(1)
+
 
         if os.path.exists(repo_name):
             print('== Cleaning up previsous work... ')
