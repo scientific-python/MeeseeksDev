@@ -363,7 +363,7 @@ class MeeseeksBox:
         self.port = int(os.environ.get('PORT', 5000))
         self.application = None
         self.config = config
-        self.auth = Authenticator(self.config.integration_id, self.config.key)
+        self.auth = Authenticator(self.config.integration_id, self.config.key, self.config.personnal_account_token, self.config.personnal_account_name)
         self.auth._build_auth_id_mapping()
 
     def sig_handler(self, sig, frame):

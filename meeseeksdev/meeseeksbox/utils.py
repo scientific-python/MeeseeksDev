@@ -50,19 +50,24 @@ def fix_comment_body(body, original_poster, original_url, original_org, original
 
 class Authenticator:
     
-    def __init__(self, integration_id, rsadata):
+    def __init__(self, integration_id, rsadata, personnal_account_token, personnal_account_name):
         self.since = int(datetime.datetime.now().timestamp())
         self.duration = 60*10
         self._token = None
         self.integration_id = integration_id
         self.rsadata = rsadata
+        self.personnal_account_token = personnal_account_token
+        self.personnal_account_name = personnal_account_name
         # TODO: this mapping is built at startup, we should update it when we
         # have new / deleted installations
         self.idmap = {}
         self._session_class = Session
 
     def session(self, installation_id):
-        return self._session_class(self.integration_id, self.rsadata, installation_id)
+        return self._session_class(self.integration_id, self.rsadata, installation_id, 
+                                   self.personnal_account_token,
+                                   self.personnal_account_name,
+                                   )
         
     def list_installations(self):
         """
@@ -111,8 +116,8 @@ class Authenticator:
 
 class Session(Authenticator):
 
-    def __init__(self, integration_id, rsadata, installation_id):
-        super().__init__(integration_id, rsadata)
+    def __init__(self, integration_id, rsadata, installation_id, personnal_account_token, personnal_account_name):
+        super().__init__(integration_id, rsadata, personnal_account_token, personnal_account_name)
         self.installation_id = installation_id
 
     def token(self):
@@ -129,6 +134,26 @@ class Session(Authenticator):
             self._token = json.loads(resp.content.decode())['token']
         except:
             raise ValueError(resp.content, url)
+
+    def personal_request(self, method, url, json):
+        """
+        Does a request but using the personal account name and token
+        """
+        def prepare():
+            headers = {'Authorization': 'token {}'.format(self.personnal_account_token),
+                       'Host': 'api.github.com',
+                       'User-Agent': 'python/requests'}
+            req = requests.Request(method, url, headers=headers, json=json)
+            return req.prepare()
+
+        with requests.Session() as s:
+            response = s.send(prepare())
+            if response.status_code == 401:
+                self.regen_token()
+                response = s.send(prepare())
+            response.raise_for_status()
+            return response
+
 
     def ghrequest(self, method, url, json=None, *, override_accept_header=None):
         accept = ACCEPT_HEADER

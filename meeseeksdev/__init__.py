@@ -89,7 +89,7 @@ def load_config_from_env():
 
 from .meeseeksbox.core import MeeseeksBox
 from .meeseeksbox.core import Config
-from .meeseeksbox.commands import replyuser, zen, backport, tag, untag, pep8ify, quote, say, party
+from .meeseeksbox.commands import replyuser, zen, backport, tag, untag, pep8ify, quote, say, party, safe_backport
 from .commands import close, open as _open, migrate_issue_request, ready, merge, help_make
 
 def main():
@@ -102,6 +102,7 @@ def main():
         'hello': replyuser,
         'zen': zen,
         'backport': backport,
+        'safe_backport': safe_backport,
         'migrate': migrate_issue_request,
         'tag': tag,
         'untag': untag,
