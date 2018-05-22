@@ -526,6 +526,7 @@ def safe_backport(session, payload, arguments):
         print("== Pushing work....:")
         repo.remotes.origin.push('workbranch:{}'.format(remote_submit_branch))
         try: 
+            print(f'Tryign to push to {remote_submit_branch} of {session.personnal_account_name}')
             repo.remotes[session.personnal_account_name].push('workbranch:{}'.format(remote_submit_branch))
         except Exception as e:
             print('could not push to self remote')
@@ -550,13 +551,14 @@ def safe_backport(session, payload, arguments):
                 "milestone": milestone_number,
                 "labels": labels_names,
             })
-        print(resp.json())
+        # print(resp.json())
     except Exception as e:
         session.post_comment(comment_url,
                         "Something went wrong ... Please have  a look at my logs.")
         keen.add_event("error", {
                             "unknown_crash": 1
                     })
+        print('Something went wrong')
         print(e)
         raise
 
