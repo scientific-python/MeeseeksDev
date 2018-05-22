@@ -430,7 +430,12 @@ def safe_backport(session, payload, arguments):
 
         print('== Cloning current repository, this can take some time..')
         process = subprocess.run(
-            ['git', 'clone', 'https://x-access-token:{}@github.com/{}/{}'.format(atk, org_name, repo_name)])
+            ['git', 'clone', 'https://x-access-token:{}@github.com/{}/{}'.format(atk, org_name, repo_name)]
+        )
+        process = subprocess.run(
+            ['git', 'remote', 'add' ,session.personnal_account_name,
+             f'https://x-access-token:{session.personnal_account_token}@github.com/{session.personnal_account_name}/{repo_name}']
+        )
         print('== Cloned..')
         process.check_returncode()
 
@@ -520,6 +525,11 @@ def safe_backport(session, payload, arguments):
         remote_submit_branch = f'auto-backport-of-pr-{prnumber}-on-{target_branch}'
         print("== Pushing work....:")
         repo.remotes.origin.push('workbranch:{}'.format(remote_submit_branch))
+        try: 
+            repo.remotes[session.personnal_account_name].push('workbranch:{}'.format(remote_submit_branch))
+        except Exception as e:
+            print('could not push to self remote')
+            print(e)
         repo.git.checkout('master')
         repo.branches.workbranch.delete(repo, 'workbranch', force=True)
 
