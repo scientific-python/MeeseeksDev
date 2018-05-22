@@ -237,7 +237,7 @@ def backport(session, payload, arguments):
         print('== Fetching branch to backport on ... {}'.format(target_branch))
         repo.remotes.origin.fetch('refs/heads/{}:workbranch'.format(target_branch))
         repo.git.checkout('workbranch')
-        print('== Fetching Commits to {mergesha} backport...'.format(mergesha=mergesha))
+        print('== Fetching Commits to {mergesha} backport...'.format(mergesha=merge_sha))
         repo.remotes.origin.fetch('{mergesha}'.format(
             num=prnumber, mergesha=merge_sha))
         print('== All has been fetched correctly')
