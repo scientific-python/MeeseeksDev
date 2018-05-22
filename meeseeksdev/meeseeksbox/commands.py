@@ -539,10 +539,10 @@ def safe_backport(session, payload, arguments):
 
         # Make the PR on GitHub
         print('try to create PR with milestone', milestone_number, 'and labels', labels_names)
-        new_pr = session.ghrequest('POST', 'https://api.github.com/repos/{}/{}/pulls'.format(org_name, repo_name), json={
+        new_pr = session.personal_request('POST', 'https://api.github.com/repos/{}/{}/pulls'.format(org_name, repo_name), json={
             "title": "Backport PR #%i on branch %s" % (prnumber, target_branch),
             "body": msg,
-            "head": "{}:{}".format(org_name, remote_submit_branch),
+            "head": "{}:{}".format(session.personnal_account_name, remote_submit_branch),
             "base": target_branch,
         }).json()
 
