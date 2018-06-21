@@ -138,8 +138,8 @@ class WebHookHandler(MainHandler):
             return
 
         if action:
-            print('## dispatching request',
-                  self.request.headers.get('X-GitHub-Delivery'))
+            #print('## dispatching request',
+            #      self.request.headers.get('X-GitHub-Delivery'))
             return self.dispatch_action(action, payload)
         else:
             event_type = self.request.headers.get('X-GitHub-Event')
@@ -210,28 +210,20 @@ class WebHookHandler(MainHandler):
             pass
         else:
             if type_ == 'closed':
-                print('[DEBUG] dealing with close event')
                 is_pr =  payload.get('pull_request', {})
-                print('[DEBUG] is_pr:', is_pr)
                 if is_pr:
                     merged_by = is_pr.get('merged_by')
-                    print('[DEBUG] merged_by:', merged_by)
                     if merged_by:
                         milestone = is_pr.get('milestone',{})
                         if milestone:
                             description = milestone.get('description')
                         else:
                             description = ''
-                        print('[DEBUG] description:', repr(description))
-                        print('[DEBUG] base ref:', is_pr['base']['ref'])
                         if 'on-merge:' in description and is_pr['base']['ref'] == 'master':
-                            print('[DEBUG] on merge detected')
                             did_backport = False
                             for l in description.splitlines():
-                                print('[DEBUG] testing line...:{}'.format(l))
                                 if l.startswith('on-merge:'):
                                     todo = l[len('on-merge:'):].strip()
-                                    print('After Merged in master; should:', todo)
                                     self.dispatch_on_mention('@meeseeksdev '+todo, payload, merged_by['login'])
                                     did_backport = True
                             if not did_backport:
@@ -240,9 +232,11 @@ class WebHookHandler(MainHandler):
                     else:
                         print('Hum, closed, PR but not merged')
                 else:
-                    print("can't deal with ", type_, "(for issues) yet")
+                    print("can't deal with `", type_, "` (for issues) yet")
+            elif type_ == 'milestoned':
+                  pass
             else:
-                print("can't deal with ", type_, "yet")
+                print(f"can't deal with `{type_}`yet")
 
     # def _action_allowed(args):
     #     """
