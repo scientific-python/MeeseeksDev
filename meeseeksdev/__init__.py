@@ -103,6 +103,7 @@ def main():
         'zen': zen,
         'backport': safe_backport,
         'safe_backport': safe_backport,
+        'legacy_backport': backport,
         'migrate': migrate_issue_request,
         'tag': tag,
         'untag': untag,
