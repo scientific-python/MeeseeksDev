@@ -101,7 +101,7 @@ def main():
     commands = {
         'hello': replyuser,
         'zen': zen,
-        'backport': backport,
+        'backport': safe_backport,
         'safe_backport': safe_backport,
         'migrate': migrate_issue_request,
         'tag': tag,
