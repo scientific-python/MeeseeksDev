@@ -201,8 +201,8 @@ class WebHookHandler(MainHandler):
                 if self.mention_bot_re.findall(body):
                     self.dispatch_on_mention(body, payload, user)
                 else:
-                    print(f'({repo}) Was not mentioned',
-                          self.config.botname, body, '|', user)
+                    print(f'({repo}) Was not mentioned, (',
+                          self.config.botname,')', body, '|', user)
             elif installation and installation.get('account'):
                 print(f'({repo}) we got a new installation.')
                 self.auth._build_auth_id_mapping()
