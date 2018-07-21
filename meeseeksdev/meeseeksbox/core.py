@@ -132,9 +132,10 @@ class WebHookHandler(MainHandler):
         keen.add_event("post", {
                 "accepted_action": action
         })
-        repo = payload.get('repo', {}).get('name', '<unknown repo>')
+        repo = payload.get('repository', {}).get('name', '<unknown repo>')
         if repo == '<unknown repo>':
-            print('137::', payload)
+            import json
+            print('137::', json.dump(payload))
         if payload.get('commits'):
             # TODO
             print(f"({repo}) commits were likely pushed....")
@@ -163,7 +164,7 @@ class WebHookHandler(MainHandler):
 
     def dispatch_action(self, type_, payload):
         botname = self.config.botname
-        repo = payload.get('repo', {}).get('name', '<unknown repo>')
+        repo = payload.get('repository', {}).get('name', '<unknown repo>')
         # new issue/PR opened
         if type_ == 'opened':
             issue = payload.get('issue', None)
