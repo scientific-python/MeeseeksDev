@@ -132,7 +132,7 @@ class WebHookHandler(MainHandler):
         keen.add_event("post", {
                 "accepted_action": action
         })
-        repo = paylod.get('repo', {}).get('name', '<unknown repo>')
+        repo = payload.get('repo', {}).get('name', '<unknown repo>')
         if payload.get('commits'):
             # TODO
             print(f"({repo}) commits were likely pushed....")
