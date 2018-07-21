@@ -212,7 +212,7 @@ class WebHookHandler(MainHandler):
             else:
                 print('not handled', payload)
         elif type_ == 'submitted':
-            print('ignoring submission')
+            print(f'({repo}) ignoring `submitted`')
             pass
         else:
             if type_ == 'closed':
@@ -236,13 +236,13 @@ class WebHookHandler(MainHandler):
                                 print('"on-merge:" found in milestone description, but unable to parse command.',
                                       'Is "on-merge:" on a separate line?')
                     else:
-                        print('Hum, closed, PR but not merged')
+                        print(f'({repo}) Hum, closed, PR but not merged')
                 else:
                     print("can't deal with `", type_, "` (for issues) yet")
             elif type_ == 'milestoned':
                   pass
             else:
-                print(f"can't deal with `{type_}`yet")
+                print(f"({repo}) can't deal with `{type_}`yet")
 
     # def _action_allowed(args):
     #     """
