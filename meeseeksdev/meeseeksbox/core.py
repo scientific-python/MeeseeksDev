@@ -161,7 +161,7 @@ class WebHookHandler(MainHandler):
 
     def dispatch_action(self, type_, payload):
         botname = self.config.botname
-        repo = paylod.get('repo', {}).get('name', '<unknown repo>')
+        repo = payload.get('repo', {}).get('name', '<unknown repo>')
         # new issue/PR opened
         if type_ == 'opened':
             issue = payload.get('issue', None)
