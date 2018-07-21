@@ -132,9 +132,10 @@ class WebHookHandler(MainHandler):
         keen.add_event("post", {
                 "accepted_action": action
         })
+        repo = paylod.get('repo', {}).get('name', '<unknown repo>')
         if payload.get('commits'):
             # TODO
-            print("commits were likely pushed....")
+            print(f"({repo}) commits were likely pushed....")
             return
 
         if action:
@@ -147,10 +148,10 @@ class WebHookHandler(MainHandler):
                 return self.finish()
 
             if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete'}:
-                print('Not handling event type', event_type,'yet.')
+                print(f'({repo}) Not handling event type', event_type,'yet.')
                 return self.finish()
 
-            print('No action available  for the webhook :',
+            print(f'({repo}) No action available  for the webhook :',
                   self.request.headers.get('X-GitHub-Event'))
 
     @property
@@ -160,11 +161,12 @@ class WebHookHandler(MainHandler):
 
     def dispatch_action(self, type_, payload):
         botname = self.config.botname
+        repo = paylod.get('repo', {}).get('name', '<unknown repo>')
         # new issue/PR opened
         if type_ == 'opened':
             issue = payload.get('issue', None)
             if not issue:
-                print('request has no issue key.')
+                print(f'({repo}) request has no issue key.')
                 return self.finish('Not really good, request has no issue')
             if issue:
                 user = payload['issue']['user']['login']
@@ -175,7 +177,7 @@ class WebHookHandler(MainHandler):
         elif type_ == 'added':
             installation = payload.get('installation', None)
             if installation and installation.get('account'):
-                print('we got a new installation.')
+                print(f'({repo}) we got a new installation.')
                 self.auth._build_auth_id_mapping()
                 return self.finish()
             else:
@@ -188,19 +190,19 @@ class WebHookHandler(MainHandler):
             if comment:
                 user = payload['comment']['user']['login']
                 if user == botname.lower() + '[bot]':
-                    print('Not responding to self')
+                    print(f'({repo}) Not responding to self')
                     return self.finish("Not responding to self")
                 if '[bot]' in user:
-                    print('Not responding to another bot')
+                    print(f'({repo}) Not responding to another bot')
                     return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
                 if self.mention_bot_re.findall(body):
                     self.dispatch_on_mention(body, payload, user)
                 else:
-                    print('Was not mentioned',
+                    print(f'({repo}) Was not mentioned',
                           self.config.botname, body, '|', user)
             elif installation and installation.get('account'):
-                print('we got a new installation.')
+                print(f'({repo}) we got a new installation.')
                 self.auth._build_auth_id_mapping()
                 return self.finish()
             else:
