@@ -16,6 +16,12 @@ from .scopes import Permission
 
 from yieldbreaker import YieldBreaker
 
+green = '\033[0;32m'
+yellow = '\033[0;33m'
+red = '\033[0;31m'
+normal = '\033[0m'
+
+
 
 class Config:
     botname = None
@@ -138,7 +144,7 @@ class WebHookHandler(MainHandler):
             print('138::', json.dump(payload))
         if payload.get('commits'):
             # TODO
-            print(f"({repo}) commits were likely pushed....")
+            print(green, f"({repo}) commits were likely pushed....", normal)
             return
 
         if action:
