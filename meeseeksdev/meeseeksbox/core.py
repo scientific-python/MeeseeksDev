@@ -138,8 +138,9 @@ class WebHookHandler(MainHandler):
         keen.add_event("post", {
                 "accepted_action": action
         })
-        repo = payload.get('repository', {}).get('full_name', '<unknown repo>')
-        if repo == '<unknown repo>':
+        unknown_repo = red+'<unknown repo>'+normal
+        repo = payload.get('repository', {}).get('full_name', unknown_repo)
+        if repo == unknown_repo:
             import json
             print('138::', json.dump(payload))
         if payload.get('commits'):
@@ -170,7 +171,7 @@ class WebHookHandler(MainHandler):
 
     def dispatch_action(self, type_, payload):
         botname = self.config.botname
-        repo = payload.get('repository', {}).get('full_name', '<unknown repo>')
+        repo = payload.get('repository', {}).get('full_name', red+'<unknown repo>'+normal)
         # new issue/PR opened
         if type_ == 'opened':
             issue = payload.get('issue', None)
@@ -198,7 +199,7 @@ class WebHookHandler(MainHandler):
             installation = payload.get('installation', None)
             issue = payload.get('issue', {})
             what = 'pull' if 'pull_request' in issue.keys() else 'issue'
-            number = issue.get('number','<no issue number>')
+            number = issue.get('number', red+'<no issue number>'+normal)
             if comment:
                 user = payload['comment']['user']['login']
                 if user == botname.lower() + '[bot]':
@@ -212,10 +213,10 @@ class WebHookHandler(MainHandler):
                     self.dispatch_on_mention(body, payload, user)
                 else:
                     import textwrap
-                    print(f'({repo}/{what}/{number}) Was not mentioned, ',
+                    print(f'({repo}/{what}/{number}) Was not mentioned by ',
                           #self.config.botname,')\n',
                           #textwrap.indent(body,
-                          'by ', user, 'on', f'{what}/{number}')
+                          user, 'on', f'{what}/{number}')
             elif installation and installation.get('account'):
                 print(f'({repo}) we got a new installation.')
                 self.auth._build_auth_id_mapping()
