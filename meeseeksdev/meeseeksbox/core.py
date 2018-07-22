@@ -381,7 +381,7 @@ class MeeseeksBox:
         self.auth._build_auth_id_mapping()
 
     def sig_handler(self, sig, frame):
-        print('Caught signal: %s, Shutting down...' % sig)
+        print(yellow, 'Caught signal: %s, Shutting down...' % sig, normal)
         keen.add_event("status", {
               "state": "stopping"
         })
@@ -397,10 +397,10 @@ class MeeseeksBox:
         def stop_loop():
             now = time.time()
             if now < deadline and (io_loop._callbacks or io_loop._timeouts):
-                print('delay stop...')
+                print(red, 'delay stop...', normal)
                 io_loop.add_timeout(now + 1, stop_loop)
             else:
-                print('stopping now...')
+                print(yellow, 'stopping now...', normal)
                 io_loop.stop()
         stop_loop()
 
