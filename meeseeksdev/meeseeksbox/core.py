@@ -200,6 +200,9 @@ class WebHookHandler(MainHandler):
             issue = payload.get('issue', {})
             what = 'pull' if 'pull_request' in issue.keys() else 'issue'
             number = issue.get('number', red+'<no issue number>'+normal)
+            if '<no issue number>' in number:
+                import json
+                print(json.dumps(issue, indent=2))
             if comment:
                 user = payload['comment']['user']['login']
                 if user == botname.lower() + '[bot]':
