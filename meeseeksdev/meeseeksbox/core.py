@@ -203,8 +203,11 @@ class WebHookHandler(MainHandler):
                     self.dispatch_on_mention(body, payload, user)
                 else:
                     import textwrap
-                    print(f'({repo}) Was not mentioned, (',
-                          self.config.botname,')\n', textwrap.indent(body, '   |') , 'by |', user)
+                    issue = payload.get('issue', '<no issues>')
+                    print(f'({repo}) Was not mentioned, ',
+                          #self.config.botname,')\n',
+                          #textwrap.indent(body,
+                          '   |' , 'by ', user, 'on', issue)
             elif installation and installation.get('account'):
                 print(f'({repo}) we got a new installation.')
                 self.auth._build_auth_id_mapping()
@@ -212,7 +215,7 @@ class WebHookHandler(MainHandler):
             else:
                 print('not handled', payload)
         elif type_ == 'submitted':
-            print(f'({repo}) ignoring `submitted`')
+            # print(f'({repo}) ignoring `submitted`')
             pass
         else:
             if type_ == 'closed':
@@ -238,11 +241,13 @@ class WebHookHandler(MainHandler):
                     else:
                         print(f'({repo}) Hum, closed, PR but not merged')
                 else:
-                    print("can't deal with `", type_, "` (for issues) yet")
+                    pass
+                    # print("can't deal with `", type_, "` (for issues) yet")
             elif type_ == 'milestoned':
                   pass
             else:
-                print(f"({repo}) can't deal with `{type_}`yet")
+                pass
+                #print(f"({repo}) can't deal with `{type_}` yet")
 
     # def _action_allowed(args):
     #     """
