@@ -190,21 +190,23 @@ class WebHookHandler(MainHandler):
         elif type_ == 'created':
             comment = payload.get('comment', None)
             installation = payload.get('installation', None)
+            issue = payload.get('issue', {})
+            what = 'pull' if 'pull_request' in issue.keys() else 'issue'
+            number = issue.get('number','<no issue number>')
             if comment:
                 user = payload['comment']['user']['login']
                 if user == botname.lower() + '[bot]':
-                    print(f'({repo}) Not responding to self')
+                    print(f'({repo}/{what}/{number}) Not responding to self')
                     return self.finish("Not responding to self")
                 if '[bot]' in user:
-                    print(f'({repo}) Not responding to another bot')
+                    print(f'({repo}/{what}/{number}) Not responding to another bot')
                     return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
                 if self.mention_bot_re.findall(body):
                     self.dispatch_on_mention(body, payload, user)
                 else:
                     import textwrap
-                    issue = payload.get('issue', '<no issues>')
-                    print(f'({repo}) Was not mentioned, ',
+                    print(f'({repo}/{what}/{number}) Was not mentioned, ',
                           #self.config.botname,')\n',
                           #textwrap.indent(body,
                           '   |' , 'by ', user, 'on', issue)
