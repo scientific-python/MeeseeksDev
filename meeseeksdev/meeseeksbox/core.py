@@ -209,7 +209,7 @@ class WebHookHandler(MainHandler):
                     print(f'({repo}/{what}/{number}) Was not mentioned, ',
                           #self.config.botname,')\n',
                           #textwrap.indent(body,
-                          '   |' , 'by ', user, 'on', issue)
+                          'by ', user, 'on', f'{what}/{number}')
             elif installation and installation.get('account'):
                 print(f'({repo}) we got a new installation.')
                 self.auth._build_auth_id_mapping()
