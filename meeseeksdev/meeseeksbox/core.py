@@ -199,10 +199,18 @@ class WebHookHandler(MainHandler):
         elif type_ == 'created':
             comment = payload.get('comment', None)
             installation = payload.get('installation', None)
-            issue = payload.get('issue', {})
-            what = 'pull' if 'pull_request' in issue.keys() else 'issue'
+            issue = payload.get('issue', None)
             no_issue_number = red+'<no issue number>'+normal
-            number = issue.get('number', no_issue_number)
+            if not issue:
+                pull_request = payload.get('pull_request')
+                if pull_request:
+                    what = 'pull'
+                    number = issue.get('number', no_issue_number)
+                number = no_issue_number
+            else:
+                what = 'issue'
+                number = issue.get('number', no_issue_number)
+
             if  number is no_issue_number:
                 import json
                 print(json.dumps(payload, indent=2))
