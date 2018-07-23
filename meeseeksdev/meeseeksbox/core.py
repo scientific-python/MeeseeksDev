@@ -202,11 +202,13 @@ class WebHookHandler(MainHandler):
             issue = payload.get('issue', {})
             no_issue_number = red+'<no issue number>'+normal
             if not issue:
+                print(yellow+'got pull-request'+normal)
                 pull_request = payload.get('pull_request', {})
                 if pull_request:
                     what = 'pull'
                     number = pull_request.get('number', no_issue_number)
-                number = no_issue_number
+                else:
+                    number = no_issue_number
             else:
                 what = 'issue'
                 number = issue.get('number', no_issue_number)
