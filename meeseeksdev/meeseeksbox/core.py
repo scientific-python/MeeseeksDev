@@ -199,13 +199,13 @@ class WebHookHandler(MainHandler):
         elif type_ == 'created':
             comment = payload.get('comment', None)
             installation = payload.get('installation', None)
-            issue = payload.get('issue', None)
+            issue = payload.get('issue', {})
             no_issue_number = red+'<no issue number>'+normal
             if not issue:
-                pull_request = payload.get('pull_request')
+                pull_request = payload.get('pull_request', {})
                 if pull_request:
                     what = 'pull'
-                    number = issue.get('number', no_issue_number)
+                    number = pull_request.get('number', no_issue_number)
                 number = no_issue_number
             else:
                 what = 'issue'
