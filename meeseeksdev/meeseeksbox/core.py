@@ -176,9 +176,9 @@ class WebHookHandler(MainHandler):
         if type_ == 'opened':
             issue = payload.get('issue', None)
             if not issue:
-                print(f'({repo}) request has no issue key.')
+                print(f'({repo}) request has no issue key., likely a PR')
                 import json
-                print(yellow+json.dumps(payload, indent=2))
+                #print(yellow+json.dumps(payload, indent=2))
                 return self.finish('Not really good, request has no issue')
             if issue:
                 user = payload['issue']['user']['login']
@@ -213,7 +213,7 @@ class WebHookHandler(MainHandler):
 
             if  number is no_issue_number:
                 import json
-                print(json.dumps(payload.keys(), indent=2))
+                print(list(payload.keys()))
             if comment:
                 user = payload['comment']['user']['login']
                 if user == botname.lower() + '[bot]':
