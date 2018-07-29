@@ -18,6 +18,12 @@ from .utils import Session, fix_issue_body, fix_comment_body
 
 from .scopes import admin, everyone, write
 
+green = '\033[0;32m'
+yellow = '\033[0;33m'
+red = '\033[0;31m'
+normal = '\033[0m'
+
+
 @everyone
 def replyuser(*, session, payload, arguments):
     print("I'm replying to a user, look at me.")
@@ -171,7 +177,7 @@ def backport(session, payload, arguments):
         target_branch = target_branch[3:].strip()
     # collect initial payload
     if 'issue' not in payload:
-        print('debug autobackport "issue" not in payload', payload)
+        print(green+'debug autobackport, "issue" not in payload, likely trigerd by milisetone merge.'+normal)
     prnumber = payload.get('issue', payload).get('number')
     prtitle = payload.get('issue',payload.get('pull_request', {})).get('title')
     org_name = payload['repository']['owner']['login']
@@ -362,7 +368,7 @@ def safe_backport(session, payload, arguments):
         target_branch = target_branch[3:].strip()
     # collect initial payload
     if 'issue' not in payload:
-        print('debug safe_autobackport, "issue" not in payload', payload)
+        print(green+'debug safe_autobackport, "issue" not in payload, likely trigerd by milisetone merge.'+normal)
     prnumber = payload.get('issue', payload).get('number')
     prtitle = payload.get('issue',payload.get('pull_request', {})).get('title')
     org_name = payload['repository']['owner']['login']
