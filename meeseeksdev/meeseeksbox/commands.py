@@ -171,7 +171,7 @@ def backport(session, payload, arguments):
         target_branch = target_branch[3:].strip()
     # collect initial payload
     if 'issue' not in payload:
-        print('debug autobackport', payload)
+        print('debug autobackport "issue" not in payload', payload)
     prnumber = payload.get('issue', payload).get('number')
     prtitle = payload.get('issue',payload.get('pull_request', {})).get('title')
     org_name = payload['repository']['owner']['login']
@@ -362,7 +362,7 @@ def safe_backport(session, payload, arguments):
         target_branch = target_branch[3:].strip()
     # collect initial payload
     if 'issue' not in payload:
-        print('debug autobackport', payload)
+        print('debug safe_autobackport, "issue" not in payload', payload)
     prnumber = payload.get('issue', payload).get('number')
     prtitle = payload.get('issue',payload.get('pull_request', {})).get('title')
     org_name = payload['repository']['owner']['login']
