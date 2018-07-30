@@ -157,12 +157,11 @@ class WebHookHandler(MainHandler):
             if event_type == 'pull_request':
                 return self.finish()
 
-            if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete'}:
+            if event_type in {'status', 'fork', 'deployment_status', 'deployment', 'delete', 'push', 'create'}:
                 print(f'({repo}) Not handling event type', event_type,'yet.')
                 return self.finish()
 
-            print(f'({repo}) No action available  for the webhook :',
-                  self.request.headers.get('X-GitHub-Event'))
+            print(f'({repo}) No action available for the webhook :', event_type)
 
     @property
     def mention_bot_re(self):
