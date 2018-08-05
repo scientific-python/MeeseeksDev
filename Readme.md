@@ -36,6 +36,31 @@ branches:
     - /^auto-backport-of-pr-[0-9]+$/
 ```
 
+## per-repository configuratino
+
+If you want per-configuration repository, create a `.meeseeksdev.yml` file at
+the root of the repository. For now this file allow you to give fine-grained
+permissions to users.
+
+```
+users:
+  <username>:
+    can:
+      - <command 1>
+      - <command 2>
+      - ...
+  <username>
+    can:
+      - ...
+```
+
+This will allow `<username>` to ask `@meeseeksdev` to perform above commands. 
+The conf file is the one that sis on the repository default  branch (usually
+`master`).
+
+
+
+
 ## What can a MeeseeksBox do ?
 
 Comment on a Pr or issue.
