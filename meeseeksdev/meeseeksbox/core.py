@@ -100,6 +100,7 @@ class WebHookHandler(MainHandler):
         self.getfinish("Webhook alive and listening")
 
     def post(self):
+        print('RECEIVED POST REQUEST')
         if 'X-Hub-Signature' not in self.request.headers:
             return self.error('WebHook not configured with secret')
 
