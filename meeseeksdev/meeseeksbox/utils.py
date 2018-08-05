@@ -180,6 +180,8 @@ class Session(Authenticator):
             rate_remaining = response.headers.get('X-RateLimit-Limit', -1)
             if rate_limit:
                 repo_name_list = [k for k,v in self.idmap.items() if v  == self.installation_id]
+                print(self.idmap.items())
+                print(self.installation_id)
                 repo_name = 'no-repo'
                 if len(repo_name_list) == 1:
                     repo_name = repo_name_list[0]
