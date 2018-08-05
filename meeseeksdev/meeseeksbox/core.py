@@ -101,7 +101,7 @@ class WebHookHandler(MainHandler):
 
     def post(self):
         if 'X-Hub-Signature' not in self.request.headers:
-            keen.add_Event('attack', {
+            keen.add_event('attack', {
                 'type': 'no X-Hub-Signature'
             })
             return self.error('WebHook not configured with secret')

@@ -176,6 +176,13 @@ class Session(Authenticator):
                 self.regen_token()
                 response = s.send(prepare())
             response.raise_for_status()
+            rate = response.headers.get('X-RateLimit-Limit', None)
+            if rate:
+                import keen
+                keen.add_event('gh-rate-limit', {
+                    'value': int(rate),
+                    'installation': self.installation_id
+                })
             return response
 
     def _get_permission(self, org, repo, username):
