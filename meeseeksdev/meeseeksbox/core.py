@@ -289,7 +289,7 @@ class WebHookHandler(MainHandler):
         Core of the logic that let people require actions from the bot.
 
         Logic is relatively strait forward at the base,
-        let `user` only trigger action it has sufficient permissions to do.
+        let `user` only trigger action it has sufficient permissions to do so.
 
         Typically an action can be done if you are at least:
             - owner
@@ -331,8 +331,7 @@ class WebHookHandler(MainHandler):
 
         # might want to just look at whether the commenter has permission over said branch.
         # you _may_ have multiple contributors to a PR.
-        is_legitimate_author = (pr_author == user) and (
-            pr_author == origin_repo_org)
+        is_legitimate_author = (pr_author == user) and (pr_author == origin_repo_org)
         if is_legitimate_author: 
             print(user, 'is legitimate author of this PR, letting commands go through')
 
@@ -347,6 +346,39 @@ class WebHookHandler(MainHandler):
                            'command':command}
             })
             handler = self.actions.get(command.lower(), None)
+            command = command.lower()
+
+            def user_can():
+                """
+                callback to test wether the current user has custom permission set on said repository.
+                """
+                try:
+                    path = '.meeseeksdev.yml'
+                    resp = session.get(f'https://api.github.com/repos/{org}/{repo}/contents/{path}')
+                except Exception:
+                    print(red+'An error occured getting repository config file.'+normal)
+                    import traceback
+                    traceback.print_exc()
+                    return False
+
+                if resp.status_code == 404:
+                    print(yellow+'config file not found'+normal)
+                elif resp.status_code != 200:
+                    print(red+f'unknown status code {resp.status_code}'+normal)
+                else:
+                    import yaml
+                    resp = yaml.safe_load(resp.content)
+                    print(resp)
+
+
+
+
+                return False
+            try:
+                user_can()
+            except Exception:
+                print(red+'error runnign user_Can'+normal)
+
             if handler:
                 print("    :: testing who can use ", str(handler))
                 if (permission_level.value >= handler.scope.value) or \
@@ -366,6 +398,7 @@ class WebHookHandler(MainHandler):
                                 # we may need to also check allow edit from maintainer and provide
                                 # another decorator for safety.
                                 # @access_original_branch.
+
                                 if target_session.has_permission(torg, trepo, user, Permission.write) or \
                                         (pr_origin_org_repo == org_repo and allow_edit_from_maintainer):
                                     gen.send(target_session)
