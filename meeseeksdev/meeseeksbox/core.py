@@ -114,12 +114,13 @@ class WebHookHandler(MainHandler):
 
         payload = tornado.escape.json_decode(self.request.body)
         org = payload.get('repository', {}).get('owner', {}).get('login')
-        if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
-            keen.add_event("post", {
-                "reject_organisation": org
-            })
-            self.finish('Not allowed org.')
-            return
+        # if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
+        #     keen.add_event("post", {
+        #         "reject_organisation": org
+        #     })
+        #     self.finish('Not allowed org.')
+        #     print('REJECTING ORG')
+        #     return
         # Let's take some risk and remove user whitelist, we'll still only allow 
         # repo's contributors.
 
