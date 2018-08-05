@@ -370,7 +370,7 @@ class WebHookHandler(MainHandler):
                 elif resp.status_code != 200:
                     print(red+f'unknown status code {resp.status_code}'+normal)
                 else:
-                    resp = yaml.safe_load(base64.decodebytes(resp['content'].encode()))
+                    resp = yaml.safe_load(base64.decodebytes(resp.json()['content'].encode()))
                     print(green+f'should test if {user} can {command} on {repo}/{org}'+normal)
                     print(green+json.dumps(resp, indent=2)+normal)
 
