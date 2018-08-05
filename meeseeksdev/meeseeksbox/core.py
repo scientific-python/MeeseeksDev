@@ -378,6 +378,9 @@ class WebHookHandler(MainHandler):
                 user_can()
             except Exception:
                 print(red+'error runnign user_Can'+normal)
+                import traceback
+                traceback.print_exc()
+
 
             if handler:
                 print("    :: testing who can use ", str(handler))
