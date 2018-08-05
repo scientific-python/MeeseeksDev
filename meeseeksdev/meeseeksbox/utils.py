@@ -176,12 +176,23 @@ class Session(Authenticator):
                 self.regen_token()
                 response = s.send(prepare())
             response.raise_for_status()
-            rate = response.headers.get('X-RateLimit-Limit', None)
-            if rate:
+            rate_limit = response.headers.get('X-RateLimit-Limit', -1)
+            rate_remaining = response.headers.get('X-RateLimit-Limit', -1)
+            if rate_limit:
+                repo_name_list = [k for k in self.idmap if v  == self.installation_id]
+                repo_name = 'no-repo'
+                if len(repo_name_list) == 1:
+                    repo_name = repo_name_list[0]
+                elif len(repo_name_list) == 0:
+                    repo_name = 'no-matches'
+                else:
+                    repo_name = 'multiple-matches'
+                    
                 import keen
-                keen.add_event('gh-rate-limit', {
-                    'value': int(rate),
-                    'installation': self.installation_id
+                keen.add_event('gh-rate', {
+                    'limit': int(rate_limit),
+                    'rate_remaining': int(rate_remaining),
+                    'installation': repo_name
                 })
             return response
 
