@@ -102,11 +102,13 @@ class WebHookHandler(MainHandler):
     def post(self):
         print('RECEIVED POST REQUEST')
         if 'X-Hub-Signature' not in self.request.headers:
+            print('NO SECRET')
             return self.error('WebHook not configured with secret')
 
         if not verify_signature(self.request.body,
                                 self.request.headers['X-Hub-Signature'],
                                 self.config.webhook_secret):
+            print('INVALID SIGNATURE')
             return self.error('Cannot validate GitHub payload with '
                               'provided WebHook secret')
 
