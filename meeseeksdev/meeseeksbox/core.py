@@ -354,7 +354,7 @@ class WebHookHandler(MainHandler):
                 """
                 try:
                     path = '.meeseeksdev.yml'
-                    resp = session.get(f'https://api.github.com/repos/{org}/{repo}/contents/{path}')
+                    resp = session.ghrequest('GET', f'https://api.github.com/repos/{org}/{repo}/contents/{path}')
                 except Exception:
                     print(red+'An error occured getting repository config file.'+normal)
                     import traceback
