@@ -5,6 +5,10 @@ import time
 import datetime
 import inspect
 
+import yaml
+import base64
+import json
+
 import keen
 
 import tornado.web
@@ -348,7 +352,7 @@ class WebHookHandler(MainHandler):
             handler = self.actions.get(command.lower(), None)
             command = command.lower()
 
-            def user_can():
+            def user_can(user, command, repo, org, session):
                 """
                 callback to test whether the current user has custom permission set on said repository.
                 """
@@ -366,8 +370,7 @@ class WebHookHandler(MainHandler):
                 elif resp.status_code != 200:
                     print(red+f'unknown status code {resp.status_code}'+normal)
                 else:
-                    import yaml
-                    resp = yaml.safe_load(base64.decodebytes(res['content'].encode()))
+                    resp = yaml.safe_load(base64.decodebytes(resp['content'].encode()))
                     print(green+f'should test if {user} can {command} on {repo}/{org}'+normal)
                     print(green+json.dumps(resp, indent=2)+normal)
 
@@ -375,7 +378,7 @@ class WebHookHandler(MainHandler):
 
                 return False
             try:
-                user_can()
+                user_can(user, command, repo, org, session)
             except Exception:
                 print(red+'error runnign user_Can'+normal)
                 import traceback
