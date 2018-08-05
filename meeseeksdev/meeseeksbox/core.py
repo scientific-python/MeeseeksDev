@@ -350,7 +350,7 @@ class WebHookHandler(MainHandler):
 
             def user_can():
                 """
-                callback to test wether the current user has custom permission set on said repository.
+                callback to test whether the current user has custom permission set on said repository.
                 """
                 try:
                     path = '.meeseeksdev.yml'
@@ -367,9 +367,9 @@ class WebHookHandler(MainHandler):
                     print(red+f'unknown status code {resp.status_code}'+normal)
                 else:
                     import yaml
-                    resp = yaml.safe_load(resp.content)
-                    print(resp)
-
+                    resp = yaml.safe_load(base64.decodebytes(res['content'].encode()))
+                    print(green+f'should test if {user} can {command} on {repo}/{org}'+normal)
+                    print(green+json.dumps(resp, indent=2)+normal)
 
 
 
