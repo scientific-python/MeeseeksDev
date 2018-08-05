@@ -374,8 +374,12 @@ class WebHookHandler(MainHandler):
                     print(green+f'should test if {user} can {command} on {repo}/{org}'+normal)
                     print(green+json.dumps(resp, indent=2)+normal)
 
-
-
+                custom_allowed_commands = resp.get('users', {}).get(user, {}).get('can', [])
+                print(f'Custom allowed command for {user} are', custom_allowed_commands)
+                if command in custom_allowed_commands:
+                    print(yellow+f'would allow {user} to {command}')
+                    return True
+                print(yellow+f'would not allow {user} to {command}')
                 return False
             try:
                 user_can(user, command, repo, org, session)
