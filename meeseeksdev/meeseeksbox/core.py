@@ -113,13 +113,13 @@ class WebHookHandler(MainHandler):
                               'provided WebHook secret')
 
         payload = tornado.escape.json_decode(self.request.body)
-        org = payload.get('repository', {}).get('owner', {}).get('login')
+        org = payload.get('repository', payload.get('issue', {})).get('owner', {}).get('login')
         if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
             print(red+'missin org ?'+normal, payload)
             keen.add_event("post", {
                 "reject_organisation": org
             })
-            self.finish('Not whitelisted org.')
+            # self.finish('Not whitelisted org.')
             #print('REJECTING ORG')
             #return
         # Let's take some risk and remove user whitelist, we'll still only allow 
