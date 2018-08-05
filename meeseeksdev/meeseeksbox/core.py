@@ -101,13 +101,17 @@ class WebHookHandler(MainHandler):
 
     def post(self):
         if 'X-Hub-Signature' not in self.request.headers:
-            print('NO SECRET')
+            keen.add_Event('attack', {
+                'type': 'no X-Hub-Signature'
+            })
             return self.error('WebHook not configured with secret')
 
         if not verify_signature(self.request.body,
                                 self.request.headers['X-Hub-Signature'],
                                 self.config.webhook_secret):
-            print('INVALID SIGNATURE')
+            keen.add_Event('attack', {
+                'type': 'wrong signature'
+            })
             return self.error('Cannot validate GitHub payload with '
                               'provided WebHook secret')
 
