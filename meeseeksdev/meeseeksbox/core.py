@@ -116,7 +116,10 @@ class WebHookHandler(MainHandler):
                               'provided WebHook secret')
 
         payload = tornado.escape.json_decode(self.request.body)
-        org = payload.get('repository', payload.get('issue', {})).get('owner', {}).get('login')
+        org = payload.get('repository', {}).get('owner', {}).get('login')
+        if not org:
+            org = payload.get('issue', {}).get('repository', {}).get('owner', {}).get('login')
+            print('org in issue', org)
 
         if payload.get('action', None) == 'edited':
             keen.add_event('ignore_org_missing', {
@@ -124,7 +127,7 @@ class WebHookHandler(MainHandler):
             })
         else:
             if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
-                print(red+'missin org ?'+normal, payload)
+                print(red+'missing org ?'+normal, payload)
                 keen.add_event("post", {
                     "reject_organisation": org
                 })
