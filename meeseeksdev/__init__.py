@@ -135,6 +135,7 @@ def main():
 
     app_v = os.environ.get("HEROKU_RELEASE_VERSION", None)
     if app_v:
+        import keen
         keen.add_event("deploy", {"version": int(app_v[1:])})
     config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
     config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
