@@ -67,7 +67,7 @@ class Authenticator:
         """
         Given and installation id, return a session with the right credentials
         """
-        print('spawning session for repo', [(k,v) for k,v in self.idmam.items() if v == installation_id])
+        print('spawning session for repo', [(k,v) for k,v in self.idmap.items() if v == installation_id])
         return self._session_class(self.integration_id, self.rsadata, installation_id,
                                    self.personnal_account_token,
                                    self.personnal_account_name,
