@@ -64,11 +64,14 @@ class Authenticator:
         self._session_class = Session
 
     def session(self, installation_id):
-        return self._session_class(self.integration_id, self.rsadata, installation_id, 
+        """
+        Given and installation id, return a session with the right credentials
+        """
+        print('spawning session for repo', [(k,v) for k,v in self.idmam.items() if v == installation_id])
+        return self._session_class(self.integration_id, self.rsadata, installation_id,
                                    self.personnal_account_token,
                                    self.personnal_account_name,
                                    )
-        
     def list_installations(self):
         """
         Todo: Pagination
@@ -180,8 +183,6 @@ class Session(Authenticator):
             rate_remaining = response.headers.get('X-RateLimit-Limit', -1)
             if rate_limit:
                 repo_name_list = [k for k,v in self.idmap.items() if v  == self.installation_id]
-                print(self.idmap.items())
-                print(self.installation_id)
                 repo_name = 'no-repo'
                 if len(repo_name_list) == 1:
                     repo_name = repo_name_list[0]
