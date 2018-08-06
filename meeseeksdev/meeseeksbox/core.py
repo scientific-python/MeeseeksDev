@@ -109,7 +109,7 @@ class WebHookHandler(MainHandler):
         if not verify_signature(self.request.body,
                                 self.request.headers['X-Hub-Signature'],
                                 self.config.webhook_secret):
-            keen.add_Event('attack', {
+            keen.add_event('attack', {
                 'type': 'wrong signature'
             })
             return self.error('Cannot validate GitHub payload with '
@@ -119,7 +119,7 @@ class WebHookHandler(MainHandler):
         org = payload.get('repository', payload.get('issue', {})).get('owner', {}).get('login')
 
         if payload.get('action', None) == 'edited':
-            keen.add_Event('ignore_org_missing', {
+            keen.add_event('ignore_org_missing', {
                 'edited': 'reason'
             })
         else:
