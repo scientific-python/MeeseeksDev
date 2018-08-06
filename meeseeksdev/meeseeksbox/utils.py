@@ -7,6 +7,11 @@ import json
 import requests
 import re
 
+green = '\033[0;32m'
+yellow = '\033[0;33m'
+red = '\033[0;31m'
+normal = '\033[0m'
+
 from .scopes import Permission
 
 API_COLLABORATORS_TEMPLATE = 'https://api.github.com/repos/{org}/{repo}/collaborators/{username}/permission'
@@ -67,8 +72,8 @@ class Authenticator:
         """
         Given and installation id, return a session with the right credentials
         """
-        print('spawning session for repo', [(k,v) for k,v in self.idmap.items() if v == installation_id])
-        print('DEBUG: ', self.idmap, installation_id)
+        #print('spawning session for repo', [(k,v) for k,v in self.idmap.items() if v == installation_id])
+        #print('DEBUG: ', self.idmap, installation_id)
         return self._session_class(self.integration_id, self.rsadata, installation_id,
                                    self.personnal_account_token,
                                    self.personnal_account_name,
@@ -79,6 +84,8 @@ class Authenticator:
         """
         response = self._integration_authenticated_request(
             'GET', "https://api.github.com/integration/installations")
+        print(yellow+'list installation')
+        print('HEADER', response.headers)
         return response.json()
 
     def _build_auth_id_mapping(self):
