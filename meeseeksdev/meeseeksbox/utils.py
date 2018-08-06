@@ -82,10 +82,12 @@ class Authenticator:
         """
         Todo: Pagination
         """
+        import json
         response = self._integration_authenticated_request(
             'GET', "https://api.github.com/integration/installations")
         print(yellow+'list installation')
-        print('HEADER', response.headers)
+        print('HEADER', json.dumps(response.headers))
+        print('Content', json.dumps(response.json()))
         return response.json()
 
     def _build_auth_id_mapping(self):
