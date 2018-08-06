@@ -157,7 +157,7 @@ class Session(Authenticator):
             return response
 
 
-    def ghrequest(self, method, url, json=None, *, override_accept_header=None):
+    def ghrequest(self, method, url, json=None, *, override_accept_header=None, raise_for_status=True):
         accept = ACCEPT_HEADER
         if override_accept_header:
             accept = override_accept_header

@@ -366,7 +366,7 @@ class WebHookHandler(MainHandler):
                 """
                 try:
                     path = '.meeseeksdev.yml'
-                    resp = session.ghrequest('GET', f'https://api.github.com/repos/{org}/{repo}/contents/{path}')
+                    resp = session.ghrequest('GET', f'https://api.github.com/repos/{org}/{repo}/contents/{path}', raise_for_status=False)
                 except Exception:
                     print(red+'An error occured getting repository config file.'+normal)
                     import traceback
@@ -377,6 +377,7 @@ class WebHookHandler(MainHandler):
                     print(yellow+'config file not found'+normal)
                 elif resp.status_code != 200:
                     print(red+f'unknown status code {resp.status_code}'+normal)
+                    resp.raise_for_status()
                 else:
                     resp = yaml.safe_load(base64.decodebytes(resp.json()['content'].encode()))
                     print(green+f'should test if {user} can {command} on {repo}/{org}'+normal)
