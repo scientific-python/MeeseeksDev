@@ -86,8 +86,8 @@ class Authenticator:
         response = self._integration_authenticated_request(
             'GET', "https://api.github.com/integration/installations")
         print(yellow+'list installation')
-        print('HEADER', json.dumps(response.headers))
-        print('Content', json.dumps(response.json()))
+        print('HEADER', json.dumps(dict(response.headers)))
+        print('Content', json.dumps(dict(response.json())))
         return response.json()
 
     def _build_auth_id_mapping(self):
