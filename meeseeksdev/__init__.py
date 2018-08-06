@@ -92,8 +92,15 @@ from .meeseeksbox.core import Config
 from .meeseeksbox.commands import replyuser, zen, backport, tag, untag, pep8ify, quote, say, party, safe_backport
 from .commands import close, open as _open, migrate_issue_request, ready, merge, help_make
 
+green = '\x1b[0;32m'
+yellow = '\x1b[0;33m'
+blue = '\x1b[0;34m'
+red = '\x1b[0;31m'
+normal = '\x1b[0m'
+
+
 def main():
-    print('====== (re) starting ======')
+    print(blue+'====== (re) starting ======'+normal)
     config = load_config_from_env()
     config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
     config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
