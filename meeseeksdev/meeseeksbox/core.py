@@ -121,7 +121,7 @@ class WebHookHandler(MainHandler):
             org = payload.get('issue', {}).get('repository', {}).get('owner', {}).get('login')
             print('org in issue', org)
 
-        if payload.get('action', None) in ['edited', 'assigned', 'labeled', 'opened']:
+        if payload.get('action', None) in ['edited', 'assigned', 'labeled', 'opened', 'created']:
             keen.add_event('ignore_org_missing', {
                 'edited': 'reason'
             })
