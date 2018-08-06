@@ -1,3 +1,6 @@
+"""
+Meeseeksbox main app module
+"""
 import os
 import base64
 import signal
@@ -131,7 +134,6 @@ normal = "\x1b[0m"
 def main():
     print(blue + "====== (re) starting ======" + normal)
     config = load_config_from_env()
-    import os
 
     app_v = os.environ.get("HEROKU_RELEASE_VERSION", None)
     if app_v:
