@@ -401,12 +401,13 @@ class WebHookHandler(MainHandler):
                 print(f'Custom allowed command for {user} are', custom_allowed_commands)
 
                 everyone_allowed_commands = resp.get('special', {}).get('everyone', {}).get('can', [])
+                custom_allowed_commands.extend(everyone_allowed_commands)
+                
                 print('with everyone taken into account', custom_allowed_commands)
 
                 if user in resp.get('blacklisted_users', []):
                     return False
 
-                custom_allowed_commands.extend(everyone_allowed_commands)
                 if command in custom_allowed_commands:
                     print(yellow+f'would allow {user} to {command}')
                     return True
