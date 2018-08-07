@@ -80,10 +80,15 @@ def process_mentionning_comment(body, bot_re):
     Given a comment body and a bot name parse this into a tuple of (command, arguments)
     """
     lines = body.splitlines()
-    lines = [l.strip() for l in lines if bot_re.search(l) and not line.startswith('>')]
-    lines = [bot_re.split(l)[-1].strip() for l in lines]
+    lines = [l.strip() for l in lines if (bot_re.search(l) and not l.startswith('>')) or l.startswith('!msbox')]
+    nl = []
+    for l in lines:
+        if l.startswith('!msbox'):
+            nl.append(l.split('!msbox')[-1].strip())
+        else:
+            nl.append(bot_re.split(l)[-1].strip())
 
-    command_args = [l.split(' ', 1) for l in lines]
+    command_args = [l.split(' ', 1) for l in nl]
     command_args = [c if len(c) > 1 else (c[0], None) for c in command_args]
     return command_args
 
