@@ -194,7 +194,8 @@ class Session(Authenticator):
             if response.status_code == 401:
                 self.regen_token()
                 response = s.send(prepare())
-            response.raise_for_status()
+            if raise_for_status:
+                response.raise_for_status()
             rate_limit = response.headers.get('X-RateLimit-Limit', -1)
             rate_remaining = response.headers.get('X-RateLimit-Limit', -1)
             if rate_limit:
