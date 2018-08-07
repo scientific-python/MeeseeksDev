@@ -418,7 +418,7 @@ class WebHookHandler(MainHandler):
                     traceback.print_exc()
 
                 if (permission_level.value >= handler.scope.value) or \
-                        (is_legitimate_author and getattr(handler, 'let_author') or 
+                        (is_legitimate_author and getattr(handler, 'let_author', False) or 
                          per_repo_config_allows):
                     print("    :: authorisation granted ", handler.scope, 'custom_rule:', per_repo_config_allows )
                     is_gen = inspect.isgeneratorfunction(handler)
