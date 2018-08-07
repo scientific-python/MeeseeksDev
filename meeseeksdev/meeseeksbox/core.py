@@ -409,11 +409,11 @@ class WebHookHandler(MainHandler):
 
             if handler:
                 print("    :: testing who can use ", str(handler))
-
+                per_repo_config_allows = None
                 try:
                     per_repo_config_allows = user_can(user, command, repo, org, session)
                 except Exception:
-                    print(red+'error runnign user_Can'+normal)
+                    print(red+'error runnign user_can'+normal)
                     import traceback
                     traceback.print_exc()
 
