@@ -249,7 +249,7 @@ class WebHookHandler(MainHandler):
                     print(f'({repo}/{what}/{number}) Not responding to another bot')
                     return self.finish("Not responding to another bot")
                 body = payload['comment']['body']
-                if self.mention_bot_re.findall(body):
+                if self.mention_bot_re.findall(body) or (`!msbox` in body):
                     self.dispatch_on_mention(body, payload, user)
                 else:
                     pass
