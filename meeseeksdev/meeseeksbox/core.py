@@ -127,7 +127,7 @@ class WebHookHandler(MainHandler):
             })
         else:
             if hasattr(self.config, 'org_whitelist') and (org not in self.config.org_whitelist):
-                print(red+'missing org ?'+normal, payload)
+                # print(red+'missing org ?'+normal, payload)
                 keen.add_event("post", {
                     "reject_organisation": org
                 })
