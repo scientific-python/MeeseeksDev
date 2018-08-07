@@ -201,7 +201,7 @@ def backport(session, payload, arguments):
             milestone_number = None
 
         print('----------------------------------------')
-        print('milestone data :', pr_data['milestone'])
+        # print('milestone data :', pr_data['milestone'])
         print('----------------------------------------')
         if not target_branch.strip():
             milestone_title = pr_data['milestone']['title']
@@ -392,7 +392,7 @@ def safe_backport(session, payload, arguments):
             milestone_number = None
 
         print('----------------------------------------')
-        print('milestone data :', pr_data['milestone'])
+        # print('milestone data :', pr_data['milestone'])
         print('----------------------------------------')
         if not target_branch.strip():
             milestone_title = pr_data['milestone']['title']
