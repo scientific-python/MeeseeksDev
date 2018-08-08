@@ -386,26 +386,26 @@ class WebHookHandler(MainHandler):
                     import traceback
                     traceback.print_exc()
                     return False
-
+                conf = {}
                 if resp.status_code == 404:
                     print(yellow+'config file not found'+normal)
                 elif resp.status_code != 200:
                     print(red+f'unknown status code {resp.status_code}'+normal)
                     resp.raise_for_status()
                 else:
-                    resp = yaml.safe_load(base64.decodebytes(resp.json()['content'].encode()))
+                    conf = yaml.safe_load(base64.decodebytes(resp.json()['content'].encode()))
                     print(green+f'should test if {user} can {command} on {repo}/{org}'+normal)
-                    print(green+json.dumps(resp, indent=2)+normal)
+                    print(green+json.dumps(conf, indent=2)+normal)
 
-                custom_allowed_commands = resp.get('users', {}).get(user, {}).get('can', [])
+                custom_allowed_commands = conf.get('users', {}).get(user, {}).get('can', [])
                 print(f'Custom allowed command for {user} are', custom_allowed_commands)
 
-                everyone_allowed_commands = resp.get('special', {}).get('everyone', {}).get('can', [])
+                everyone_allowed_commands = conf.get('special', {}).get('everyone', {}).get('can', [])
                 custom_allowed_commands.extend(everyone_allowed_commands)
                 
-                print('with everyone taken into account', custom_allowed_commands)
+                print('with everyone taken into account', everyone_allowed_commands)
 
-                if user in resp.get('blacklisted_users', []):
+                if user in conf.get('blacklisted_users', []):
                     return False
 
                 if command in custom_allowed_commands:
