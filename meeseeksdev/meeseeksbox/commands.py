@@ -715,7 +715,11 @@ def tag(session, payload, arguments, local_config=None):
     url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
     tags = [arg.strip() for arg in arguments.split(",")]
     if local_config:
+        
         only = set(local_config.get('only', []))
+        any_tags = local_config.get('any', False)
+        if any_tags:
+            print('not filtering, any tags set')
         if only:
             tags = [t for t in tags if t.lower() in only]
             print('will only allow', tags )
