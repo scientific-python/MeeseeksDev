@@ -11,6 +11,7 @@ class Permission(Enum):
     write = 2
     admin = 4
 
+
 def admin(function):
     function.scope = Permission.admin
     return function

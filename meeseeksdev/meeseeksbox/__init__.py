@@ -12,35 +12,36 @@ import base64
 from .core import Config
 from .core import MeeseeksBox
 
-version_info = (0,0,2)
+version_info = (0, 0, 2)
 
-__version__ = '.'.join(map(str,version_info))
+__version__ = ".".join(map(str, version_info))
+
 
 def load_config_from_env():
     """
     Load the configuration, for now stored in the environment
     """
-    config={}
+    config = {}
 
-    integration_id = os.environ.get('GITHUB_INTEGRATION_ID')
-    botname = os.environ.get('GITHUB_BOT_NAME', None)
-    
+    integration_id = os.environ.get("GITHUB_INTEGRATION_ID")
+    botname = os.environ.get("GITHUB_BOT_NAME", None)
+
     if not integration_id:
-        raise ValueError('Please set GITHUB_INTEGRATION_ID')
+        raise ValueError("Please set GITHUB_INTEGRATION_ID")
 
     if not botname:
-        raise ValueError('Need to set a botname')
+        raise ValueError("Need to set a botname")
     if "@" in botname:
         print("Don't include @ in the botname !")
 
-    botname = botname.replace('@','')
-    at_botname = '@'+botname
+    botname = botname.replace("@", "")
+    at_botname = "@" + botname
     integration_id = int(integration_id)
 
-    config['key'] = base64.b64decode(bytes(os.environ.get('B64KEY'), 'ASCII'))
-    config['botname'] = botname
-    config['at_botname'] = at_botname
-    config['integration_id'] = integration_id
-    config['webhook_secret'] = os.environ.get('WEBHOOK_SECRET')
+    config["key"] = base64.b64decode(bytes(os.environ.get("B64KEY"), "ASCII"))
+    config["botname"] = botname
+    config["at_botname"] = at_botname
+    config["integration_id"] = integration_id
+    config["webhook_secret"] = os.environ.get("WEBHOOK_SECRET")
 
     return Config(**config).validate()
