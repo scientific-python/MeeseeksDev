@@ -159,7 +159,7 @@ def main():
         "ready": ready,
         "merge": merge,
         "say": say,
-        "debug", debug,
+        "debug": debug,
         "party": party,
     }
     commands["help"] = help_make(commands)
