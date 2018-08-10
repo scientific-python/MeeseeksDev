@@ -443,10 +443,14 @@ class WebHookHandler(MainHandler):
                 if command in custom_allowed_commands:
                     print(yellow + f"would allow {user} to {command}")
                     if "config" in user_section:
-                        local_config = user_section.get("config", {}).get(command, None)
+                        user_section_config = user_section.get("config", {})
+                        if isinstance(user_section_config, list):
+                            print('pop0 from user_config')
+                            user_section_config = user_section_config[0]
+                        local_config = user_section_config.get(command, None)
                         if local_config:
                             print("returning local_config", local_config)
-                            return True, config
+                            return True, local_config
                     return True, {}
 
                 everyone_section = conf.get("special", {}).get("everyone", {})
@@ -456,10 +460,14 @@ class WebHookHandler(MainHandler):
                 if command in everyone_allowed_commands:
                     print(yellow + f"would allow {user} (via everyone) to do {command}")
                     if "config" in everyone_section:
-                        local_config = everyone_section.get("config", {}).get(command, None)
+                        everyone_section_config = everyone_section.get("config", {})
+                        if isinstance(everyone_section_config, list):
+                            print('pop0 from user_config')
+                            everyone_section_config = everyone_section_config[0]
+                        local_config = everyone_section_config.get(command, None)
                         if local_config:
                             print("returning local_config", local_config)
-                            return True, config
+                            return True, local_config
                     return True, {}
 
                 print(yellow + f"would not allow {user} to {command}")
