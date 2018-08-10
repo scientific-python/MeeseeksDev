@@ -42,8 +42,17 @@ def replyuser(*, session, payload, arguments, local_config=None):
 
 @write
 def say(*, session, payload, arguments, local_config=None):
+    print('Oh, got local_config', local_config )
     comment_url = payload["issue"]["comments_url"]
     session.post_comment(comment_url, "".join(arguments))
+
+@write
+def debug(*, session, payload, arguments, local_config=None):
+    print("DEBUG")
+    print('session', session)
+    print('payload', payload)
+    print('arguments', arguments)
+    print('local_config', local_config)
 
 
 @everyone

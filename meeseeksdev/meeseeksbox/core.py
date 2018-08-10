@@ -443,7 +443,7 @@ class WebHookHandler(MainHandler):
                 if command in custom_allowed_commands:
                     print(yellow + f"would allow {user} to {command}")
                     if "config" in user_section:
-                        local_config = user_section.get("config", {}).get(command)
+                        local_config = user_section.get("config", {}).get(command, None)
                         if local_config:
                             print("returning local_config", local_config)
                             return True, config
@@ -456,7 +456,7 @@ class WebHookHandler(MainHandler):
                 if command in everyone_allowed_commands:
                     print(yellow + f"would allow {user} (via everyone) to do {command}")
                     if "config" in everyone_section:
-                        local_config = everyone_section.get("config", {}).get(command)
+                        local_config = everyone_section.get("config", {}).get(command, None)
                         if local_config:
                             print("returning local_config", local_config)
                             return True, config

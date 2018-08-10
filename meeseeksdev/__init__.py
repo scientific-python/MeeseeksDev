@@ -112,6 +112,7 @@ from .meeseeksbox.commands import (
     pep8ify,
     quote,
     say,
+    debug,
     party,
     safe_backport,
 )
@@ -158,6 +159,7 @@ def main():
         "ready": ready,
         "merge": merge,
         "say": say,
+        "debug", debug,
         "party": party,
     }
     commands["help"] = help_make(commands)
