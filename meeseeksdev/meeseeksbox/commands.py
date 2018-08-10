@@ -708,14 +708,19 @@ def safe_backport(session, payload, arguments, local_config=None):
 @admin
 def tag(session, payload, arguments, local_config=None):
     "tag[, tag, [...] ]"
+    print('Got local config for tag: ', local_config)
     org = payload["repository"]["owner"]["login"]
     repo = payload["repository"]["name"]
     num = payload.get("issue").get("number")
-    url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(
-        **locals()
-    )
+    url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
     tags = [arg.strip() for arg in arguments.split(",")]
-    session.ghrequest("POST", url, json=tags)
+    if local_config:
+        only = set(local_config.get('only', []))
+        if only:
+            tags = [t for t in tags if t.lower() in only]
+            print('will only allow', tags )
+    if tags:
+        session.ghrequest("POST", url, json=tags)
 
 
 @admin
