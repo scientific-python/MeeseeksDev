@@ -413,7 +413,7 @@ class WebHookHandler(MainHandler):
                     import traceback
 
                     traceback.print_exc()
-                    return False
+                    return False, {}
                 conf = {}
                 if resp.status_code == 404:
                     print(yellow + "config file not found" + normal)
@@ -432,7 +432,7 @@ class WebHookHandler(MainHandler):
                     print(green + json.dumps(conf, indent=2) + normal)
 
                 if user in conf.get("blacklisted_users", []):
-                    return False
+                    return False, {}
 
                 user_section = conf.get("users", {}).get(user, {})
 
@@ -440,23 +440,39 @@ class WebHookHandler(MainHandler):
 
                 print(f"Custom allowed command for {user} are", custom_allowed_commands)
 
-                everyone_section = conf.get("special", {}).get("everyone", {})
-                everyone_allowed_commands = everyone_section.get("can", [])
-                custom_allowed_commands.extend(everyone_allowed_commands)
-
-                print("with everyone taken into account", everyone_allowed_commands)
-
                 if command in custom_allowed_commands:
                     print(yellow + f"would allow {user} to {command}")
-                    return True
+                    if "config" in user_section:
+                        local_config = user_section.get("config", {}).get(command)
+                        if local_config:
+                            print("returning local_config", local_config)
+                            return True, config
+                    return True, {}
+
+                everyone_section = conf.get("special", {}).get("everyone", {})
+                everyone_allowed_commands = everyone_section.get("can", [])
+
+                print("with everyone taken into account", everyone_allowed_commands)
+                if command in everyone_allowed_commands:
+                    print(yellow + f"would allow {user} (via everyone) to do {command}")
+                    if "config" in everyone_section:
+                        local_config = everyone_section.get("config", {}).get(command)
+                        if local_config:
+                            print("returning local_config", local_config)
+                            return True, config
+                    return True, {}
+
                 print(yellow + f"would not allow {user} to {command}")
-                return False
+                return False, {}
 
             if handler:
                 print("    :: testing who can use ", str(handler))
                 per_repo_config_allows = None
+                local_config = {}
                 try:
-                    per_repo_config_allows = user_can(user, command, repo, org, session)
+                    per_repo_config_allows, local_config = user_can(
+                        user, command, repo, org, session
+                    )
                 except Exception:
                     print(red + "error runnign user_can" + normal)
                     import traceback
@@ -473,10 +489,14 @@ class WebHookHandler(MainHandler):
                         handler.scope,
                         "custom_rule:",
                         per_repo_config_allows,
+                        local_config,
                     )
                     is_gen = inspect.isgeneratorfunction(handler)
                     maybe_gen = handler(
-                        session=session, payload=payload, arguments=arguments
+                        session=session,
+                        payload=payload,
+                        arguments=arguments,
+                        local_config=local_config,
                     )
                     if is_gen:
                         gen = YieldBreaker(maybe_gen)

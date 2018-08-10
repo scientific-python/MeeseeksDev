@@ -26,7 +26,7 @@ normal = "\033[0m"
 
 
 @everyone
-def replyuser(*, session, payload, arguments):
+def replyuser(*, session, payload, arguments, local_config=None):
     print("I'm replying to a user, look at me.")
     comment_url = payload["issue"]["comments_url"]
     user = payload["comment"]["user"]["login"]
@@ -41,20 +41,20 @@ def replyuser(*, session, payload, arguments):
 
 
 @write
-def say(*, session, payload, arguments):
+def say(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
     session.post_comment(comment_url, "".join(arguments))
 
 
 @everyone
-def party(*, session, payload, arguments):
+def party(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
     parrot = "![party parrot](http://cultofthepartyparrot.com/parrots/hd/parrot.gif)"
     session.post_comment(comment_url, parrot * 10)
 
 
 @everyone
-def zen(*, session, payload, arguments):
+def zen(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
     session.post_comment(
         comment_url,
@@ -89,7 +89,7 @@ def zen(*, session, payload, arguments):
 
 
 @admin
-def replyadmin(*, session, payload, arguments):
+def replyadmin(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
     user = payload["issue"]["user"]["login"]
     session.post_comment(
@@ -98,7 +98,7 @@ def replyadmin(*, session, payload, arguments):
 
 
 @admin
-def pep8ify(*, session, payload, arguments):
+def pep8ify(*, session, payload, arguments, local_config=None):
     print("===== pe8ifying =====")
     print(payload)
     print("===== ========= =====")
@@ -188,7 +188,7 @@ def pep8ify(*, session, payload, arguments):
 
 
 @write
-def backport(session, payload, arguments):
+def backport(session, payload, arguments, local_config=None):
     """[to] {branch}"""
     if arguments is None:
         arguments = ""
@@ -424,7 +424,7 @@ def backport(session, payload, arguments):
 
 
 @write
-def safe_backport(session, payload, arguments):
+def safe_backport(session, payload, arguments, local_config=None):
     """[to] {branch}"""
     if arguments is None:
         arguments = ""
@@ -697,7 +697,7 @@ def safe_backport(session, payload, arguments):
 
 
 @admin
-def tag(session, payload, arguments):
+def tag(session, payload, arguments, local_config=None):
     "tag[, tag, [...] ]"
     org = payload["repository"]["owner"]["login"]
     repo = payload["repository"]["name"]
@@ -710,7 +710,7 @@ def tag(session, payload, arguments):
 
 
 @admin
-def untag(session, payload, arguments):
+def untag(session, payload, arguments, local_config=None):
     "tag[, tag, [...] ]"
     org = payload["repository"]["owner"]["login"]
     repo = payload["repository"]["name"]
@@ -725,7 +725,9 @@ def untag(session, payload, arguments):
 
 
 @write
-def migrate_issue_request(*, session: Session, payload: dict, arguments: str):
+def migrate_issue_request(
+    *, session: Session, payload: dict, arguments: str, local_config=None
+):
     """Todo:
 
     - Works through pagination of comments
@@ -817,7 +819,7 @@ def migrate_issue_request(*, session: Session, payload: dict, arguments: str):
 
 
 @write
-def quote(*, session, payload, arguments):
+def quote(*, session, payload, arguments, local_config=None):
     if arguments.lower() == "over the world":
         comment_url = payload["issue"]["comments_url"]
         user = payload["issue"]["user"]["login"]

@@ -39,17 +39,19 @@ def help_make(commands):
 
 
 @write
-def close(*, session, payload, arguments):
+def close(*, session, payload, arguments, local_config=None):
     session.ghrequest("PATCH", payload["issue"]["url"], json={"state": "closed"})
 
 
 @write
-def open(*, session, payload, arguments):
+def open(*, session, payload, arguments, local_config=None):
     session.ghrequest("PATCH", payload["issue"]["url"], json={"state": "open"})
 
 
 @write
-def migrate_issue_request(*, session: Session, payload: dict, arguments: str):
+def migrate_issue_request(
+    *, session: Session, payload: dict, arguments: str, local_config=None
+):
     """[to] {org}/{repo} 
 
 Need to be admin on target repo. Replicate all comments on target repo and close current on.
@@ -155,7 +157,7 @@ from .meeseeksbox.commands import tag, untag
 
 @pr_author
 @write
-def ready(*, session, payload, arguments):
+def ready(*, session, payload, arguments, local_config=None):
     """{no arguments}
 
     Remove "waiting for author" tag, adds "need review" tag. Can also be issued
@@ -166,7 +168,7 @@ def ready(*, session, payload, arguments):
 
 
 @write
-def merge(*, session, payload, arguments, method="merge"):
+def merge(*, session, payload, arguments, method="merge", local_config=None):
     print("===== merging =====")
     if arguments:
         if arguments not in {"merge", "squash", "rebase"}:
