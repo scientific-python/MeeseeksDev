@@ -334,7 +334,7 @@ class WebHookHandler(MainHandler):
         Typically an action can be done if you are at least:
             - owner
             - admin
-            - have write permissin
+            - have write permission
             - read permissions
             - no permission.
 
@@ -429,7 +429,7 @@ class WebHookHandler(MainHandler):
                         + f"should test if {user} can {command} on {repo}/{org}"
                         + normal
                     )
-                    print(green + json.dumps(conf, indent=2) + normal)
+                    # print(green + json.dumps(conf, indent=2) + normal)
 
                 if user in conf.get("blacklisted_users", []):
                     return False, {}
