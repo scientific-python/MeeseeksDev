@@ -561,6 +561,9 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("Cherry-picking %s" % merge_sha)
         args = ("-m", "1", merge_sha)
 
+        msg = "Backport PR #%i: %s" % (prnumber, prtitle)
+        remote_submit_branch = f"auto-backport-of-pr-{prnumber}-on-{target_branch}"
+
         try:
             with mock.patch.dict("os.environ", {"GIT_EDITOR": "true"}):
                 try:
@@ -597,14 +600,42 @@ def safe_backport(session, payload, arguments, local_config=None):
                     file=sys.stderr,
                 )
                 session.post_comment(
-                    comment_url, "There seem to be a conflict, please backport manually"
+                    comment_url,
+                    f"""Owee, I'm MrMeeseeks, Look at me.
+                    
+There seem to be a conflict, please backport manually. Here are approximate instructions:
+
+Checkout backport branch and update it.
+                    
+```
+$ git checkout {target_branch}
+$ git pull
+```
+
+Cherry pick the first parent branch of the this PR on top of the older branch:
+```
+$ git cherry-pick -m1 {merge_sha}
+```
+
+You will likely have some merge/cherry-pick conflict here, fix them and commit:
+
+```
+$ git commit -am {msg!r}
+```
+
+And push to a named branch :
+
+```
+git push YOURFORK {target_branch}:{remote_submit_branch}
+```
+
+If these instruction are inaccurate, feel free to [suggest an improvement](https://github.com/MeeseeksBox/MeeseeksDev).
+                """,
                 )
                 org = payload["repository"]["owner"]["login"]
                 repo = payload["repository"]["name"]
                 num = payload.get("issue", payload).get("number")
-                url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels".format(
-                    **locals()
-                )
+                url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
                 print("trying to apply still needs manual backport")
                 reply = session.ghrequest(
                     "POST", url, json=["Still Needs Manual Backport"]
@@ -632,10 +663,6 @@ def safe_backport(session, payload, arguments, local_config=None):
             return
 
         # write the commit message
-        msg = "Backport PR #%i: %s" % (
-            prnumber,
-            prtitle,
-        )  # + '\n\n' + description.splitlines()
         repo.git.commit("--amend", "-m", msg)
 
         print("== PR #%i applied, with msg:" % prnumber)
@@ -644,7 +671,6 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("== ")
 
         # Push the backported work
-        remote_submit_branch = f"auto-backport-of-pr-{prnumber}-on-{target_branch}"
         print("== Pushing work....:")
         repo.remotes.origin.push("workbranch:{}".format(remote_submit_branch))
         try:
