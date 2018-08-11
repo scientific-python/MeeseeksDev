@@ -762,9 +762,12 @@ def tag(session, payload, arguments, local_config=None):
     if not_applied:
         comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
         lf = "`,`".join(not_applied)
+        user = payload.get("comment", {}).get("user", {}).get("login", None)
         session.post_comment(
             comment_url,
-            f"I was not able to apply the following label(s): `{lf}`. either because they do not already exist or because you do not have the permission",
+            f"Aww {user}, I was not able to apply the following label(s): `{lf}`. Either "
+            "because they are not existing labels on this repository or because you do not have the permission to apply these",
+            "I tried my best to guess by looking at the casing, but was unable to find matching labels.",
         )
 
 
