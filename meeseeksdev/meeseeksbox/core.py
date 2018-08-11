@@ -531,6 +531,19 @@ class WebHookHandler(MainHandler):
                                 print("org/repo not found", org_repo, self.auth.idmap)
                                 gen.send(None)
                 else:
+                    try:
+                        comment_url = payload.get("issue", payload.get("pull_request"))[
+                            "comments_url"
+                        ]
+                        user = payload["comment"]["user"]["login"]
+                        session.post_comment(
+                            comment_url,
+                            f"Awww, sorry {user} you do not seem to be allowed to do that, please ask a repository maintainer.",
+                        )
+                    except Exception:
+                        import traceback
+
+                        traceback.print_exc()
                     print(
                         "I Cannot let you do that: requires",
                         handler.scope.value,
