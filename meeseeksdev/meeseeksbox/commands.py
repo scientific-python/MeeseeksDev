@@ -787,7 +787,8 @@ def untag(session, payload, arguments, local_config=None):
         try:
             session.ghrequest("DELETE", url.format(name=tag))
         except Exception:
-            no_untag.append('tag')
+            no_untag.append(tag)
+    print('was not able to remove tags:', no_untag)
                 
 
 @write
