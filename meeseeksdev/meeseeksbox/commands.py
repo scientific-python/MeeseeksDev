@@ -764,7 +764,7 @@ def tag(session, payload, arguments, local_config=None):
         lf = "`,`".join(not_applied)
         session.post_comment(
             comment_url,
-            "'I was not able to apply the following labels: `{lf}`, either because they are do not already exist or because you do not have the permission",
+            f"I was not able to apply the following label(s): `{lf}`. either because they do not already exist or because you do not have the permission",
         )
 
 
