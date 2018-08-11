@@ -730,7 +730,7 @@ def tag(session, payload, arguments, local_config=None):
         # try to look at casing
         nk = []
         known_lower_normal = {l.lower(): l for l in know_labels}
-        for t in not not_known_tags:
+        for t in not_known_tags:
             target = known_lower_normal.get(t.lower())
             if target:
                 known_tags.append(t)
