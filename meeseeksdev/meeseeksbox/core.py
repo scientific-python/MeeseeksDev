@@ -445,7 +445,7 @@ class WebHookHandler(MainHandler):
                     if "config" in user_section:
                         user_section_config = user_section.get("config", {})
                         if isinstance(user_section_config, list):
-                            print('pop0 from user_config')
+                            print("pop0 from user_config")
                             user_section_config = user_section_config[0]
                         local_config = user_section_config.get(command, None)
                         if local_config:
@@ -462,7 +462,7 @@ class WebHookHandler(MainHandler):
                     if "config" in everyone_section:
                         everyone_section_config = everyone_section.get("config", {})
                         if isinstance(everyone_section_config, list):
-                            print('pop0 from user_config')
+                            print("pop0 from user_config")
                             everyone_section_config = everyone_section_config[0]
                         local_config = everyone_section_config.get(command, None)
                         if local_config:

@@ -42,17 +42,18 @@ def replyuser(*, session, payload, arguments, local_config=None):
 
 @write
 def say(*, session, payload, arguments, local_config=None):
-    print('Oh, got local_config', local_config )
+    print("Oh, got local_config", local_config)
     comment_url = payload["issue"]["comments_url"]
     session.post_comment(comment_url, "".join(arguments))
+
 
 @write
 def debug(*, session, payload, arguments, local_config=None):
     print("DEBUG")
-    print('session', session)
-    print('payload', payload)
-    print('arguments', arguments)
-    print('local_config', local_config)
+    print("session", session)
+    print("payload", payload)
+    print("arguments", arguments)
+    print("local_config", local_config)
 
 
 @everyone
@@ -708,23 +709,63 @@ def safe_backport(session, payload, arguments, local_config=None):
 @admin
 def tag(session, payload, arguments, local_config=None):
     "tag[, tag, [...] ]"
-    print('Got local config for tag: ', local_config)
+    print("Got local config for tag: ", local_config)
     org = payload["repository"]["owner"]["login"]
     repo = payload["repository"]["name"]
     num = payload.get("issue").get("number")
     url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
     tags = [arg.strip() for arg in arguments.split(",")]
+    to_apply = []
+    not_applied = []
+    try:
+        label_payload = session.ghrequest(
+            "GET", f"https://api.github.com/repos/{org}/{repo}/labels"
+        )
+        label_payload.raise_for_status()
+        know_labels = [label["name"] for label in label_payload.json()]
+
+        not_known_tags = [t for t in tags if t not in know_labels]
+        known_tags = [t for t in tags if t in know_labels]
+
+        # try to look at casing
+        nk = []
+        known_lower_normal = {l.lower(): l for l in know_labels}
+        for t in not not_known_tags:
+            target = known_lower_normal.get(t.lower())
+            if target:
+                known_tags.append(t)
+            else:
+                nk.append(t)
+
+        to_apply = known_tags
+        not_applied = nk
+    except Exception:
+        print(red + "something went wrong getting labels" + normal)
+        import traceback
+
+        traceback.print_exc()
     if local_config:
-        
-        only = set(local_config.get('only', []))
-        any_tags = local_config.get('any', False)
+        only = set(local_config.get("only", []))
+        any_tags = local_config.get("any", False)
         if any_tags:
-            print('not filtering, any tags set')
-        if only:
-            tags = [t for t in tags if t.lower() in only]
-            print('will only allow', tags )
-    if tags:
-        session.ghrequest("POST", url, json=tags)
+            print("not filtering, any tags set")
+        elif only:
+            allowed_tags = [t for t in to_apply if t.lower() in only]
+            not_allowed_tags = [t for t in to_apply if t.lower() not in only]
+
+            print("will only allow", allowed_tags)
+            print("will refuse", not_allowed_tags)
+            to_apply = allowed_tags
+            not_applied.extend(not_allowed_tags)
+    if to_apply:
+        session.ghrequest("POST", url, json=to_apply)
+    if not_applied:
+        comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
+        lf = "`,`".join(not_applied)
+        session.post_comment(
+            comment_url,
+            "'I was not able to apply the following labels: `{lf}`, either because they are do not already exist or because you do not have the permission",
+        )
 
 
 @admin
