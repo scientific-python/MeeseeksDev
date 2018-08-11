@@ -605,29 +605,37 @@ def safe_backport(session, payload, arguments, local_config=None):
                     
 There seem to be a conflict, please backport manually. Here are approximate instructions:
 
-Checkout backport branch and update it.
+1. Checkout backport branch and update it.
                     
 ```
 $ git checkout {target_branch}
 $ git pull
 ```
 
-Cherry pick the first parent branch of the this PR on top of the older branch:
+2. Cherry pick the first parent branch of the this PR on top of the older branch:
 ```
 $ git cherry-pick -m1 {merge_sha}
 ```
 
-You will likely have some merge/cherry-pick conflict here, fix them and commit:
+3. You will likely have some merge/cherry-pick conflict here, fix them and commit:
 
 ```
 $ git commit -am {msg!r}
 ```
 
-And push to a named branch :
+4. Push to a named branch :
 
 ```
 git push YOURFORK {target_branch}:{remote_submit_branch}
 ```
+
+5. Create a PR against branch {target_branch}, I would have named this PR:
+
+> "Backport PR #{prnumber} on branch {target_branch}"
+
+And apply the correct labels and milestones.
+
+Congratulation you did some good work ! Hopefully your backport PR will be tested by the continuous integration and merged soon!
 
 If these instruction are inaccurate, feel free to [suggest an improvement](https://github.com/MeeseeksBox/MeeseeksDev).
                 """,
@@ -699,7 +707,7 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
             "POST",
             "https://api.github.com/repos/{}/{}/pulls".format(org_name, repo_name),
             json={
-                "title": "Backport PR #%i on branch %s" % (prnumber, target_branch),
+                "title": f"Backport PR #{prnumber} on branch {target_branch}",
                 "body": msg,
                 "head": "{}:{}".format(
                     session.personnal_account_name, remote_submit_branch
