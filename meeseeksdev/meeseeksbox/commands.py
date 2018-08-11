@@ -782,9 +782,13 @@ def untag(session, payload, arguments, local_config=None):
     url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels/{name}".format(
         **locals()
     )
+    no_untag = []
     for tag in tags:
-        session.ghrequest("DELETE", url.format(name=tag))
-
+        try:
+            session.ghrequest("DELETE", url.format(name=tag))
+        except Exception:
+            no_untag.append('tag')
+                
 
 @write
 def migrate_issue_request(
