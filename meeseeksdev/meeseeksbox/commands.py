@@ -43,7 +43,7 @@ def replyuser(*, session, payload, arguments, local_config=None):
 @write
 def say(*, session, payload, arguments, local_config=None):
     print("Oh, got local_config", local_config)
-    comment_url = payload["issue"]["comments_url"]
+    comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
     session.post_comment(comment_url, "".join(arguments))
 
 
@@ -58,14 +58,14 @@ def debug(*, session, payload, arguments, local_config=None):
 
 @everyone
 def party(*, session, payload, arguments, local_config=None):
-    comment_url = payload["issue"]["comments_url"]
+    comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
     parrot = "![party parrot](http://cultofthepartyparrot.com/parrots/hd/parrot.gif)"
     session.post_comment(comment_url, parrot * 10)
 
 
 @everyone
 def zen(*, session, payload, arguments, local_config=None):
-    comment_url = payload["issue"]["comments_url"]
+    comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
     session.post_comment(
         comment_url,
         dedent(
