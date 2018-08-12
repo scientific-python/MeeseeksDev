@@ -16,6 +16,7 @@ import tornado.httpserver
 import tornado.ioloop
 
 from .utils import Authenticator
+from .utils import ACCEPT_HEADER_SYMMETRA
 from .scopes import Permission
 
 from yieldbreaker import YieldBreaker
@@ -280,15 +281,20 @@ class WebHookHandler(MainHandler):
                     merged_by = is_pr.get("merged_by")
                     if merged_by:
                         try:
-                            raw_labels = is_pr.get('labels',[])
+                            raw_labels = is_pr.get("labels", [])
                             if raw_labels:
                                 installation_id = payload["installation"]["id"]
                                 session = self.auth.session(installation_id)
                                 for raw_label in raw_labels:
-                                    label = session.ghrequest('GET', raw_label.get('url', '')).json()
-                                    print(green,label)
+                                    label = session.ghrequest(
+                                        "GET",
+                                        raw_label.get("url", ""),
+                                        override_accept_header=ACCEPT_HEADER_SYMMETRA,
+                                    ).json()
+                                    print(green, label)
                         except:
                             import traceback
+
                             traceback.print_exc()
                         milestone = is_pr.get("milestone", {})
                         if milestone:

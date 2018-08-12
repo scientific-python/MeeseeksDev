@@ -19,6 +19,7 @@ API_COLLABORATORS_TEMPLATE = (
 )
 ACCEPT_HEADER = "application/vnd.github.machine-man-preview"
 ACCEPT_HEADER_KORA = "json,application/vnd.github.korra-preview"
+ACCEPT_HEADER_SYMMETRA = "application/vnd.github.symmetra-preview+json"
 
 """
 Regular expression to relink issues/pr comments correctly.
