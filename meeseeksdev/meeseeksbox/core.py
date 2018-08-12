@@ -292,7 +292,9 @@ class WebHookHandler(MainHandler):
                                         override_accept_header=ACCEPT_HEADER_SYMMETRA,
                                     ).json()
                                     print(green, label)
-                                    description += '\n'+label.get('description', '')
+                                    description += "\n" + label.get(
+                                        "description", ""
+                                    ).replace("&", "\n")
                         except:
                             import traceback
 
@@ -306,6 +308,7 @@ class WebHookHandler(MainHandler):
                         ):
                             did_backport = False
                             for l in description.splitlines():
+                                l = l.strip()
                                 if l.startswith("on-merge:"):
                                     todo = l[len("on-merge:") :].strip()
                                     self.dispatch_on_mention(
