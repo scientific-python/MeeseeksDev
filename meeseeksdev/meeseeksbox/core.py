@@ -275,7 +275,7 @@ class WebHookHandler(MainHandler):
         else:
             if type_ == "closed":
                 is_pr = payload.get("pull_request", {})
-                print(blue+is_pr+normal)
+                print(yellow+is_pr+normal)
                 if is_pr:
                     merged_by = is_pr.get("merged_by")
                     if merged_by:
