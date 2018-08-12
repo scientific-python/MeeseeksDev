@@ -276,10 +276,10 @@ class WebHookHandler(MainHandler):
         else:
             if type_ == "closed":
                 is_pr = payload.get("pull_request", {})
-                print(yellow, is_pr, normal)
                 if is_pr:
                     merged_by = is_pr.get("merged_by")
                     if merged_by:
+                        description = ""
                         try:
                             raw_labels = is_pr.get("labels", [])
                             if raw_labels:
@@ -292,15 +292,14 @@ class WebHookHandler(MainHandler):
                                         override_accept_header=ACCEPT_HEADER_SYMMETRA,
                                     ).json()
                                     print(green, label)
+                                    description += '\n'+label.get('description', '')
                         except:
                             import traceback
 
                             traceback.print_exc()
                         milestone = is_pr.get("milestone", {})
                         if milestone:
-                            description = milestone.get("description")
-                        else:
-                            description = ""
+                            description += milestone.get("description")
                         if (
                             "on-merge:" in description
                             and is_pr["base"]["ref"] == "master"
