@@ -292,9 +292,11 @@ class WebHookHandler(MainHandler):
                                         override_accept_header=ACCEPT_HEADER_SYMMETRA,
                                     ).json()
                                     print(green, label)
-                                    description += "\n" + label.get(
-                                        "description", ""
-                                    ).replace("&", "\n")
+                                    label_desc = label.get("description", "")
+                                    # apparently can still be none-like ?
+                                    if not label_desc:
+                                        label_desc = ''
+                                    description += "\n" + label_desc.replace("&", "\n")
                         except:
                             import traceback
 
