@@ -291,7 +291,6 @@ class WebHookHandler(MainHandler):
                                         raw_label.get("url", ""),
                                         override_accept_header=ACCEPT_HEADER_SYMMETRA,
                                     ).json()
-                                    print(green, label)
                                     label_desc = label.get("description", "")
                                     # apparently can still be none-like ?
                                     if not label_desc:
