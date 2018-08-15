@@ -746,7 +746,7 @@ def tag(session, payload, arguments, local_config=None):
     print("Got local config for tag: ", local_config)
     org = payload["repository"]["owner"]["login"]
     repo = payload["repository"]["name"]
-    num = payload.get("issue", paylaod.get('pull_request')).get("number")
+    num = payload.get("issue", payload.get('pull_request')).get("number")
     url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
     tags = [arg.strip() for arg in arguments.split(",")]
     to_apply = []
