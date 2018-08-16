@@ -206,7 +206,7 @@ class WebHookHandler(MainHandler):
             issue = payload.get("issue", None)
             if not issue:
                 pr_number = payload.get('pull_request', {}).get('number', None)
-                print(f"({repo}) request has no issue key., likely a PR ?: {pr_number}")
+                print(f"({repo}) request for 'opened' has no issue key, likely a PR ?: {pr_number}")
                 return self.finish("Not really good, request has no issue")
             if issue:
                 user = payload["issue"]["user"]["login"]
