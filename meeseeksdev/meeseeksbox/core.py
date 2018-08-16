@@ -205,8 +205,10 @@ class WebHookHandler(MainHandler):
         if type_ == "opened":
             issue = payload.get("issue", None)
             if not issue:
-                pr_number = payload.get('pull_request', {}).get('number', None)
-                print(f"({repo}) request for 'opened' has no issue key, likely a PR ?: {pr_number}")
+                pr_number = payload.get("pull_request", {}).get("number", None)
+                print(
+                    f"({repo}) request for 'opened' has no issue key, likely a PR ?: {pr_number}"
+                )
                 return self.finish("Not really good, request has no issue")
             if issue:
                 user = payload["issue"]["user"]["login"]
@@ -292,7 +294,7 @@ class WebHookHandler(MainHandler):
                                     label_desc = label.get("description", "")
                                     # apparently can still be none-like ?
                                     if not label_desc:
-                                        label_desc = ''
+                                        label_desc = ""
                                     description += "\n" + label_desc.replace("&", "\n")
                         except:
                             import traceback
