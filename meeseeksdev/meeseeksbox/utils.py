@@ -189,10 +189,7 @@ class Session(Authenticator):
 
     def regen_token(self):
         method = "POST"
-        url = (
-            "https://api.github.com/app/%s/access_tokens"
-            % self.installation_id
-        )
+        url = f"https://api.github.com/app/installations/{self.installation_id}/access_tokens"
         resp = self._integration_authenticated_request(method, url)
         try:
             self._token = json.loads(resp.content.decode())["token"]
@@ -230,7 +227,7 @@ class Session(Authenticator):
         json=None,
         *,
         override_accept_header=None,
-        raise_for_status=True
+        raise_for_status=True,
     ):
         accept = ACCEPT_HEADER
         if override_accept_header:
