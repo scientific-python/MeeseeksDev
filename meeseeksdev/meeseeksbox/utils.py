@@ -190,7 +190,7 @@ class Session(Authenticator):
     def regen_token(self):
         method = "POST"
         url = (
-            "https://api.github.com/installations/%s/access_tokens"
+            "https://api.github.com/app/%s/access_tokens"
             % self.installation_id
         )
         resp = self._integration_authenticated_request(method, url)
