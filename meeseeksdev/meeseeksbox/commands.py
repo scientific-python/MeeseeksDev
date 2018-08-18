@@ -454,6 +454,22 @@ def safe_backport(session, payload, arguments, local_config=None):
     repo_name = payload["repository"]["name"]
     comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
     try:
+        existing_branches = session.ghrequest(
+            "GET", "https://api.github.com/repos/{org_name}/{repositories}/branches"
+        )
+        existing_branches_names = {b["name"] for b in existing_branches}
+        if target_branch not in existing_branches_names:
+            print(
+                red
+                + f"Request to backport to `{target_branch}`, which does not seem to exist. Known : {existing_branches_names}"
+            )
+        else:
+            print(green + f"found branch {target_branch}")
+    except Exception:
+        import traceback
+
+        traceback.print_exc()
+    try:
 
         # collect extended payload on the PR
         print("== Collecting data on Pull-request...")
