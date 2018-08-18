@@ -454,6 +454,7 @@ def safe_backport(session, payload, arguments, local_config=None):
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
     comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
+    maybe_wrong_named_branch = False
     try:
         existing_branches = session.ghrequest(
             "GET", f"https://api.github.com/repos/{org_name}/{repo_name}/branches"
@@ -464,6 +465,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 red
                 + f"Request to backport to `{target_branch}`, which does not seem to exist. Known : {existing_branches_names}"
             )
+            maybe_wrong_named_branch = True
         else:
             print(green + f"found branch {target_branch}")
     except Exception:
@@ -751,8 +753,11 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
         )
         # print(resp.json())
     except Exception as e:
+        extra_info = ''
+        if maybe_wrong_named_branch:
+            extra_info = "It seem that the branch you are trying to backport to  does not exists."
         session.post_comment(
-            comment_url, "Something went wrong ... Please have  a look at my logs."
+            comment_url, "Something went wrong ... Please have  a look at my logs."+ extra_info
         )
         keen.add_event("error", {"unknown_crash": 1})
         print("Something went wrong")
