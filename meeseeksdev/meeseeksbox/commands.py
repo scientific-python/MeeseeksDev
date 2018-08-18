@@ -499,8 +499,12 @@ def safe_backport(session, payload, arguments, local_config=None):
             infered_target_branch = ".".join(parts)
             print("inferring branch....", infered_target_branch)
             target_branch = infered_target_branch
+            special_case_matpltolib = False
             if org_name == "matplotlib" and repo_name == "matplotlib":
+                special_case_matpltolib = True
                 target_branch = "v" + target_branch
+            keen.add_event("backport_special_case_matpltolib", {"prepend_v": special_case_matpltolib})
+
 
         if milestone_number:
             milestone_number = int(milestone_number)
