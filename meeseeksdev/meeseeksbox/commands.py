@@ -456,7 +456,7 @@ def safe_backport(session, payload, arguments, local_config=None):
     comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
     try:
         existing_branches = session.ghrequest(
-            "GET", "https://api.github.com/repos/{org_name}/{repositories}/branches"
+            "GET", f"https://api.github.com/repos/{org_name}/{repositories}/branches"
         )
         existing_branches_names = {b["name"] for b in existing_branches}
         if target_branch not in existing_branches_names:
