@@ -457,7 +457,7 @@ def safe_backport(session, payload, arguments, local_config=None):
     try:
         existing_branches = session.ghrequest(
             "GET", f"https://api.github.com/repos/{org_name}/{repo_name}/branches"
-        )
+        ).json()
         existing_branches_names = {b["name"] for b in existing_branches}
         if target_branch not in existing_branches_names:
             print(
