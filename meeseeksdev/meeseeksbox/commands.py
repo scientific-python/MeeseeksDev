@@ -436,6 +436,7 @@ def backport(session, payload, arguments, local_config=None):
 @write
 def safe_backport(session, payload, arguments, local_config=None):
     """[to] {branch}"""
+
     if arguments is None:
         arguments = ""
     target_branch = arguments
@@ -503,14 +504,18 @@ def safe_backport(session, payload, arguments, local_config=None):
             if org_name == "matplotlib" and repo_name == "matplotlib":
                 special_case_matpltolib = True
                 target_branch = "v" + target_branch
-            keen.add_event("backport_special_case_matpltolib", {"prepend_v": special_case_matpltolib})
-
+            keen.add_event(
+                "backport_special_case_matpltolib",
+                {"prepend_v": special_case_matpltolib},
+            )
 
         if milestone_number:
             milestone_number = int(milestone_number)
         labels_names = []
         try:
-            labels_names = [l["name"] for l in payload["issue"]["labels"]]
+            label_names = [l["name"] for l in pr_data["labels"]]
+            if not label_names:
+                labels_names = [l["name"] for l in payload["issue"]["labels"]]
         except KeyError:
             print("Did not find labels|", pr_data)
         # clone locally
