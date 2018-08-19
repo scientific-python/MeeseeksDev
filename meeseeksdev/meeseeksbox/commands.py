@@ -271,7 +271,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 special_case_matpltolib = True
                 target_branch = "v" + target_branch
             keen.add_event(
-                "backport_special_case_matpltolib",
+                "backport_special_case_matplotlib",
                 {"prepend_v": special_case_matpltolib},
             )
 
