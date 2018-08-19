@@ -106,7 +106,6 @@ from .meeseeksbox.core import Config
 from .meeseeksbox.commands import (
     replyuser,
     zen,
-    backport,
     tag,
     untag,
     pep8ify,
