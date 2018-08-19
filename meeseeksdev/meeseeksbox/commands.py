@@ -753,11 +753,12 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
         )
         # print(resp.json())
     except Exception as e:
-        extra_info = ''
+        extra_info = ""
         if maybe_wrong_named_branch:
             extra_info = "\n\n It seem that the branch you are trying to backport to  does not exists."
         session.post_comment(
-            comment_url, "Something went wrong ... Please have  a look at my logs."+ extra_info
+            comment_url,
+            "Something went wrong ... Please have  a look at my logs." + extra_info,
         )
         keen.add_event("error", {"unknown_crash": 1})
         print("Something went wrong")

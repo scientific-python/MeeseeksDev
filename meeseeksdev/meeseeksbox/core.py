@@ -305,7 +305,7 @@ class WebHookHandler(MainHandler):
                         if milestone:
                             e = milestone.get("description", "")
                             if not e:
-                                e = ''
+                                e = ""
                             description += e
                         if (
                             "on-merge:" in description
