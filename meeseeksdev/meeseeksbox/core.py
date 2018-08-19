@@ -303,7 +303,10 @@ class WebHookHandler(MainHandler):
                             traceback.print_exc()
                         milestone = is_pr.get("milestone", {})
                         if milestone:
-                            description += milestone.get("description", "")
+                            e = milestone.get("description", "")
+                            if not e:
+                                e = ''
+                            description += e
                         if (
                             "on-merge:" in description
                             and is_pr["base"]["ref"] == "master"
