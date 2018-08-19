@@ -471,7 +471,6 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
 
         # Push the backported work
         print("== Pushing work....:")
-        repo.remotes.origin.push("workbranch:{}".format(remote_submit_branch))
         try:
             print(
                 f"Tryign to push to {remote_submit_branch} of {session.personnal_account_name}"
@@ -480,6 +479,8 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
                 "workbranch:{}".format(remote_submit_branch)
             )
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print("could not push to self remote")
             print(e)
         repo.git.checkout("master")
