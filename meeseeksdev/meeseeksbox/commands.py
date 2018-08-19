@@ -480,6 +480,7 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
             )
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             print("could not push to self remote")
             print(e)
