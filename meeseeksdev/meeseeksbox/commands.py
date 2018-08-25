@@ -9,6 +9,7 @@ import git
 import pipes
 import mock
 import keen
+import time
 
 import sys
 from textwrap import dedent
@@ -201,6 +202,31 @@ def pep8ify(*, session, payload, arguments, local_config=None):
 def safe_backport(session, payload, arguments, local_config=None):
     """[to] {branch}"""
 
+    s_clone_time = 0
+    s_success = False
+    s_reason = "unknown"
+    s_fork_time = 0
+    s_clean_time = 0
+
+    def keen_stats():
+        nonlocal s_slug
+        nonlocal s_clone_time
+        nonlocal s_success
+        nonlocal s_reason
+        nonlocal s_fork_time
+        nonlocal s_clean_time
+        keen.add_event(
+            "backport_stats",
+            {
+                "slug": s_slug,
+                "clone_time": s_clone_time,
+                "fork_time": s_fork_time,
+                "clean_time": s_clean_time,
+                "success": s_success,
+                "reason": s_reason,
+            },
+        )
+
     if arguments is None:
         arguments = ""
     target_branch = arguments
@@ -219,6 +245,7 @@ def safe_backport(session, payload, arguments, local_config=None):
     repo_name = payload["repository"]["name"]
     comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
     maybe_wrong_named_branch = False
+    s_slug = f"{org_name}/{repo_name}"
     try:
         existing_branches = session.ghrequest(
             "GET", f"https://api.github.com/repos/{org_name}/{repo_name}/branches"
@@ -236,6 +263,8 @@ def safe_backport(session, payload, arguments, local_config=None):
         import traceback
 
         traceback.print_exc()
+        s_reason = "Exception line 256"
+        keen_stats()
     try:
 
         # collect extended payload on the PR
@@ -289,6 +318,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         atk = session.token()
 
         # FORK it.
+        fork_epoch = time.clock()
         frk = session.personal_request(
             "POST", f"https://api.github.com/repos/{org_name}/{repo_name}/forks"
         ).json()
@@ -298,14 +328,17 @@ def safe_backport(session, payload, arguments, local_config=None):
             if ff.status_code == 200:
                 keen.add_event("fork_wait", {"n": i})
                 break
-            import time
-
             time.sleep(1)
+        s_fork_time = time.clock() - fork_epoch
 
+        clean_epoch = time.clock()
         if os.path.exists(repo_name):
             print("== Cleaning up previsous work... ")
             subprocess.run("rm -rf {}".format(repo_name).split(" "))
             print("== Done cleaning ")
+        s_clean_time = time.clock() - clean_epoch()
+
+        clone_epoch = time.clock()
 
         print("== Cloning current repository, this can take some time..")
         process = subprocess.run(
@@ -317,6 +350,8 @@ def safe_backport(session, payload, arguments, local_config=None):
                 ),
             ]
         )
+
+        s_clone_time = time.clock() - clone_epoch
         process = subprocess.run(
             [
                 "git",
@@ -382,6 +417,8 @@ def safe_backport(session, payload, arguments, local_config=None):
                 print("----")
                 print(e.stdout)
                 print("----")
+                s_reason = "empty commit"
+                keen_stats()
                 return
             elif "after resolving the conflicts" in e.stderr:
                 cmd = " ".join(pipes.quote(arg) for arg in sys.argv)
@@ -440,6 +477,8 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
                     "POST", url, json=["Still Needs Manual Backport"]
                 )
                 print("Should be applied:", reply)
+                s_reason = "conflicts"
+                keen_stats()
                 return
             else:
                 session.post_comment(
@@ -450,6 +489,8 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
                 print("----")
                 print(e.stdout)
                 print("----")
+                s_reason = "Unknow error line 491"
+                keen_stats()
                 return
         except Exception as e:
             session.post_comment(
@@ -458,6 +499,8 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
             print("\n" + e.stderr.decode("utf8", "replace"), file=sys.stderr)
             print("\n" + repo.git.status(), file=sys.stderr)
             keen.add_event("error", {"git_crash": 1})
+            s_reason = "Unknown error line 501"
+            keen_stats()
 
             return
 
@@ -483,11 +526,14 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
 
             traceback.print_exc()
             print("could not push to self remote")
+            s_reason = "Could not push"
+            keen_stats()
+            # TODO comment on issue
             print(e)
         repo.git.checkout("master")
         repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
-        # ToDO checkout master and get rid of branch
+        # TODO checkout master and get rid of branch
 
         # Make the PR on GitHub
         print(
@@ -529,11 +575,16 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
         keen.add_event("error", {"unknown_crash": 1})
         print("Something went wrong")
         print(e)
+        s_reason = "Remote branches does not exists"
+        keen_stats()
         raise
 
     resp.raise_for_status()
 
     print("Backported as PR", new_number)
+    s_reason = "Sucess"
+    s_success = True
+    keen_stats()
     return new_pr
 
 
