@@ -336,7 +336,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             print("== Cleaning up previsous work... ")
             subprocess.run("rm -rf {}".format(repo_name).split(" "))
             print("== Done cleaning ")
-        s_clean_time = time.clock() - clean_epoch()
+        s_clean_time = time.clock() - clean_epoch
 
         clone_epoch = time.clock()
 
