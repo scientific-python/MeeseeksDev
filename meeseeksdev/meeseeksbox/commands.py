@@ -318,7 +318,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         atk = session.token()
 
         # FORK it.
-        fork_epoch = time.clock()
+        fork_epoch = time.time()
         frk = session.personal_request(
             "POST", f"https://api.github.com/repos/{org_name}/{repo_name}/forks"
         ).json()
@@ -329,16 +329,16 @@ def safe_backport(session, payload, arguments, local_config=None):
                 keen.add_event("fork_wait", {"n": i})
                 break
             time.sleep(1)
-        s_fork_time = time.clock() - fork_epoch
+        s_fork_time = time.time() - fork_epoch
 
-        clean_epoch = time.clock()
+        clean_epoch = time.time()
         if os.path.exists(repo_name):
             print("== Cleaning up previsous work... ")
             subprocess.run("rm -rf {}".format(repo_name).split(" "))
             print("== Done cleaning ")
-        s_clean_time = time.clock() - clean_epoch
+        s_clean_time = time.time() - clean_epoch
 
-        clone_epoch = time.clock()
+        clone_epoch = time.time()
 
         print("== Cloning current repository, this can take some time..")
         process = subprocess.run(
@@ -351,7 +351,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             ]
         )
 
-        s_clone_time = time.clock() - clone_epoch
+        s_clone_time = time.time() - clone_epoch
         process = subprocess.run(
             [
                 "git",
