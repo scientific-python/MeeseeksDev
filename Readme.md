@@ -155,7 +155,7 @@ def zen(*, session, payload, arguments):
     session.post_comment(comment_url,
     dedent(
         """
-        Zen of Pyton ([pep 20](https://www.python.org/dev/peps/pep-0020/))
+        Zen of Python ([pep 20](https://www.python.org/dev/peps/pep-0020/))
         ```
         >>> import this
         Beautiful is better than ugly.

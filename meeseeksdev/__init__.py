@@ -93,7 +93,7 @@ def load_config_from_env():
 
     ## Despite their names, this are not __your__ account, but an account created
     # for some functionalities of mr-meeseeks. Indeed, github does not allow
-    # cross repositories pull-requests with Applications, so I use a peronal
+    # cross repositories pull-requests with Applications, so I use a personal
     # account just for that.
     config["personnal_account_name"] = os.environ.get("PERSONAL_ACCOUNT_NAME")
     config["personnal_account_token"] = os.environ.get("PERSONAL_ACCOUNT_TOKEN")

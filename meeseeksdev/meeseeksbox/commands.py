@@ -71,7 +71,7 @@ def zen(*, session, payload, arguments, local_config=None):
         comment_url,
         dedent(
             """
-        Zen of Pyton ([pep 20](https://www.python.org/dev/peps/pep-0020/))
+        Zen of Python ([pep 20](https://www.python.org/dev/peps/pep-0020/))
         ```
         >>> import this
         Beautiful is better than ugly.
@@ -136,7 +136,7 @@ def pep8ify(*, session, payload, arguments, local_config=None):
     repo_name = pr_data["head"]["repo"]["name"]
 
     # that will likely fail, as if PR, we need to bypass the fact that the
-    # requester has technically no access to commiter repo.
+    # requester has technically no access to committer repo.
     target_session = yield "{}/{}".format(author_login, repo_name)
     if not target_session:
         comment_url = payload["issue"]["comments_url"]
@@ -582,7 +582,7 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
     resp.raise_for_status()
 
     print("Backported as PR", new_number)
-    s_reason = "Sucess"
+    s_reason = "Success"
     s_success = True
     keen_stats()
     return new_pr

@@ -432,7 +432,7 @@ class WebHookHandler(MainHandler):
                 except Exception:
                     print(
                         red
-                        + "An error occured getting repository config file."
+                        + "An error occurred getting repository config file."
                         + normal
                     )
                     import traceback
