@@ -201,6 +201,8 @@ def pep8ify(*, session, payload, arguments, local_config=None):
 @write
 def safe_backport(session, payload, arguments, local_config=None):
     """[to] {branch}"""
+    import builtins
+    print = lambda *args, **kwargs: builtins.print('  [backport]', *args, **kwargs)
 
     s_clone_time = 0
     s_success = False
