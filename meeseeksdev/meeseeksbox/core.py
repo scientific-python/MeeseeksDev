@@ -168,7 +168,7 @@ class WebHookHandler(MainHandler):
             there.print(json.dumps(payload))
         if payload.get("commits"):
             # TODO
-            print(green, f"({repo}) commits were likely pushed....", normal)
+            print(green + f"(https://github.com/{repo}) commits were pushed", normal)
             return
 
         if action:
