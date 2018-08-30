@@ -229,6 +229,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 "fork_time": s_fork_time,
                 "clean_time": s_clean_time,
                 "success": s_success,
+                "fast_forward_opt_time": s_ff_time,
                 "reason": s_reason,
             },
         )
