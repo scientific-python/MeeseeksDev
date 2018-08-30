@@ -169,6 +169,7 @@ class WebHookHandler(MainHandler):
         if payload.get("commits"):
             # TODO
             print(green + f"(https://github.com/{repo}) commits were pushed", normal)
+            self.finish("commits were pushed to {repo}")
             return
 
         if action:
@@ -187,7 +188,9 @@ class WebHookHandler(MainHandler):
                 "push",
                 "create",
             }:
-                print(f"({repo}) Not handling event type", event_type, "yet.")
+                print(
+                    f"(https://github.com/{repo}) Not handling event type `{event_type}` yet."
+                )
                 return self.finish()
 
             print(f"({repo}) No action available for the webhook :", event_type)
