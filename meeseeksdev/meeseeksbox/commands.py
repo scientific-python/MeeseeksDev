@@ -23,6 +23,7 @@ from .scopes import admin, everyone, write
 green = "\033[0;32m"
 yellow = "\033[0;33m"
 red = "\033[0;31m"
+blue = "\x1b[0;34m"
 normal = "\033[0m"
 
 
@@ -202,13 +203,15 @@ def pep8ify(*, session, payload, arguments, local_config=None):
 def safe_backport(session, payload, arguments, local_config=None):
     """[to] {branch}"""
     import builtins
-    print = lambda *args, **kwargs: builtins.print('  [backport]', *args, **kwargs)
+
+    print = lambda *args, **kwargs: builtins.print("  [backport]", *args, **kwargs)
 
     s_clone_time = 0
     s_success = False
     s_reason = "unknown"
     s_fork_time = 0
     s_clean_time = 0
+    s_ff_time = 0
 
     def keen_stats():
         nonlocal s_slug
@@ -217,6 +220,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         nonlocal s_reason
         nonlocal s_fork_time
         nonlocal s_clean_time
+        nonlocal s_ff_time
         keen.add_event(
             "backport_stats",
             {
@@ -297,10 +301,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             infered_target_branch = ".".join(parts)
             print("inferring branch....", infered_target_branch)
             target_branch = infered_target_branch
-            keen.add_event(
-                "backport_infering_branch",
-                {"infering_remove_x": 1},
-            )
+            keen.add_event("backport_infering_branch", {"infering_remove_x": 1})
 
         if milestone_number:
             milestone_number = int(milestone_number)
@@ -330,6 +331,38 @@ def safe_backport(session, payload, arguments, local_config=None):
         s_fork_time = time.time() - fork_epoch
 
         clean_epoch = time.time()
+
+        ## optimize-fetch-experiment
+        print("Attempting FF")
+        if os.path.exists(repo_name):
+            try:
+                re_fetch_epoch = time.time()
+                subprocess.run(
+                    [
+                        "git",
+                        "remote",
+                        "set-url",
+                        "origin",
+                        f"https://x-access-token:{atk}@github.com/{org_name}/{repo_name}",
+                    ],
+                    cwd=repo_name,
+                ).check_returncode()
+
+                repo = git.Repo(repo_name)
+                repo.remotes.origin.fetch("master")
+                subprocess.run(
+                    ["git", "reset", "--hard", "origin/master"], cwd=repo_name
+                )
+                subprocess.run(["git", "describe", "--tag"], cwd=repo_name)
+                re_fetch_delta = time.time() - re_fetch_epoch
+                print(blue + f"FF took {re_fetch_delta}s")
+                s_ff_time = re_fetch_delta
+            except Exception as e:
+                import traceback
+
+                sys.print_exc()
+        ## end optimise-fetch-experiment
+
         if os.path.exists(repo_name):
             print("== Cleaning up previsous work... ")
             subprocess.run("rm -rf {}".format(repo_name).split(" "))
