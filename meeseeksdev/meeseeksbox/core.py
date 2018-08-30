@@ -207,9 +207,7 @@ class WebHookHandler(MainHandler):
             issue = payload.get("issue", None)
             if not issue:
                 pr_number = payload.get("pull_request", {}).get("number", None)
-                print(
-                    f"({repo}) request for 'opened' has no issue key, likely a PR ?: {pr_number}"
-                )
+                print(green + f"(https://github.com/{repo}/pull/{pr_number}) `opened`.")
                 return self.finish("Not really good, request has no issue")
             if issue:
                 user = payload["issue"]["user"]["login"]
@@ -250,10 +248,16 @@ class WebHookHandler(MainHandler):
             if comment:
                 user = payload["comment"]["user"]["login"]
                 if user == botname.lower() + "[bot]":
-                    print(f"({repo}/{what}/{number}) Not responding to self")
+                    print(
+                        green
+                        + f"(https://github.com/{repo}/{what}/{number}) Not responding to self"
+                    )
                     return self.finish("Not responding to self")
                 if "[bot]" in user:
-                    print(f"({repo}/{what}/{number}) Not responding to another bot")
+                    print(
+                        green
+                        + f"(https://github.com/{repo}/{what}/{number}) Not responding to another bot ({user})"
+                    )
                     return self.finish("Not responding to another bot")
                 body = payload["comment"]["body"]
                 if self.mention_bot_re.findall(body) or ("!msbox" in body):
