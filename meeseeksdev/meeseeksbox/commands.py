@@ -521,7 +521,7 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
                 print("----")
                 print(e.stdout)
                 print("----")
-                s_reason = "Unknow error line 491"
+                s_reason = "Unknown error line 491"
                 keen_stats()
                 return
         except Exception as e:
