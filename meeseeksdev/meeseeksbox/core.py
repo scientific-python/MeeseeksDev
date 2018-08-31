@@ -296,7 +296,7 @@ class WebHookHandler(MainHandler):
                 merged = is_pr.get("merged", None)
                 action = is_pr.get("action", None)
                 if is_pr:
-                    merged_by = is_pr.get("merged_by")
+                    merged_by = is_pr.get("merged_by", {})
                     login = merged_by.get('login')
                     print(
                         green
