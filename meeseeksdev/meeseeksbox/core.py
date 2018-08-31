@@ -172,7 +172,6 @@ class WebHookHandler(MainHandler):
             num = payload.get("size")
             ref = payload.get("ref")
             by = payload.get("pusher", {}).get("name")
-            print(yellow + str(list(payload.keys())))
             print(
                 green
                 + f"(https://github.com/{repo}) `{num}` commit(s) were pushed to `{ref}` by `{by}` – type: {etype}"
