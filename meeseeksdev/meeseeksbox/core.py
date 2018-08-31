@@ -296,9 +296,10 @@ class WebHookHandler(MainHandler):
                 action = is_pr.get("action", None)
                 if is_pr:
                     merged_by = is_pr.get("merged_by")
+                    login = merged_by.get('login')
                     print(
                         green
-                        + f"(https://github.com/{repo}/pull/{num}) merged (action: {action}, merged:{merged}) by {merged_by}"
+                        + f"(https://github.com/{repo}/pull/{num}) merged (action: {action}, merged:{merged}) by {login}"
                     )
                     if merged_by:
                         description = ""
