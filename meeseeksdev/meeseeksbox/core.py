@@ -168,13 +168,14 @@ class WebHookHandler(MainHandler):
             there.print(json.dumps(payload))
         if payload.get("commits"):
             # TODO
+            etype = self.request.headers.get("X-GitHub-Event")
             num = payload.get("size")
             ref = payload.get("ref")
             by = payload.get("pusher", {}).get("name")
             print(yellow + str(list(payload.keys())))
             print(
                 green
-                + f"(https://github.com/{repo}) `{num}` commit(s) were pushed to `{ref}` by `{by}`"
+                + f"(https://github.com/{repo}) `{num}` commit(s) were pushed to `{ref}` by `{by}` – type: {etype}"
             )
             self.finish("commits were pushed to {repo}")
             return
