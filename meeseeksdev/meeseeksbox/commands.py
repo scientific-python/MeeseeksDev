@@ -578,7 +578,7 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
             "POST",
             "https://api.github.com/repos/{}/{}/pulls".format(org_name, repo_name),
             json={
-                "title": f"Backport PR #{prnumber} on branch {target_branch}",
+                "title": f"Backport PR #{prnumber} on branch {target_branch} ({prtitle})",
                 "body": msg,
                 "head": "{}:{}".format(
                     session.personnal_account_name, remote_submit_branch
