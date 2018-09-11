@@ -90,8 +90,9 @@ def load_config_from_env():
     config["at_botname"] = at_botname
     config["integration_id"] = integration_id
     config["webhook_secret"] = os.environ.get("WEBHOOK_SECRET")
+    config["port"] = int(os.environ.get("PORT", 5000))
 
-    ## Despite their names, this are not __your__ account, but an account created
+    # Despite their names, this are not __your__ account, but an account created
     # for some functionalities of mr-meeseeks. Indeed, github does not allow
     # cross repositories pull-requests with Applications, so I use a personal
     # account just for that.

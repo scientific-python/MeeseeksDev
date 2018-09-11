@@ -1,8 +1,6 @@
 import re
-import os
 import hmac
 import time
-import datetime
 import inspect
 
 import yaml
@@ -162,7 +160,6 @@ class WebHookHandler(MainHandler):
         unknown_repo = red + "<unknown repo>" + normal
         repo = payload.get("repository", {}).get("full_name", unknown_repo)
         if repo == unknown_repo:
-            import json
             import there
 
             there.print(json.dumps(payload))
@@ -252,7 +249,6 @@ class WebHookHandler(MainHandler):
                 number = issue.get("number", no_issue_number)
 
             if number is no_issue_number:
-                import json
 
                 print(list(payload.keys()))
             if comment:
@@ -298,7 +294,7 @@ class WebHookHandler(MainHandler):
                     merged_by = is_pr.get("merged_by", {})
                     if merged_by is None:
                         merged_by = {}
-                    login = merged_by.get('login')
+                    login = merged_by.get("login")
                     print(
                         green
                         + f"(https://github.com/{repo}/pull/{num}) merged (action: {action}, merged:{merged}) by {login}"
@@ -336,10 +332,10 @@ class WebHookHandler(MainHandler):
                             and is_pr["base"]["ref"] == "master"
                         ):
                             did_backport = False
-                            for l in description.splitlines():
-                                l = l.strip()
-                                if l.startswith("on-merge:"):
-                                    todo = l[len("on-merge:") :].strip()
+                            for description_line in description.splitlines():
+                                line = description_line.strip()
+                                if line.startswith("on-merge:"):
+                                    todo = line[len("on-merge:") :].strip()
                                     self.dispatch_on_mention(
                                         "@meeseeksdev " + todo,
                                         payload,
@@ -608,9 +604,9 @@ class MeeseeksBox:
 
         keen.add_event("status", {"state": "starting"})
         self.commands = commands
-        self.port = int(os.environ.get("PORT", 5000))
         self.application = None
         self.config = config
+        self.port = config.port
         self.auth = Authenticator(
             self.config.integration_id,
             self.config.key,
