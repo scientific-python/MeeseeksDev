@@ -337,6 +337,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         if os.path.exists(repo_name):
             try:
                 re_fetch_epoch = time.time()
+                print('FF: Git set-url origin')
                 subprocess.run(
                     [
                         "git",
@@ -349,10 +350,13 @@ def safe_backport(session, payload, arguments, local_config=None):
                 ).check_returncode()
 
                 repo = git.Repo(repo_name)
+                print('FF: Git fetch master')
                 repo.remotes.origin.fetch("master")
+                print('FF: Reset hard origin/master')
                 subprocess.run(
                     ["git", "reset", "--hard", "origin/master"], cwd=repo_name
-                )
+                ).check_returncode()
+                print('FF: Git describe tags....')
                 subprocess.run(["git", "describe", "--tag"], cwd=repo_name)
                 re_fetch_delta = time.time() - re_fetch_epoch
                 print(blue + f"FF took {re_fetch_delta}s")
