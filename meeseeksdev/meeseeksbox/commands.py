@@ -331,7 +331,6 @@ def safe_backport(session, payload, arguments, local_config=None):
             time.sleep(1)
         s_fork_time = time.time() - fork_epoch
 
-        clean_epoch = time.time()
 
         ## optimize-fetch-experiment
         print("Attempting FF")
@@ -364,37 +363,45 @@ def safe_backport(session, payload, arguments, local_config=None):
                 sys.print_exc()
         ## end optimise-fetch-experiment
 
-        if os.path.exists(repo_name):
-            print("== Cleaning up previsous work... ")
-            subprocess.run("rm -rf {}".format(repo_name).split(" "))
-            print("== Done cleaning ")
+        clean_epoch = time.time()
+
+        # if os.path.exists(repo_name):
+            # print("== Cleaning up previsous work... ")
+            # subprocess.run("rm -rf {}".format(repo_name).split(" "))
+            # print("== Done cleaning ")
         s_clean_time = time.time() - clean_epoch
 
         clone_epoch = time.time()
-
-        print("== Cloning current repository, this can take some time..")
-        process = subprocess.run(
-            [
-                "git",
-                "clone",
-                "https://x-access-token:{}@github.com/{}/{}".format(
-                    atk, org_name, repo_name
-                ),
-            ]
-        )
+        action = 'set-url'
+        what_was_done = 'Fast-Forwarded'
+        if not os.path.exists(repo_name):
+            print("== Cloning current repository, this can take some time..")
+            process = subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "https://x-access-token:{}@github.com/{}/{}".format(
+                        atk, org_name, repo_name
+                    ),
+                ]
+            )
+            process.check_returncode()
+            action = 'add'
+            what_was_done = 'Cloned'
 
         s_clone_time = time.time() - clone_epoch
+
         process = subprocess.run(
             [
                 "git",
                 "remote",
-                "add",
+                action,
                 session.personnal_account_name,
                 f"https://x-access-token:{session.personnal_account_token}@github.com/{session.personnal_account_name}/{repo_name}",
             ],
             cwd=repo_name,
         )
-        print("== Cloned..")
+        print("==", what_was_done)
         process.check_returncode()
 
         subprocess.run(
