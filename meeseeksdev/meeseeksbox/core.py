@@ -2,6 +2,7 @@ import re
 import hmac
 import time
 import inspect
+import requests
 
 import yaml
 import base64
@@ -107,6 +108,13 @@ class WebHookHandler(MainHandler):
         self.getfinish("Webhook alive and listening")
 
     def post(self):
+        if self.config.forward_staging_url:
+            try:
+                pass
+            except:
+                print(red+'failure to forward')
+                import traceback
+                traceback.print_exc()
         if "X-Hub-Signature" not in self.request.headers:
             keen.add_event("attack", {"type": "no X-Hub-Signature"})
             return self.error("WebHook not configured with secret")
@@ -118,7 +126,7 @@ class WebHookHandler(MainHandler):
         ):
             keen.add_event("attack", {"type": "wrong signature"})
             return self.error(
-                "Cannot validate GitHub payload with " "provided WebHook secret"
+                "Cannot validate GitHub payload with provided WebHook secret"
             )
 
         payload = tornado.escape.json_decode(self.request.body)
@@ -319,7 +327,6 @@ class WebHookHandler(MainHandler):
                                     description += "\n" + label_desc.replace("&", "\n")
                         except:
                             import traceback
-
                             traceback.print_exc()
                         milestone = is_pr.get("milestone", {})
                         if milestone:
