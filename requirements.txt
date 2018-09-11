@@ -1,5 +1,5 @@
 tornado==4.4.2
-requests==2.13.0
+requests==2.19.1
 pyjwt==1.4.2
 gitpython==2.1.1
 there==0.0.5
