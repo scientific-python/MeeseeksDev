@@ -127,8 +127,6 @@ class WebHookHandler(MainHandler):
                         print("Fake forwarding request to x")
                         h = {"X-Hub-Signature":req.headers["X-Hub-Signature"]}
                         req = requests.Request('POST', url, headers=h, data=req.body)
-                        r2 =  request.get(url)
-                        print('R2:', r2)
                         prepared = req.prepare()
                         with requests.Session() as s:
                             res = s.send(prepared)
