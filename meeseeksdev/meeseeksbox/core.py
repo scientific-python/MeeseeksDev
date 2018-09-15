@@ -125,7 +125,7 @@ class WebHookHandler(MainHandler):
                     time.sleep(1)
                     print("Fake forwarding request to x")
 
-                pool.submit(fn, req)
+                pool.submit(fn, self.request)
             except:
                 print(red + "failure to forward")
                 import traceback
