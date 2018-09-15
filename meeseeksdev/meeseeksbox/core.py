@@ -13,6 +13,11 @@ import keen
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
+from tornado.ioloop import IOLoop
+from tornado.web import asynchronous
+
+from concurrent.futures import ThreadPoolExecutor as Pool
+
 
 from .utils import Authenticator
 from .utils import ACCEPT_HEADER_SYMMETRA
@@ -24,6 +29,10 @@ green = "\033[0;32m"
 yellow = "\033[0;33m"
 red = "\033[0;31m"
 normal = "\033[0m"
+
+pool = Pool(6)
+
+import time
 
 
 class Config:
@@ -110,10 +119,17 @@ class WebHookHandler(MainHandler):
     def post(self):
         if self.config.forward_staging_url:
             try:
-                pass
+
+                def fn(req):
+                    print("threadpooling...", req)
+                    time.sleep(1)
+                    print("Fake forwarding request to x")
+
+                pool.submit(fn, req)
             except:
-                print(red+'failure to forward')
+                print(red + "failure to forward")
                 import traceback
+
                 traceback.print_exc()
         if "X-Hub-Signature" not in self.request.headers:
             keen.add_event("attack", {"type": "no X-Hub-Signature"})
@@ -327,6 +343,7 @@ class WebHookHandler(MainHandler):
                                     description += "\n" + label_desc.replace("&", "\n")
                         except:
                             import traceback
+
                             traceback.print_exc()
                         milestone = is_pr.get("milestone", {})
                         if milestone:
@@ -625,12 +642,12 @@ class MeeseeksBox:
     def sig_handler(self, sig, frame):
         print(yellow, "Caught signal: %s, Shutting down..." % sig, normal)
         keen.add_event("status", {"state": "stopping"})
-        tornado.ioloop.IOLoop.instance().add_callback(self.shutdown)
+        IOLoop.instance().add_callback(self.shutdown)
 
     def shutdown(self):
         self.server.stop()
 
-        io_loop = tornado.ioloop.IOLoop.instance()
+        io_loop = IOLoop.instance()
 
         deadline = time.time() + 10
 

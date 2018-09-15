@@ -331,13 +331,12 @@ def safe_backport(session, payload, arguments, local_config=None):
             time.sleep(1)
         s_fork_time = time.time() - fork_epoch
 
-
         ## optimize-fetch-experiment
         print("Attempting FF")
         if os.path.exists(repo_name):
             try:
                 re_fetch_epoch = time.time()
-                print('FF: Git set-url origin')
+                print("FF: Git set-url origin")
                 subprocess.run(
                     [
                         "git",
@@ -350,13 +349,13 @@ def safe_backport(session, payload, arguments, local_config=None):
                 ).check_returncode()
 
                 repo = git.Repo(repo_name)
-                print('FF: Git fetch master')
+                print("FF: Git fetch master")
                 repo.remotes.origin.fetch("master")
-                print('FF: Reset hard origin/master')
+                print("FF: Reset hard origin/master")
                 subprocess.run(
                     ["git", "reset", "--hard", "origin/master"], cwd=repo_name
                 ).check_returncode()
-                print('FF: Git describe tags....')
+                print("FF: Git describe tags....")
                 subprocess.run(["git", "describe", "--tag"], cwd=repo_name)
                 re_fetch_delta = time.time() - re_fetch_epoch
                 print(blue + f"FF took {re_fetch_delta}s")
@@ -370,14 +369,14 @@ def safe_backport(session, payload, arguments, local_config=None):
         clean_epoch = time.time()
 
         # if os.path.exists(repo_name):
-            # print("== Cleaning up previsous work... ")
-            # subprocess.run("rm -rf {}".format(repo_name).split(" "))
-            # print("== Done cleaning ")
+        # print("== Cleaning up previsous work... ")
+        # subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        # print("== Done cleaning ")
         s_clean_time = time.time() - clean_epoch
 
         clone_epoch = time.time()
-        action = 'set-url'
-        what_was_done = 'Fast-Forwarded'
+        action = "set-url"
+        what_was_done = "Fast-Forwarded"
         if not os.path.exists(repo_name):
             print("== Cloning current repository, this can take some time..")
             process = subprocess.run(
@@ -390,8 +389,8 @@ def safe_backport(session, payload, arguments, local_config=None):
                 ]
             )
             process.check_returncode()
-            action = 'add'
-            what_was_done = 'Cloned'
+            action = "add"
+            what_was_done = "Cloned"
 
         s_clone_time = time.time() - clone_epoch
 
