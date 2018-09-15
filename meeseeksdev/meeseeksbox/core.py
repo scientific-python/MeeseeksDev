@@ -122,16 +122,11 @@ class WebHookHandler(MainHandler):
                 def fn(req, url):
                     try:
                         import requests
-                        print("threadpooling to forward `req` to", url)
-                        time.sleep(1)
-                        print("Fake forwarding request to x")
                         h = {"X-Hub-Signature":req.headers["X-Hub-Signature"]}
                         req = requests.Request('POST', url, headers=h, data=req.body)
                         prepared = req.prepare()
                         with requests.Session() as s:
                             res = s.send(prepared)
-                        print('forwarded ok.reply::')
-                        print('  > ', res)
                         return res
                     except:
                         import traceback
