@@ -658,15 +658,11 @@ class MeeseeksBox:
         deadline = time.time() + 10
 
         def stop_loop():
-            now = time.time()
-            if now < deadline and (io_loop._callbacks or io_loop._timeouts):
-                print(red, "delay stop...", normal)
-                io_loop.add_timeout(now + 1, stop_loop)
-            else:
-                print(yellow, "stopping now...", normal)
-                io_loop.stop()
+            print(yellow, "stopping now...", normal)
+            io_loop.stop()
 
-        stop_loop()
+        print(red, "stopping soon...", normal)
+        io_loop.add_timeout(now + 5, stop_loop)
 
     def start(self):
         self.application = tornado.web.Application(
