@@ -662,7 +662,7 @@ class MeeseeksBox:
             io_loop.stop()
 
         print(red, "stopping soon...", normal)
-        io_loop.add_timeout(now + 5, stop_loop)
+        io_loop.add_timeout(time.time() + 5, stop_loop)
 
     def start(self):
         self.application = tornado.web.Application(
