@@ -120,23 +120,26 @@ class WebHookHandler(MainHandler):
             try:
 
                 def fn(req, url):
-                    import requests
-                    print("threadpooling to forward `req` to", url)
-                    time.sleep(1)
-                    print("Fake forwarding request to x")
-                    req = requests.Request('POST', url, headers=req.headers, data=req.body)
-                    prepared = req.prepare()
-                    with requests.Session() as s:
-                        res = s.send(prepared)
-                    print('forwarded ok... reply:')
-                    print(res.body)
-                    return res
+                    try:
+                        import requests
+                        print("threadpooling to forward `req` to", url)
+                        time.sleep(1)
+                        print("Fake forwarding request to x")
+                        req = requests.Request('POST', url, headers=req.headers, data=req.body)
+                        prepared = req.prepare()
+                        with requests.Session() as s:
+                            res = s.send(prepared)
+                        print('forwarded ok.reply::')
+                        print('  > ', res.body)
+                        return res
+                    except:
+                        import traceback
+                        traceback.print_exc()
 
                 pool.submit(fn, self.request, self.config.forward_staging_url)
             except:
                 print(red + "failure to forward")
                 import traceback
-
                 traceback.print_exc()
         if "X-Hub-Signature" not in self.request.headers:
             keen.add_event("attack", {"type": "no X-Hub-Signature"})
