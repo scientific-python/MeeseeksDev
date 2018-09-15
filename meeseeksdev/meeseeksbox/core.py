@@ -124,7 +124,7 @@ class WebHookHandler(MainHandler):
                     print("threadpooling to forward `req` to", url)
                     time.sleep(1)
                     print("Fake forwarding request to x")
-                    req = requests.Request(method, url, headers=req.headers, data=req.body)
+                    req = requests.Request('POST', url, headers=req.headers, data=req.body)
                     prepared = req.prepare()
                     with requests.Session() as s:
                         res = s.send(prepared)
