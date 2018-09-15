@@ -121,13 +121,15 @@ class WebHookHandler(MainHandler):
 
                 def fn(req, url):
                     import requests
-                    print("threadpooling...", req)
+                    print("threadpooling to forward `req` to", url)
                     time.sleep(1)
                     print("Fake forwarding request to x")
                     req = requests.Request(method, url, headers=req.headers, data=req.body)
                     prepared = req.prepare()
                     with requests.Session() as s:
-                        return s.send(prepared)
+                        res = s.send(prepared)
+                    print('forwarded ok')
+                    return res
 
                 pool.submit(fn, self.request, self.config.forward_staging_url)
             except:
