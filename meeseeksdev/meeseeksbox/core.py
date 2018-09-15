@@ -2,7 +2,6 @@ import re
 import hmac
 import time
 import inspect
-import requests
 
 import yaml
 import base64
@@ -120,12 +119,17 @@ class WebHookHandler(MainHandler):
         if self.config.forward_staging_url:
             try:
 
-                def fn(req):
+                def fn(req, url):
+                    import requests
                     print("threadpooling...", req)
                     time.sleep(1)
                     print("Fake forwarding request to x")
+                    req = requests.Request(method, url, headers=req.headers, data=req.body)
+                    prepared = req.prepare()
+                    with requests.Session() as s:
+                        return s.send(prepared)
 
-                pool.submit(fn, self.request)
+                pool.submit(fn, self.request, self.config.forward_staging_url)
             except:
                 print(red + "failure to forward")
                 import traceback
