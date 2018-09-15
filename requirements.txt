@@ -1,10 +1,10 @@
-tornado==4.4.2
+tornado==5.1
 requests==2.19.1
 pyjwt==1.4.2
 gitpython==2.1.11
 there==0.0.7
 mock==2.0.0
-cryptography==1.7.2
+cryptography==2.3.1
 friendlyautopep8==0.0.4
 yieldbreaker==0.0.1
 pep8radius==0.9.2
