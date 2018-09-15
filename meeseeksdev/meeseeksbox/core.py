@@ -128,7 +128,8 @@ class WebHookHandler(MainHandler):
                     prepared = req.prepare()
                     with requests.Session() as s:
                         res = s.send(prepared)
-                    print('forwarded ok')
+                    print('forwarded ok... reply:')
+                    print(res.body)
                     return res
 
                 pool.submit(fn, self.request, self.config.forward_staging_url)
