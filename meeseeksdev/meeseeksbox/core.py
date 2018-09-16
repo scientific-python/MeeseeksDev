@@ -91,12 +91,14 @@ def process_mentionning_comment(body, bot_re):
     lines = [
         l.strip()
         for l in lines
-        if (bot_re.search(l) and not l.startswith(">")) or l.startswith("!msbox")
+        if (bot_re.search(l) and not l.startswith(">")) or l.startswith("!msbox") or l.startswith('bot>')
     ]
     nl = []
     for l in lines:
         if l.startswith("!msbox"):
             nl.append(l.split("!msbox")[-1].strip())
+        elif l.startswith("bot>"):
+            nl.append(l.split("bot>")[-1].strip())
         else:
             nl.append(bot_re.split(l)[-1].strip())
 
@@ -658,10 +660,10 @@ class MeeseeksBox:
         deadline = time.time() + 10
 
         def stop_loop():
-            print(yellow, "stopping now...", normal)
+            print(red, "stopping now...", normal)
             io_loop.stop()
 
-        print(red, "stopping soon...", normal)
+        print(yellow, "stopping soon...", normal)
         io_loop.add_timeout(time.time() + 5, stop_loop)
 
     def start(self):
