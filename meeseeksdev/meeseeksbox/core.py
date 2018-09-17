@@ -91,7 +91,9 @@ def process_mentionning_comment(body, bot_re):
     lines = [
         l.strip()
         for l in lines
-        if (bot_re.search(l) and not l.startswith(">")) or l.startswith("!msbox") or l.startswith('bot>')
+        if (bot_re.search(l) and not l.startswith(">"))
+        or l.startswith("!msbox")
+        or l.startswith("bot>")
     ]
     nl = []
     for l in lines:
@@ -124,20 +126,34 @@ class WebHookHandler(MainHandler):
                 def fn(req, url):
                     try:
                         import requests
-                        h = {"X-Hub-Signature":req.headers["X-Hub-Signature"]}
-                        req = requests.Request('POST', url, headers=h, data=req.body)
+
+                        headers = {
+                            k: req.headers[k]
+                            for k in (
+                                "content-type",
+                                "User-Agent",
+                                "X-GitHub-Delivery",
+                                "X-GitHub-Event",
+                                "X-Hub-Signature",
+                            )
+                        }
+                        req = requests.Request(
+                            "POST", url, headers=headers, data=req.body
+                        )
                         prepared = req.prepare()
                         with requests.Session() as s:
                             res = s.send(prepared)
                         return res
                     except:
                         import traceback
+
                         traceback.print_exc()
 
                 pool.submit(fn, self.request, self.config.forward_staging_url)
             except:
                 print(red + "failure to forward")
                 import traceback
+
                 traceback.print_exc()
         if "X-Hub-Signature" not in self.request.headers:
             keen.add_event("attack", {"type": "no X-Hub-Signature"})

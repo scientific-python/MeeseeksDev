@@ -93,7 +93,7 @@ def load_config_from_env():
     config["port"] = int(os.environ.get("PORT", 5000))
     # config option to forward requests as-is to a test server.
     config["forward_staging_url"] = os.environ.get("FORWARD_STAGING_URL", "")
-    print('saw config forward', config["forward_staging_url"])
+    print("saw config forward", config["forward_staging_url"])
 
     # Despite their names, this are not __your__ account, but an account created
     # for some functionalities of mr-meeseeks. Indeed, github does not allow
