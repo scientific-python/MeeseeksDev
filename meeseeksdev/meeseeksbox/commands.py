@@ -364,7 +364,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             except Exception as e:
                 import traceback
 
-                sys.print_exc()
+                traceback.print_exc()
         ## end optimise-fetch-experiment
 
         clean_epoch = time.time()
