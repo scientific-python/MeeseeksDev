@@ -362,18 +362,19 @@ def safe_backport(session, payload, arguments, local_config=None):
                 print(blue + f"FF took {re_fetch_delta}s")
                 s_ff_time = re_fetch_delta
             except Exception as e:
+                # something went wrong. Kill repository it's going to be
+                # recloned.
+                clean_epoch = time.time()
+                if os.path.exists(repo_name):
+                    print("== Cleaning up previsous work... ")
+                    subprocess.run("rm -rf {}".format(repo_name).split(" "))
+                    print("== Done cleaning ")
+                s_clean_time = time.time() - clean_epoch
                 import traceback
 
                 traceback.print_exc()
         ## end optimise-fetch-experiment
 
-        clean_epoch = time.time()
-
-        # if os.path.exists(repo_name):
-        # print("== Cleaning up previsous work... ")
-        # subprocess.run("rm -rf {}".format(repo_name).split(" "))
-        # print("== Done cleaning ")
-        s_clean_time = time.time() - clean_epoch
 
         clone_epoch = time.time()
         action = "set-url"
