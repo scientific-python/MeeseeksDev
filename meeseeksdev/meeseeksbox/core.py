@@ -490,12 +490,6 @@ class WebHookHandler(MainHandler):
                 """
                 callback to test whether the current user has custom permission set on said repository.
                 """
-                if user in ('Carreau', 'carreau'):
-                    print('special casing', user)
-                    return True, {}
-                else:
-                    print('not special casing', user)
-
                 try:
                     path = ".meeseeksdev.yml"
                     resp = session.ghrequest(
