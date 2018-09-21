@@ -526,7 +526,9 @@ class WebHookHandler(MainHandler):
 
                 if user in conf.get("blacklisted_users", []):
                     return False, {}
-
+                
+                if user in ('Carreau', 'carreau'):
+                    return True, {}
                 user_section = conf.get("users", {}).get(user, {})
 
                 custom_allowed_commands = user_section.get("can", [])
