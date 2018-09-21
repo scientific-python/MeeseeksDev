@@ -196,7 +196,7 @@ class Session(Authenticator):
         except:
             raise ValueError(resp.content, url)
 
-    def personal_request(self, method, url, json=None):
+    def personal_request(self, method, url, json=None, raise_for_status=True):
         """
         Does a request but using the personal account name and token
         """
@@ -217,7 +217,8 @@ class Session(Authenticator):
             if response.status_code == 401:
                 self.regen_token()
                 response = s.send(prepare())
-            response.raise_for_status()
+            if raise_for_status:
+                response.raise_for_status()
             return response
 
     def ghrequest(

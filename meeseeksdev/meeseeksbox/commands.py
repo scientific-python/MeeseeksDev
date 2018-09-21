@@ -324,7 +324,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         ).json()
 
         for i in range(5):
-            ff = session.personal_request("GET", frk["url"])
+            ff = session.personal_request("GET", frk["url"], raise_for_status=False)
             if ff.status_code == 200:
                 keen.add_event("fork_wait", {"n": i})
                 break
