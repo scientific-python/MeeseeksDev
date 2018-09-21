@@ -351,7 +351,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 repo = git.Repo(repo_name)
                 print("FF: Git fetch master")
                 repo.remotes.origin.fetch("master")
-                repo.checkout("master")
+                repo.git.checkout("master")
                 print("FF: Reset hard origin/master")
                 subprocess.run(
                     ["git", "reset", "--hard", "origin/master"], cwd=repo_name
