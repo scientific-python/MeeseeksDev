@@ -465,6 +465,8 @@ def safe_backport(session, payload, arguments, local_config=None):
                 keen_stats()
                 return
             elif "after resolving the conflicts" in e.stderr:
+                # TODO, here we should also do a git merge --abort 
+                # to avoid thrashing the cache at next backport request.
                 cmd = " ".join(pipes.quote(arg) for arg in sys.argv)
                 print(
                     "\nPatch did not apply. Resolve conflicts (add, not commit), then re-run `%s`"
