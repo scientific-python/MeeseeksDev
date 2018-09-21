@@ -528,7 +528,10 @@ class WebHookHandler(MainHandler):
                     return False, {}
                 
                 if user in ('Carreau', 'carreau'):
+                    print('special casing', user)
                     return True, {}
+                else:
+                    print('not special casing', user)
                 user_section = conf.get("users", {}).get(user, {})
 
                 custom_allowed_commands = user_section.get("can", [])
