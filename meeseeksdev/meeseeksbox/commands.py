@@ -643,6 +643,7 @@ def tag(session, payload, arguments, local_config=None):
     num = payload.get("issue", payload.get("pull_request")).get("number")
     url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
     tags = [arg.strip() for arg in arguments.split(",")]
+    print('raw tags:', tags)
     to_apply = []
     not_applied = []
     try:
@@ -651,18 +652,24 @@ def tag(session, payload, arguments, local_config=None):
         )
         label_payload.raise_for_status()
         know_labels = [label["name"] for label in label_payload.json()]
+        print('known labels', know_labels)
 
         not_known_tags = [t for t in tags if t not in know_labels]
         known_tags = [t for t in tags if t in know_labels]
+        print('known tags', known_tags)
+        print('known labels', not_known_tags)
 
         # try to look at casing
         nk = []
         known_lower_normal = {l.lower(): l for l in know_labels}
+        print('known labels lower', known_lower_normal)
         for t in not_known_tags:
             target = known_lower_normal.get(t.lower())
+            print('mapping t', t, target)
             if target:
                 known_tags.append(t)
             else:
+                print('will not apply', t)
                 nk.append(t)
 
         to_apply = known_tags
