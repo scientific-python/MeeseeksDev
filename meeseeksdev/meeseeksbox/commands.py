@@ -657,7 +657,7 @@ def tag(session, payload, arguments, local_config=None):
             all_links = req.headers.get('Link')
             if 'rel="next"' in all_links:
                 links = all_links.split(',')
-                next_link = [l for l in links if 'next' in l]
+                next_link = [l for l in links if 'next' in l][0] # assume only one.
                 if next_link:
                     return next_link.split(';')[0].strip(' <>')
 
