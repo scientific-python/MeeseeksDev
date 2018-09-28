@@ -648,7 +648,7 @@ def tag(session, payload, arguments, local_config=None):
     not_applied = []
     try:
         label_payload = session.ghrequest(
-            "GET", f"https://api.github.com/repos/{org}/{repo}/labels&per_page=100"
+            "GET", f"https://api.github.com/repos/{org}/{repo}/labels"
         )
         print(label_payload.headers)
         label_payload.raise_for_status()
