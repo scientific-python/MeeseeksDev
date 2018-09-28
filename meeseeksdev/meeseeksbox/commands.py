@@ -650,6 +650,7 @@ def tag(session, payload, arguments, local_config=None):
         label_payload = session.ghrequest(
             "GET", f"https://api.github.com/repos/{org}/{repo}/labels"
         )
+        print(label_payload.headers)
         label_payload.raise_for_status()
         know_labels = [label["name"] for label in label_payload.json()]
         print('known labels', know_labels)
