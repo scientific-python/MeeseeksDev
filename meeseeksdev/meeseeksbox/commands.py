@@ -650,9 +650,37 @@ def tag(session, payload, arguments, local_config=None):
         label_payload = session.ghrequest(
             "GET", f"https://api.github.com/repos/{org}/{repo}/labels"
         )
-        print(label_payload.headers)
-        label_payload.raise_for_status()
-        know_labels = [label["name"] for label in label_payload.json()]
+
+        label_payloads = [label_payload]
+
+        def get_next_link(req):
+            all_links = req.headers.get('Link')
+            if 'rel="next"' in all_links:
+                links = all_links.split(',')
+                next_link = [l for l in links if 'next' in l]
+                if next_link:
+                    return next_link.split(';')[0].strip(' <>')
+
+
+        # let's assume no more than 200 labels
+        resp = label_payload
+        try:
+            for i in range(10):
+                print('get labels page',i)
+                next_link = get_next_link(resp)
+                if next_link:
+                    resp = session.ghrequest( "GET", next_link)
+                    label_payloads.append(resp)
+                else:
+                    break
+        except Exception:
+            traceback.print_exc()
+
+
+
+        know_labels = []
+        for p in label_payloads:
+            know_labels.extend([label["name"] for label in p.json()])
         print('known labels', know_labels)
 
         not_known_tags = [t for t in tags if t not in know_labels]
