@@ -465,7 +465,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 keen_stats()
                 return
             elif "after resolving the conflicts" in e.stderr:
-                # TODO, here we should also do a git merge --abort 
+                # TODO, here we should also do a git merge --abort
                 # to avoid thrashing the cache at next backport request.
                 cmd = " ".join(pipes.quote(arg) for arg in sys.argv)
                 print(
@@ -476,11 +476,11 @@ def safe_backport(session, payload, arguments, local_config=None):
                 session.post_comment(
                     comment_url,
                     f"""Owee, I'm MrMeeseeks, Look at me.
-                    
+
 There seem to be a conflict, please backport manually. Here are approximate instructions:
 
 1. Checkout backport branch and update it.
-                    
+
 ```
 $ git checkout {target_branch}
 $ git pull
@@ -642,7 +642,11 @@ def tag(session, payload, arguments, local_config=None):
     repo = payload["repository"]["name"]
     num = payload.get("issue", payload.get("pull_request")).get("number")
     url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
-    tags = [arg.strip() for arg in arguments.split(",")]
+    arguments = arguments.replace("'", '"')
+    quoted = re.findall(r'\"(.+?)\"',arguments.replace("'", '"'))
+    for q in quoted:
+        arguments = arguments.replace('"%s"' % q, '')
+    tags = [arg.strip() for arg in arguments.split(",")] + quoted
     print('raw tags:', tags)
     to_apply = []
     not_applied = []
