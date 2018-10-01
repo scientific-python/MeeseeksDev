@@ -4,12 +4,14 @@ Define a few commands
 
 import random
 import os
+import re
 import subprocess
 import git
 import pipes
 import mock
 import keen
 import time
+import traceback
 
 import sys
 from textwrap import dedent
@@ -705,7 +707,6 @@ def tag(session, payload, arguments, local_config=None):
         not_applied = nk
     except Exception:
         print(red + "something went wrong getting labels" + normal)
-        import traceback
 
         traceback.print_exc()
     if local_config:
