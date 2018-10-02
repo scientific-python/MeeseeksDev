@@ -580,7 +580,11 @@ class WebHookHandler(MainHandler):
 
                     traceback.print_exc()
 
-                if (permission_level.value >= handler.scope.value) or (
+                has_scope = (permission_level.value >= handler.scope.value)
+                if has_scope:
+                    local_config={}
+
+                if (has_scope) or (
                     is_legitimate_author
                     and getattr(handler, "let_author", False)
                     or per_repo_config_allows
