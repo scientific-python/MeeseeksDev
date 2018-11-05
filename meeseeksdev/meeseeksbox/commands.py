@@ -648,7 +648,7 @@ def tag(session, payload, arguments, local_config=None):
     quoted = re.findall(r'\"(.+?)\"',arguments.replace("'", '"'))
     for q in quoted:
         arguments = arguments.replace('"%s"' % q, '')
-    tags = [arg.strip() for arg in arguments.split(",")] + quoted
+    tags = [arg.strip() for arg in arguments.split(",") if arg.strip()] + quoted
     print('raw tags:', tags)
     to_apply = []
     not_applied = []
