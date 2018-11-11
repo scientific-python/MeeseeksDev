@@ -1,8 +1,8 @@
 tornado==5.1.1
-requests==2.19.1
+requests==2.20.1
 pyjwt==1.6.4
 gitpython==2.1.11
-there==0.0.7
+there==0.0.9
 mock==2.0.0
 cryptography==2.3.1
 friendlyautopep8==0.0.4
