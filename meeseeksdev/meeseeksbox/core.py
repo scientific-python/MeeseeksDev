@@ -13,7 +13,6 @@ import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 from tornado.ioloop import IOLoop
-from tornado.web import asynchronous
 
 from concurrent.futures import ThreadPoolExecutor as Pool
 
