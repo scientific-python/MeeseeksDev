@@ -1,4 +1,4 @@
-tornado==5.1.1
+tornado==6.0.3
 requests==2.22.0
 pyjwt==1.7.1
 gitpython==2.1.12
