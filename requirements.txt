@@ -1,7 +1,7 @@
 tornado==5.1.1
 requests==2.20.1
 pyjwt==1.7.1
-gitpython==2.1.11
+gitpython==2.1.12
 there==0.0.9
 mock==2.0.0
 cryptography==2.3.1
