@@ -10,7 +10,7 @@ We host MeeseeksBox(es) and will expose them as GitHub Integrations so you don't
 have to host and run your own. You can if you want, it should be pretty
 simple. 
 
-The advantage of having One and only one box, is to do cross repository
+The advantage of having one and only one box, is to do cross repository
 operations (and fix security bugs). 
 
 The drawback is if there is a security issue, then we're screwed.
@@ -36,9 +36,9 @@ branches:
     - /^auto-backport-of-pr-[0-9]+$/
 ```
 
-## per-repository configuratino
+## per-repository configuration
 
-If you want per-configuration repository, create a `.meeseeksdev.yml` file at
+If you want per-repository configuration, create a `.meeseeksdev.yml` file at
 the root of the repository. For now this file allow you to give fine-grained
 permissions to users.
 
@@ -55,7 +55,7 @@ users:
 ```
 
 This will allow `<username>` to ask `@meeseeksdev` to perform above commands. 
-The conf file is the one that sis on the repository default  branch (usually
+The conf file is the one that sits on the repository default  branch (usually
 `master`).
 
 
@@ -91,7 +91,7 @@ Apply origin-pr labels and milestone to backport.
 Repo admins only
 
 Note: Cloning can take a long-time. So expect MrMeeseeks to be busy while this
-happen. Also heroku as a 2min deadline and other limitations, so MrMeeseeks can
+happen. Also heroku has a 2min deadline and other limitations, so MrMeeseeks can
 likely be killed. I haven't implemented a queue yet. 
 
 ### @MeeseeksDev pep8ify
