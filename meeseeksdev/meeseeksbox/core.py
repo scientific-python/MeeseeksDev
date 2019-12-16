@@ -81,6 +81,11 @@ class MainHandler(BaseHandler):
     def get(self):
         self.finish("No")
 
+def _strip_please(c):
+    if c[0] == 'please':
+        return c[1:]
+    else:
+        return c
 
 def process_mentionning_comment(body, bot_re):
     """
@@ -104,9 +109,7 @@ def process_mentionning_comment(body, bot_re):
             nl.append(bot_re.split(l)[-1].strip())
 
     command_args = [l.split(" ", 1) for l in nl]
-    if command_args[0] == 'please':
-        command_args = command_args[1:]
-    command_args = [c if len(c) > 1 else [c[0], None] for c in command_args]
+    command_args = [_strip_please(c) if len(c) > 1 else [c[0], None] for c in command_args]
     return command_args
 
 
