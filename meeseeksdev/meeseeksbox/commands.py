@@ -192,7 +192,7 @@ def pep8ify(*, session, payload, arguments, local_config=None):
         print('Should run:', *args)
 
     lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', base_sha )
-    #subprocess.run("pep8radius --in-place".split(" ") + [base_sha])
+    subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', base_sha])
     #os.chdir("..")
 
     ## write the commit message
@@ -202,9 +202,9 @@ def pep8ify(*, session, payload, arguments, local_config=None):
     ## Push the pep8ify work
     print("== Pushing work....:")
     lpr(f"pushing with workbranch:{branch}")
-    #repo.remotes.origin.push("workbranch:{}".format(branch))
-    #repo.git.checkout("master")
-    #repo.branches.workbranch.delete(repo, "workbranch", force=True)
+    repo.remotes.origin.push("workbranch:{}".format(branch))
+    repo.git.checkout("master")
+    repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
 
 @write
