@@ -198,10 +198,10 @@ def pep8ify(*, session, payload, arguments, local_config=None):
     def lpr(*args):
         print('Should run:', *args)
 
-    lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', base_sha )
+    lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', to_rebase_on )
 
     ## todo check error code.
-    subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', base_sha])
+    subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', to_rebase_on])
     #os.chdir("..")
 
     ## write the commit message
