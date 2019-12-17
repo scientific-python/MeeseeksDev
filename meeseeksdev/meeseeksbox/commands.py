@@ -181,7 +181,7 @@ def blackify(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run("git config --global user.email meeseeksbot@jupyter.org".split(" "))
+    subprocess.run("git config --global user.email meeseeksmachine@gmail.com".split(" "))
     subprocess.run("git config --global user.name FriendlyBot".split(" "))
 
     # do the pep8ify on local filesystem
@@ -427,7 +427,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         process.check_returncode()
 
         subprocess.run(
-            "git config --global user.email meeseeksdevbot@jupyter.org".split(" ")
+            "git config --global user.email meeseeksmachine@gmail.com".split(" ")
         )
         subprocess.run("git config --global user.name MeeseeksDev[bot]".split(" "))
 
