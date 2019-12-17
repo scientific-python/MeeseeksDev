@@ -142,7 +142,7 @@ def pep8ify(*, session, payload, arguments, local_config=None):
 
     cdata = session.ghrequest( "GET",commits_url).json()
     # TODO : check there is only one parent.
-    to_rebase_on = cdata[0]['parents']['sha']
+    to_rebase_on = cdata[0]['parents'][0]['sha']
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
