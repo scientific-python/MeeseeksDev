@@ -140,6 +140,7 @@ def pep8ify(*, session, payload, arguments, local_config=None):
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
+    # TODO, check if maintainer
     target_session = yield "{}/{}".format(author_login, repo_name)
     if not target_session:
         comment_url = payload["issue"]["comments_url"]
@@ -192,6 +193,8 @@ def pep8ify(*, session, payload, arguments, local_config=None):
         print('Should run:', *args)
 
     lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', base_sha )
+
+    ## todo check error code.
     subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', base_sha])
     #os.chdir("..")
 
