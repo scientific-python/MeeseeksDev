@@ -211,7 +211,7 @@ def pep8ify(*, session, payload, arguments, local_config=None):
     ## Push the pep8ify work
     print("== Pushing work....:")
     lpr(f"pushing with workbranch:{branch}")
-    repo.remotes.origin.push("workbranch:{}".format(branch))
+    repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
     repo.git.checkout("master")
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
