@@ -112,7 +112,7 @@ def replyadmin(*, session, payload, arguments, local_config=None):
 
 
 @admin
-def pep8ify(*, session, payload, arguments, local_config=None):
+def blackify(*, session, payload, arguments, local_config=None):
     print("===== pe8ifying =====")
     print(payload)
     print("===== ========= =====")

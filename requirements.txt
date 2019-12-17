@@ -5,7 +5,6 @@ gitpython==2.1.12
 there==0.0.9
 mock==3.0.5
 cryptography==2.8
-friendlyautopep8==0.0.4
 yieldbreaker==0.0.1
 black
 pyyaml==5.2
