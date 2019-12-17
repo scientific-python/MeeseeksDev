@@ -161,7 +161,7 @@ def pep8ify(*, session, payload, arguments, local_config=None):
         subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
-    print("== Cloning current repository, this can take some time..")
+    print(f"== Cloning repository from {author_login}/{repo_name}, this can take some time..")
     process = subprocess.run(
         [
             "git",
@@ -179,7 +179,7 @@ def pep8ify(*, session, payload, arguments, local_config=None):
 
     # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
-    print("== Fetching branch to pep8ify on ...")
+    print(f"== Fetching branch `{branch}` to pep8ify on ...")
     repo.remotes.origin.fetch("{}:workbranch".format(branch))
     repo.git.checkout("workbranch")
     print("== Fetching Commits to pep8ify...")
@@ -187,18 +187,24 @@ def pep8ify(*, session, payload, arguments, local_config=None):
     print("== All has been fetched correctly")
 
     os.chdir(repo_name)
-    subprocess.run("pep8radius --in-place".split(" ") + [base_sha])
-    os.chdir("..")
 
-    # write the commit message
-    msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
-    repo.git.commit("-am", msg)
+    def lpr(*args):
+        print('Should run:', *args)
 
-    # Push the pep8ify work
+    lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', base_sha )
+    #subprocess.run("pep8radius --in-place".split(" ") + [base_sha])
+    #os.chdir("..")
+
+    ## write the commit message
+    #msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
+    #repo.git.commit("-am", msg)
+
+    ## Push the pep8ify work
     print("== Pushing work....:")
-    repo.remotes.origin.push("workbranch:{}".format(branch))
-    repo.git.checkout("master")
-    repo.branches.workbranch.delete(repo, "workbranch", force=True)
+    lpr(f"pushing with workbranch:{}")
+    #repo.remotes.origin.push("workbranch:{}".format(branch))
+    #repo.git.checkout("master")
+    #repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
 
 @write
