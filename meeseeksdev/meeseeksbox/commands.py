@@ -111,7 +111,7 @@ def replyadmin(*, session, payload, arguments, local_config=None):
     )
 
 
-@admin
+@write
 def pep8ify(*, session, payload, arguments, local_config=None):
     print("===== pe8ifying =====")
     print(payload)
@@ -199,6 +199,44 @@ def pep8ify(*, session, payload, arguments, local_config=None):
     repo.remotes.origin.push("workbranch:{}".format(branch))
     repo.git.checkout("master")
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
+
+
+@write
+def black_pull(session, payload, arguments, local_config=None):
+    """
+
+    Supposed to be called on a pull-request; and will attempt to run black on
+    all the individual commits by doing a rebase, and force-push on the user's
+    branch. 
+
+    Something like
+
+    git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash <commitish>
+
+
+
+    That does requires the machine-account (not the bot account) to be a
+    maintainer of the given repo. Which I don't like; but I do not have the choice.
+
+     - We could also ask the user to make the machine account a user on their fork...
+     - Or push on our fork and past a reply on how to reset to the user...
+    """
+
+    prnumber = payload.get("issue", payload).get("number")
+    prtitle = payload.get("issue", payload.get("pull_request", {})).get("title")
+    org_name = payload["repository"]["owner"]["login"]
+    repo_name = payload["repository"]["name"]
+    comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
+
+    print("== Collecting data on Pull-request...")
+    r = session.ghrequest(
+        "GET",
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(
+            org_name, repo_name, prnumber
+        ),
+        json=None,
+    )
+    pr_data = r.json()
 
 
 @write
@@ -376,7 +414,6 @@ def safe_backport(session, payload, arguments, local_config=None):
 
                 traceback.print_exc()
         ## end optimise-fetch-experiment
-
 
         clone_epoch = time.time()
         action = "set-url"
@@ -645,11 +682,11 @@ def tag(session, payload, arguments, local_config=None):
     num = payload.get("issue", payload.get("pull_request")).get("number")
     url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
     arguments = arguments.replace("'", '"')
-    quoted = re.findall(r'\"(.+?)\"',arguments.replace("'", '"'))
+    quoted = re.findall(r"\"(.+?)\"", arguments.replace("'", '"'))
     for q in quoted:
-        arguments = arguments.replace('"%s"' % q, '')
+        arguments = arguments.replace('"%s"' % q, "")
     tags = [arg.strip() for arg in arguments.split(",") if arg.strip()] + quoted
-    print('raw tags:', tags)
+    print("raw tags:", tags)
     to_apply = []
     not_applied = []
     try:
@@ -660,51 +697,48 @@ def tag(session, payload, arguments, local_config=None):
         label_payloads = [label_payload]
 
         def get_next_link(req):
-            all_links = req.headers.get('Link')
+            all_links = req.headers.get("Link")
             if 'rel="next"' in all_links:
-                links = all_links.split(',')
-                next_link = [l for l in links if 'next' in l][0] # assume only one.
+                links = all_links.split(",")
+                next_link = [l for l in links if "next" in l][0]  # assume only one.
                 if next_link:
-                    return next_link.split(';')[0].strip(' <>')
-
+                    return next_link.split(";")[0].strip(" <>")
 
         # let's assume no more than 200 labels
         resp = label_payload
         try:
             for i in range(10):
-                print('get labels page',i)
+                print("get labels page", i)
                 next_link = get_next_link(resp)
                 if next_link:
-                    resp = session.ghrequest( "GET", next_link)
+                    resp = session.ghrequest("GET", next_link)
                     label_payloads.append(resp)
                 else:
                     break
         except Exception:
             traceback.print_exc()
 
-
-
         know_labels = []
         for p in label_payloads:
             know_labels.extend([label["name"] for label in p.json()])
-        print('known labels', know_labels)
+        print("known labels", know_labels)
 
         not_known_tags = [t for t in tags if t not in know_labels]
         known_tags = [t for t in tags if t in know_labels]
-        print('known tags', known_tags)
-        print('known labels', not_known_tags)
+        print("known tags", known_tags)
+        print("known labels", not_known_tags)
 
         # try to look at casing
         nk = []
         known_lower_normal = {l.lower(): l for l in know_labels}
-        print('known labels lower', known_lower_normal)
+        print("known labels lower", known_lower_normal)
         for t in not_known_tags:
             target = known_lower_normal.get(t.lower())
-            print('mapping t', t, target)
+            print("mapping t", t, target)
             if target:
                 known_tags.append(t)
             else:
-                print('will not apply', t)
+                print("will not apply", t)
                 nk.append(t)
 
         to_apply = known_tags

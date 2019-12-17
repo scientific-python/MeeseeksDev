@@ -81,11 +81,13 @@ class MainHandler(BaseHandler):
     def get(self):
         self.finish("No")
 
+
 def _strip_please(c):
-    if c.startswith('please '):
+    if c.startswith("please "):
         return c[6:].lstrip()
     else:
         return c
+
 
 def process_mentionning_comment(body, bot_re):
     """
@@ -530,7 +532,7 @@ class WebHookHandler(MainHandler):
 
                 if user in conf.get("blacklisted_users", []):
                     return False, {}
-                
+
                 user_section = conf.get("users", {}).get(user, {})
 
                 custom_allowed_commands = user_section.get("can", [])
@@ -584,9 +586,9 @@ class WebHookHandler(MainHandler):
 
                     traceback.print_exc()
 
-                has_scope = (permission_level.value >= handler.scope.value)
+                has_scope = permission_level.value >= handler.scope.value
                 if has_scope:
-                    local_config={}
+                    local_config = {}
 
                 if (has_scope) or (
                     is_legitimate_author
