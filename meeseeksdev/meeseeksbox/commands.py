@@ -138,6 +138,10 @@ def pep8ify(*, session, payload, arguments, local_config=None):
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
 
+    commits_url = pr_data["commits_url"]
+
+    cdata = session.ghrequest("GET", commits_url)
+
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
     target_session = yield "{}/{}".format(author_login, repo_name)
