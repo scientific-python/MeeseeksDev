@@ -245,7 +245,7 @@ def blackify(*, session, payload, arguments, local_config=None):
         I've rebased this Pull Request, applied `black` on all the
         individual commits, and pushed. You may have trouble pushing further
         commits, but feel free to force push and ask me to reformat again.   
-        """
+        """)
     )
 
 
