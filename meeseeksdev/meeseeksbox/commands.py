@@ -142,6 +142,7 @@ def blackify(*, session, payload, arguments, local_config=None):
 
     cdata = session.ghrequest( "GET",commits_url).json()
     
+    print("cdata", cdata)
     if len(cdata[0]['parents'][0]) !=1:
         comment_url = payload["issue"]["comments_url"]
         session.post_comment(
