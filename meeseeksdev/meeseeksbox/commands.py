@@ -113,9 +113,8 @@ def replyadmin(*, session, payload, arguments, local_config=None):
 
 @admin
 def blackify(*, session, payload, arguments, local_config=None):
-    print("===== pe8ifying =====")
-    print(payload)
-    print("===== ========= =====")
+    print("===== reformatting =====")
+    print("===== ============ =====")
     # collect initial payload
     prnumber = payload["issue"]["number"]
     prtitle = payload["issue"]["title"]
@@ -140,18 +139,19 @@ def blackify(*, session, payload, arguments, local_config=None):
 
     commits_url = pr_data['commits_url']
 
-    cdata = session.ghrequest( "GET",commits_url).json()
+    commits_data = session.ghrequest( "GET",commits_url).json()
     
-    print("cdata", cdata)
-    if len(cdata[0]['parents'][0]) !=1:
-        comment_url = payload["issue"]["comments_url"]
-        session.post_comment(
-            comment_url,
-            body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n"
-        )
-        return
+    for commit in commits_data:
+        if len(commit['parents']) != 1:
+            comment_url = payload["issue"]["comments_url"]
+            session.post_comment(
+                comment_url,
+                body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n"
+            )
+            return
 
-    to_rebase_on = cdata[0]['parents'][0]['sha']
+    # so far we assume that the commit we rebase on is the first.
+    to_rebase_on = commits_data[0]['parents'][0]['sha']
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
