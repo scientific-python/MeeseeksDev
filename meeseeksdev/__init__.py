@@ -158,6 +158,7 @@ def main():
         "open": _open,
         "close": close,
         "autopep8": blackify,
+        "reformat": blackify,
         "black": blackify,
         "ready": ready,
         "merge": merge,

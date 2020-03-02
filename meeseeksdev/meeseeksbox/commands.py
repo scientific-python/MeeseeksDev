@@ -138,8 +138,15 @@ def blackify(*, session, payload, arguments, local_config=None):
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
 
+    commits_url = pr_data['commits_url']
+
+    cdata = session.ghrequest( "GET",commits_url).json()
+    # TODO : check there is only one parent.
+    to_rebase_on = cdata[0]['parents'][0]['sha']
+
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
+    # TODO, check if maintainer
     target_session = yield "{}/{}".format(author_login, repo_name)
     if not target_session:
         comment_url = payload["issue"]["comments_url"]
@@ -174,7 +181,7 @@ def blackify(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run("git config --global user.email meeseeksbot@jupyter.org".split(" "))
+    subprocess.run("git config --global user.email meeseeksmachine@gmail.com".split(" "))
     subprocess.run("git config --global user.name FriendlyBot".split(" "))
 
     # do the pep8ify on local filesystem
@@ -191,8 +198,10 @@ def blackify(*, session, payload, arguments, local_config=None):
     def lpr(*args):
         print('Should run:', *args)
 
-    lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', base_sha )
-    subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', base_sha])
+    lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', to_rebase_on )
+
+    ## todo check error code.
+    subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', to_rebase_on])
     #os.chdir("..")
 
     ## write the commit message
@@ -202,7 +211,7 @@ def blackify(*, session, payload, arguments, local_config=None):
     ## Push the pep8ify work
     print("== Pushing work....:")
     lpr(f"pushing with workbranch:{branch}")
-    repo.remotes.origin.push("workbranch:{}".format(branch))
+    repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
     repo.git.checkout("master")
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
@@ -418,7 +427,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         process.check_returncode()
 
         subprocess.run(
-            "git config --global user.email meeseeksdevbot@jupyter.org".split(" ")
+            "git config --global user.email meeseeksmachine@gmail.com".split(" ")
         )
         subprocess.run("git config --global user.name MeeseeksDev[bot]".split(" "))
 
