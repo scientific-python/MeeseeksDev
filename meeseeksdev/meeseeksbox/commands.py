@@ -165,11 +165,11 @@ def blackify(*, session, payload, arguments, local_config=None):
         comment_url = payload["issue"]["comments_url"]
         session.post_comment(
             comment_url,
-            body="Would you mind installing me on your fork so that I can update
-            your branch ? \n"
+            body="Would you mind installing me on your fork so that I can update your branch ? \n"
             "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(
                 botname="meeseeksdev"
             ),
+        )
     # if not target_session:
     #     comment_url = payload["issue"]["comments_url"]
     #     session.post_comment(
