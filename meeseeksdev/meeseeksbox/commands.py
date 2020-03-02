@@ -167,16 +167,16 @@ def blackify(*, session, payload, arguments, local_config=None):
         session.post_comment(
             comment_url,
             body="Would you mind installing me on your fork so that I can update your branch ? \n"
-            "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(
-                botname="meeseeksdev"
-            ),
+            "Click [here](https://github.com/apps/meeseeksdev/installations/new)
+            to do that, and follow the instruction to add your fork."
+            "I'm going to try to push as a maintainer but this may not work."
         )
     # if not target_session:
     #     comment_url = payload["issue"]["comments_url"]
     #     session.post_comment(
     #         comment_url,
     #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
-    #         "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(
+    #         "Click [here](https://github.com/apps/meeseeksdev/installations/new) to do that.".format(
     #             botname="meeseeksdev"
     #         ),
     #     )
@@ -236,6 +236,18 @@ def blackify(*, session, payload, arguments, local_config=None):
     repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
     repo.git.checkout("master")
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
+
+
+    comment_url = payload["issue"]["comments_url"]
+    session.post_comment(
+        comment_url,
+        body=dedent("""
+        I've rebased this Pull Request, applied `black` on all the
+        individual commits, and pushed. You may have trouble pushing further
+        commits, but feel free to force push and ask me to reformat again.   
+        """
+    )
+
 
 
 @write
