@@ -141,27 +141,48 @@ def blackify(*, session, payload, arguments, local_config=None):
     commits_url = pr_data['commits_url']
 
     cdata = session.ghrequest( "GET",commits_url).json()
-    # TODO : check there is only one parent.
+    
+    if len(cdata[0]['parents'][0]) !=1:
+        comment_url = payload["issue"]["comments_url"]
+        session.post_comment(
+            comment_url,
+            body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n"
+        )
+        return
+
     to_rebase_on = cdata[0]['parents'][0]['sha']
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
     # TODO, check if maintainer
     target_session = yield "{}/{}".format(author_login, repo_name)
-    if not target_session:
+    if target_session: 
+        print('installed on target repository')
+        atk = target_session.token()
+    else:
+        print('use allow edit as maintainer')
+        atk = session.token()
         comment_url = payload["issue"]["comments_url"]
         session.post_comment(
             comment_url,
-            body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
+            body="Would you mind installing me on your fork so that I can update
+            your branch ? \n"
             "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(
                 botname="meeseeksdev"
             ),
-        )
-        return
+    # if not target_session:
+    #     comment_url = payload["issue"]["comments_url"]
+    #     session.post_comment(
+    #         comment_url,
+    #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
+    #         "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(
+    #             botname="meeseeksdev"
+    #         ),
+    #     )
+    #     return
 
     # clone locally
     # this process can take some time, regen token
-    atk = target_session.token()
 
     if os.path.exists(repo_name):
         print("== Cleaning up previsous work... ")
