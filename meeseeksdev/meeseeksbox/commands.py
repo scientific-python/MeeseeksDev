@@ -167,8 +167,8 @@ def blackify(*, session, payload, arguments, local_config=None):
         session.post_comment(
             comment_url,
             body="Would you mind installing me on your fork so that I can update your branch ? \n"
-            "Click [here](https://github.com/apps/meeseeksdev/installations/new)
-            to do that, and follow the instruction to add your fork."
+            "Click [here](https://github.com/apps/meeseeksdev/installations/new)"
+            "to do that, and follow the instruction to add your fork."
             "I'm going to try to push as a maintainer but this may not work."
         )
     # if not target_session:
