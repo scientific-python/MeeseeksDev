@@ -140,7 +140,7 @@ def blackify(*, session, payload, arguments, local_config=None):
     commits_url = pr_data['commits_url']
 
     commits_data = session.ghrequest( "GET",commits_url).json()
-    
+
     for commit in commits_data:
         if len(commit['parents']) != 1:
             comment_url = payload["issue"]["comments_url"]
@@ -157,7 +157,7 @@ def blackify(*, session, payload, arguments, local_config=None):
     # requester has technically no access to committer repo.
     # TODO, check if maintainer
     target_session = yield "{}/{}".format(author_login, repo_name)
-    if target_session: 
+    if target_session:
         print('installed on target repository')
         atk = target_session.token()
     else:
@@ -244,7 +244,7 @@ def blackify(*, session, payload, arguments, local_config=None):
         body=dedent("""
         I've rebased this Pull Request, applied `black` on all the
         individual commits, and pushed. You may have trouble pushing further
-        commits, but feel free to force push and ask me to reformat again.   
+        commits, but feel free to force push and ask me to reformat again.
         """)
     )
 
@@ -309,7 +309,10 @@ def safe_backport(session, payload, arguments, local_config=None):
             "GET", f"https://api.github.com/repos/{org_name}/{repo_name}/branches"
         ).json()
         existing_branches_names = {b["name"] for b in existing_branches}
-        if target_branch not in existing_branches_names:
+        if target_branch not in existing_branches_names and target_branch.endswith('.'):
+            target_branch = target_branch[:-1]
+
+        if target_branch not in existing_branches_names
             print(
                 red
                 + f"Request to backport to `{target_branch}`, which does not seem to exist. Known : {existing_branches_names}"
