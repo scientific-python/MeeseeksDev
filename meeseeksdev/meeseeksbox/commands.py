@@ -312,7 +312,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         if target_branch not in existing_branches_names and target_branch.endswith('.'):
             target_branch = target_branch[:-1]
 
-        if target_branch not in existing_branches_names
+        if target_branch not in existing_branches_names:
             print(
                 red
                 + f"Request to backport to `{target_branch}`, which does not seem to exist. Known : {existing_branches_names}"
