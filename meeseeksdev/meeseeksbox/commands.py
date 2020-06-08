@@ -281,12 +281,16 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                "side": "RIGHT"
             }
 
-            resp = session.ghrequest(
-                 "POST",
-                 f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
-                 json=data,
-                 override_accept_header=COMFORT_FADE,
-            )
+            try:
+                resp = session.ghrequest(
+                     "POST",
+                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
+                     json=data,
+                     override_accept_header=COMFORT_FADE,
+                )
+            except Exception:
+                # likely unprecessable entity out of range
+                pass
         else:
             # we can't seem to do single line with COMFORT_FADE
             data = {
