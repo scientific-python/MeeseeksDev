@@ -111,7 +111,7 @@ def replyadmin(*, session, payload, arguments, local_config=None):
     )
 
 
-def _compute_pwd_changes():
+def _compute_pwd_changes(whitelist):
     import black
     from difflib import SequenceMatcher
     from pathlib import Path
@@ -122,7 +122,7 @@ def _compute_pwd_changes():
     print('== listdir', os.listdir())
 
     for p in glob.glob('**/*.py', recursive=True):
-        print('=== scanning', p)
+        print('=== scanning', p, p.as_posix() in whitelist)
         p = Path(p)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
@@ -172,6 +172,8 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     commits_url = pr_data['commits_url']
 
     commits_data = session.ghrequest( "GET",commits_url).json()
+
+
     
 
     # that will likely fail, as if PR, we need to bypass the fact that the
@@ -206,12 +208,17 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # clone locally
     # this process can take some time, regen token
 
+    # paginated by 30 files, let's nto go that far (yet)
+    files_response = session.ghrequest("GET", f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/files")
+    pr_files = [r['filename'] for r in files_response]
+    print('== PR contains', len(pr_files), file)
+
     if os.path.exists(repo_name):
         print("== Cleaning up previsous work... ")
         subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
-    print(f"== Cloning repository from {author_login}/{repo_name}, this can take some time..")
+    print(f"== Cloning repository from {org_name}/{repo_name}, this can take some time..")
     process = subprocess.run(
         [
             "git",
@@ -241,7 +248,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     print("== Computing changes....")
     os.chdir(repo_name)
-    changes = _compute_pwd_changes()
+    changes = _compute_pwd_changes(pr_files)
     os.chdir('..')
     print("... computed", len(changes), changes)
 
