@@ -116,36 +116,39 @@ def _compute_pwd_changes(whitelist):
     from difflib import SequenceMatcher
     from pathlib import Path
     import glob
+
     post_changes = []
     import os
-    print('== pwd', os.getcwd())
-    print('== listdir', os.listdir())
 
-    for p in glob.glob('**/*.py', recursive=True):
-        print('=== scanning', p, p in whitelist)
+    print("== pwd", os.getcwd())
+    print("== listdir", os.listdir())
+
+    for p in glob.glob("**/*.py", recursive=True):
+        print("=== scanning", p, p in whitelist)
         if p not in whitelist:
             # we don't touch files not in this PR.
             continue
         p = Path(p)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
-        if new != old: 
-            print('will differ')
+        if new != old:
+            print("will differ")
             nl = new.splitlines()
             ol = old.splitlines()
             s = SequenceMatcher(None, ol, nl)
             for t, a1, a2, b1, b2 in s.get_opcodes():
-                if t == 'replace':
+                if t == "replace":
 
-                    c = '```suggestion\n'
-                    
+                    c = "```suggestion\n"
+
                     for n in nl[b1:b2]:
-                        c+=n
-                        c+='\n'
-                    c+='```'
+                        c += n
+                        c += "\n"
+                    c += "```"
                     ch = (p.as_posix(), a1, a2, c)
                     post_changes.append(ch)
     return post_changes
+
 
 @admin
 def black_suggest(*, session, payload, arguments, local_config=None):
@@ -172,18 +175,15 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
 
-    commits_url = pr_data['commits_url']
+    commits_url = pr_data["commits_url"]
 
-    commits_data = session.ghrequest( "GET",commits_url).json()
-
-
-    
+    commits_data = session.ghrequest("GET", commits_url).json()
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
     # TODO, check if maintainer
     ## target_session = yield "{}/{}".format(author_login, repo_name)
-    ## if target_session: 
+    ## if target_session:
     ##     print('installed on target repository')
     ##     atk = target_session.token()
     ## else:
@@ -212,16 +212,21 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # this process can take some time, regen token
 
     # paginated by 30 files, let's nto go that far (yet)
-    files_response = session.ghrequest("GET", f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/files")
-    pr_files = [r['filename'] for r in files_response.json()]
-    print('== PR contains', len(pr_files), 'files')
+    files_response = session.ghrequest(
+        "GET",
+        f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/files",
+    )
+    pr_files = [r["filename"] for r in files_response.json()]
+    print("== PR contains", len(pr_files), "files")
 
     if os.path.exists(repo_name):
         print("== Cleaning up previsous work... ")
         subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
-    print(f"== Cloning repository from {org_name}/{repo_name}, this can take some time..")
+    print(
+        f"== Cloning repository from {org_name}/{repo_name}, this can take some time.."
+    )
     process = subprocess.run(
         [
             "git",
@@ -234,59 +239,59 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run("git config --global user.email meeseeksmachine@gmail.com".split(" "))
+    subprocess.run(
+        "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+    )
     subprocess.run("git config --global user.name FriendlyBot".split(" "))
 
     # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
-    #branch = master
-    #print(f"== Fetching branch `{branch}`  ...")
-    #repo.remotes.origin.fetch("{}:workbranch".format(branch))
-    #repo.git.checkout("workbranch")
+    # branch = master
+    # print(f"== Fetching branch `{branch}`  ...")
+    # repo.remotes.origin.fetch("{}:workbranch".format(branch))
+    # repo.git.checkout("workbranch")
     print("== Fetching Commits to reformat...")
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
     print("== All has been fetched correctly")
     repo.git.checkout(head_sha)
     print(f"== checked PR head {head_sha}")
 
-
     print("== Computing changes....")
     os.chdir(repo_name)
     changes = _compute_pwd_changes(pr_files)
-    os.chdir('..')
+    os.chdir("..")
     print("... computed", len(changes), changes)
 
-
-    COMFORT_FADE = 'application/vnd.github.comfort-fade-preview+json'
+    COMFORT_FADE = "application/vnd.github.comfort-fade-preview+json"
     # comment_url = payload["issue"]["comments_url"]
     # session.post_comment(
     #     comment_url,
     #     body=dedent("""
     #     I've rebased this Pull Request, applied `black` on all the
     #     individual commits, and pushed. You may have trouble pushing further
-    #     commits, but feel free to force push and ask me to reformat again.   
+    #     commits, but feel free to force push and ask me to reformat again.
     #     """)
     # )
 
     for path, start, end, body in changes:
-        print(f'== will suggest the following on {path} {start+1} to {end}\n', body)
-        if start+1 != end:
+        print(f"== will suggest the following on {path} {start+1} to {end}\n", body)
+        if start + 1 != end:
             data = {
-               "body": body,
-               "commit_id": head_sha,
-               "path": path,
-               "start_line": start+1,
-               "start_side": "RIGHT",
-               "line": end,
-               "side": "RIGHT"
+                "body": body,
+                "commit_id": head_sha,
+                "path": path,
+                "start_line": start + 1,
+                "start_side": "RIGHT",
+                "line": end,
+                "side": "RIGHT",
             }
 
             try:
                 resp = session.ghrequest(
-                     "POST",
-                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
-                     json=data,
-                     override_accept_header=COMFORT_FADE,
+                    "POST",
+                    f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
+                    json=data,
+                    override_accept_header=COMFORT_FADE,
                 )
             except Exception:
                 # likely unprecessable entity out of range
@@ -294,18 +299,18 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         else:
             # we can't seem to do single line with COMFORT_FADE
             data = {
-               "body": body,
-               "commit_id": head_sha,
-               "path": path,
-               "line": end,
-               "side": "RIGHT"
+                "body": body,
+                "commit_id": head_sha,
+                "path": path,
+                "line": end,
+                "side": "RIGHT",
             }
 
             try:
                 resp = session.ghrequest(
-                     "POST",
-                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
-                     json=data,
+                    "POST",
+                    f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
+                    json=data,
                 )
             except Exception:
                 # likely unprecessable entity out of range
@@ -315,7 +320,6 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
-        
 
 @admin
 def blackify(*, session, payload, arguments, local_config=None):
@@ -343,31 +347,31 @@ def blackify(*, session, payload, arguments, local_config=None):
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
 
-    commits_url = pr_data['commits_url']
+    commits_url = pr_data["commits_url"]
 
-    commits_data = session.ghrequest( "GET",commits_url).json()
-    
+    commits_data = session.ghrequest("GET", commits_url).json()
+
     for commit in commits_data:
-        if len(commit['parents']) != 1:
+        if len(commit["parents"]) != 1:
             comment_url = payload["issue"]["comments_url"]
             session.post_comment(
                 comment_url,
-                body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n"
+                body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n",
             )
             return
 
     # so far we assume that the commit we rebase on is the first.
-    to_rebase_on = commits_data[0]['parents'][0]['sha']
+    to_rebase_on = commits_data[0]["parents"][0]["sha"]
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
     # TODO, check if maintainer
     target_session = yield "{}/{}".format(author_login, repo_name)
-    if target_session: 
-        print('installed on target repository')
+    if target_session:
+        print("installed on target repository")
         atk = target_session.token()
     else:
-        print('use allow edit as maintainer')
+        print("use allow edit as maintainer")
         atk = session.token()
         comment_url = payload["issue"]["comments_url"]
         session.post_comment(
@@ -375,7 +379,7 @@ def blackify(*, session, payload, arguments, local_config=None):
             body="Would you mind installing me on your fork so that I can update your branch ? \n"
             "Click [here](https://github.com/apps/meeseeksdev/installations/new)"
             "to do that, and follow the instruction to add your fork."
-            "I'm going to try to push as a maintainer but this may not work."
+            "I'm going to try to push as a maintainer but this may not work.",
         )
     # if not target_session:
     #     comment_url = payload["issue"]["comments_url"]
@@ -396,7 +400,9 @@ def blackify(*, session, payload, arguments, local_config=None):
         subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
-    print(f"== Cloning repository from {author_login}/{repo_name}, this can take some time..")
+    print(
+        f"== Cloning repository from {author_login}/{repo_name}, this can take some time.."
+    )
     process = subprocess.run(
         [
             "git",
@@ -409,7 +415,9 @@ def blackify(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run("git config --global user.email meeseeksmachine@gmail.com".split(" "))
+    subprocess.run(
+        "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+    )
     subprocess.run("git config --global user.name FriendlyBot".split(" "))
 
     # do the pep8ify on local filesystem
@@ -424,16 +432,29 @@ def blackify(*, session, payload, arguments, local_config=None):
     os.chdir(repo_name)
 
     def lpr(*args):
-        print('Should run:', *args)
+        print("Should run:", *args)
 
-    lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', to_rebase_on )
+    lpr(
+        'git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
+        to_rebase_on,
+    )
 
     ## todo check error code.
-    subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', to_rebase_on])
+    subprocess.run(
+        [
+            "git",
+            "rebase",
+            "-x",
+            "black --fast . && git commit -a --amend --no-edit",
+            "--strategy-option=theirs",
+            "--autosquash",
+            to_rebase_on,
+        ]
+    )
 
     ## write the commit message
-    #msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
-    #repo.git.commit("-am", msg)
+    # msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
+    # repo.git.commit("-am", msg)
 
     ## Push the pep8ify work
     print("== Pushing work....:")
@@ -442,18 +463,18 @@ def blackify(*, session, payload, arguments, local_config=None):
     repo.git.checkout("master")
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
-
     comment_url = payload["issue"]["comments_url"]
     session.post_comment(
         comment_url,
-        body=dedent("""
+        body=dedent(
+            """
         I've rebased this Pull Request, applied `black` on all the
         individual commits, and pushed. You may have trouble pushing further
         commits, but feel free to force push and ask me to reformat again.   
-        """)
+        """
+        ),
     )
-    #os.chdir("..")
-
+    # os.chdir("..")
 
 
 @write
@@ -631,7 +652,6 @@ def safe_backport(session, payload, arguments, local_config=None):
 
                 traceback.print_exc()
         ## end optimise-fetch-experiment
-
 
         clone_epoch = time.time()
         action = "set-url"
@@ -900,11 +920,11 @@ def tag(session, payload, arguments, local_config=None):
     num = payload.get("issue", payload.get("pull_request")).get("number")
     url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
     arguments = arguments.replace("'", '"')
-    quoted = re.findall(r'\"(.+?)\"',arguments.replace("'", '"'))
+    quoted = re.findall(r"\"(.+?)\"", arguments.replace("'", '"'))
     for q in quoted:
-        arguments = arguments.replace('"%s"' % q, '')
+        arguments = arguments.replace('"%s"' % q, "")
     tags = [arg.strip() for arg in arguments.split(",") if arg.strip()] + quoted
-    print('raw tags:', tags)
+    print("raw tags:", tags)
     to_apply = []
     not_applied = []
     try:
@@ -915,51 +935,48 @@ def tag(session, payload, arguments, local_config=None):
         label_payloads = [label_payload]
 
         def get_next_link(req):
-            all_links = req.headers.get('Link')
+            all_links = req.headers.get("Link")
             if 'rel="next"' in all_links:
-                links = all_links.split(',')
-                next_link = [l for l in links if 'next' in l][0] # assume only one.
+                links = all_links.split(",")
+                next_link = [l for l in links if "next" in l][0]  # assume only one.
                 if next_link:
-                    return next_link.split(';')[0].strip(' <>')
-
+                    return next_link.split(";")[0].strip(" <>")
 
         # let's assume no more than 200 labels
         resp = label_payload
         try:
             for i in range(10):
-                print('get labels page',i)
+                print("get labels page", i)
                 next_link = get_next_link(resp)
                 if next_link:
-                    resp = session.ghrequest( "GET", next_link)
+                    resp = session.ghrequest("GET", next_link)
                     label_payloads.append(resp)
                 else:
                     break
         except Exception:
             traceback.print_exc()
 
-
-
         know_labels = []
         for p in label_payloads:
             know_labels.extend([label["name"] for label in p.json()])
-        print('known labels', know_labels)
+        print("known labels", know_labels)
 
         not_known_tags = [t for t in tags if t not in know_labels]
         known_tags = [t for t in tags if t in know_labels]
-        print('known tags', known_tags)
-        print('known labels', not_known_tags)
+        print("known tags", known_tags)
+        print("known labels", not_known_tags)
 
         # try to look at casing
         nk = []
         known_lower_normal = {l.lower(): l for l in know_labels}
-        print('known labels lower', known_lower_normal)
+        print("known labels lower", known_lower_normal)
         for t in not_known_tags:
             target = known_lower_normal.get(t.lower())
-            print('mapping t', t, target)
+            print("mapping t", t, target)
             if target:
                 known_tags.append(t)
             else:
-                print('will not apply', t)
+                print("will not apply", t)
                 nk.append(t)
 
         to_apply = known_tags
