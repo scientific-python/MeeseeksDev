@@ -118,10 +118,12 @@ def _compute_pwd_changes():
     import glob
     post_changes = []
     for p in glob.glob('**/*.py', recursive=True):
+        print('=== scanning', p)
         p = Path(p)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
         if new != old: 
+            print('will differ')
             nl = new.splitlines()
             ol = old.splitlines()
             s = SequenceMatcher(None, ol, nl)
@@ -236,31 +238,13 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
     print("== All has been fetched correctly")
 
+
+    print("== Computing changes....")
     os.chdir(repo_name)
-
     changes = _compute_pwd_changes()
-
     os.chdir('..')
+    print("... computed", len(changes), changes)
 
-    def lpr(*args):
-        print('Should run:', *args)
-
-    #lpr('git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash', to_rebase_on )
-
-    ## todo check error code.
-    #subprocess.run(['git','rebase', '-x','black --fast . && git commit -a --amend --no-edit','--strategy-option=theirs','--autosquash', to_rebase_on])
-    #os.chdir("..")
-
-    ## write the commit message
-    #msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
-    #repo.git.commit("-am", msg)
-
-    ## Push the pep8ify work
-    #print("== Pushing work....:")
-    #lpr(f"pushing with workbranch:{branch}")
-    #repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
-    #repo.git.checkout("master")
-    #repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
     COMFORT_FADE = 'application/vnd.github.comfort-fade-preview+json'
     # comment_url = payload["issue"]["comments_url"]
@@ -274,6 +258,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # )
 
     for path, start, end, body in changes:
+        print(f'== will suggest the following on {path}\n', body)
         data = {
            "body": body,
            "commit_id": head_sha,
@@ -283,6 +268,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
            "line": end,
            "side": "RIGHT"
         }
+
         resp = session.ghrequest(
              "POST",
              f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
