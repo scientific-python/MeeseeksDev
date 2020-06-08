@@ -216,7 +216,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
             "git",
             "clone",
             "https://x-access-token:{}@github.com/{}/{}".format(
-                atk, author_login, repo_name
+                session.token(), org_name, repo_name
             ),
         ]
     )
