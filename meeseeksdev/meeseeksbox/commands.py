@@ -263,15 +263,15 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     #repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
     COMFORT_FADE = 'application/vnd.github.comfort-fade-preview+json'
-    comment_url = payload["issue"]["comments_url"]
-    session.post_comment(
-        comment_url,
-        body=dedent("""
-        I've rebased this Pull Request, applied `black` on all the
-        individual commits, and pushed. You may have trouble pushing further
-        commits, but feel free to force push and ask me to reformat again.   
-        """)
-    )
+    # comment_url = payload["issue"]["comments_url"]
+    # session.post_comment(
+    #     comment_url,
+    #     body=dedent("""
+    #     I've rebased this Pull Request, applied `black` on all the
+    #     individual commits, and pushed. You may have trouble pushing further
+    #     commits, but feel free to force push and ask me to reformat again.   
+    #     """)
+    # )
 
     for path, start, end, body in changes:
         data = {
