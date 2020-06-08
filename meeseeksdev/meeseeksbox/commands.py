@@ -134,17 +134,11 @@ def _compute_pwd_changes():
             for t, a1, a2, b1, b2 in s.get_opcodes():
                 if t == 'replace':
 
-                    #print(f'{p} replace {a1} to {a2} by:')
-                    #for o in ol[a1:a2]:
-                        #print('-', o)
-                    c = '```diff\n'
+                    c = '```suggestion\n'
                     
-                    #print("+|```diff")
                     for n in nl[b1:b2]:
-                        #print('+|'+n)
                         c+=n
                         c+='\n'
-                    #print("+|```")
                     c+='```'
                     ch = (p.as_posix(), a1, a2, c)
                     post_changes.append(ch)
