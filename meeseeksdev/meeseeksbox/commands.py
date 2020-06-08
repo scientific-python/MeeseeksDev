@@ -123,6 +123,9 @@ def _compute_pwd_changes(whitelist):
 
     for p in glob.glob('**/*.py', recursive=True):
         print('=== scanning', p, p in whitelist)
+        if p not in whitelist:
+            # we don't touch files not in this PR.
+            continue
         p = Path(p)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
