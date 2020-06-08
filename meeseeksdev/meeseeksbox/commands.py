@@ -118,7 +118,7 @@ def _compute_pwd_changes():
     import glob
     post_changes = []
     import os
-    print('== pwd', os.os.getcwd())
+    print('== pwd', os.getcwd())
     print('== listdir', os.listdir())
 
     for p in glob.glob('**/*.py', recursive=True):
