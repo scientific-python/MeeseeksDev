@@ -263,7 +263,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
            "body": body,
            "commit_id": head_sha,
            "path": path,
-           "start_line": start+1,
+           "start_line": start,
            "start_side": "RIGHT",
            "line": end,
            "side": "RIGHT"
