@@ -273,7 +273,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         """)
     )
 
-    for path, start, end, body in post_changes:
+    for path, start, end, body in changes:
         data = {
            "body": body,
            "commit_id": head_sha,
