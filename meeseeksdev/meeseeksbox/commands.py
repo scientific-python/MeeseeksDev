@@ -259,22 +259,39 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     for path, start, end, body in changes:
         print(f'== will suggest the following on {path}\n', body)
-        data = {
-           "body": body,
-           "commit_id": head_sha,
-           "path": path,
-           "start_line": start,
-           "start_side": "RIGHT",
-           "line": end,
-           "side": "RIGHT"
-        }
+        if start+1 == end:
+            data = {
+               "body": body,
+               "commit_id": head_sha,
+               "path": path,
+               "start_line": start+1,
+               "start_side": "RIGHT",
+               "line": end,
+               "side": "RIGHT"
+            }
 
-        resp = session.ghrequest(
-             "POST",
-             f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
-             json=data,
-             override_accept_header=COMFORT_FADE,
-        )
+            resp = session.ghrequest(
+                 "POST",
+                 f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
+                 json=data,
+                 override_accept_header=COMFORT_FADE,
+            )
+        else:
+            # we can't seem to do single line with COMFORT_FADE
+            data = {
+               "body": body,
+               "commit_id": head_sha,
+               "path": path,
+               "line": end,
+               "side": "RIGHT"
+            }
+
+            resp = session.ghrequest(
+                 "POST",
+                 f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
+                 json=data,
+            )
+
         print(resp.json())
 
 
