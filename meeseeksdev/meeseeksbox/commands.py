@@ -211,7 +211,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # paginated by 30 files, let's nto go that far (yet)
     files_response = session.ghrequest("GET", f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/files")
     pr_files = [r['filename'] for r in files_response.json()]
-    print('== PR contains', len(pr_files), file)
+    print('== PR contains', len(pr_files), 'files')
 
     if os.path.exists(repo_name):
         print("== Cleaning up previsous work... ")
