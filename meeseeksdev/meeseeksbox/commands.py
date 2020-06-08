@@ -306,9 +306,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
             except Exception:
                 # likely unprecessable entity out of range
                 pass
-
-        print(resp.json())
-
+        
 
 @admin
 def blackify(*, session, payload, arguments, local_config=None):
