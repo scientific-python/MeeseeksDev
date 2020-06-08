@@ -241,6 +241,8 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== Fetching Commits to reformat...")
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
     print("== All has been fetched correctly")
+    repo.git.checkout(head_sha)
+    print(f"== checked PR head {head_sha}")
 
 
     print("== Computing changes....")
