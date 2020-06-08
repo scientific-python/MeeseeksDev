@@ -117,6 +117,10 @@ def _compute_pwd_changes():
     from pathlib import Path
     import glob
     post_changes = []
+    import os
+    print('== pwd', os.os.getcwd())
+    print('== listdir', os.listdir())
+
     for p in glob.glob('**/*.py', recursive=True):
         print('=== scanning', p)
         p = Path(p)
