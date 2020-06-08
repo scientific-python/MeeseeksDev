@@ -303,7 +303,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                      f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
                      json=data,
                 )
-            except Execption:
+            except Exception:
                 # likely unprecessable entity out of range
                 pass
 
