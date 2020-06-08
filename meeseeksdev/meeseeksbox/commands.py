@@ -122,7 +122,7 @@ def _compute_pwd_changes(whitelist):
     print('== listdir', os.listdir())
 
     for p in glob.glob('**/*.py', recursive=True):
-        print('=== scanning', p, p.as_posix() in whitelist)
+        print('=== scanning', p, p in whitelist)
         p = Path(p)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
