@@ -236,9 +236,10 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
-    print(f"== Fetching branch `{branch}`  ...")
-    repo.remotes.origin.fetch("{}:workbranch".format(branch))
-    repo.git.checkout("workbranch")
+    #branch = master
+    #print(f"== Fetching branch `{branch}`  ...")
+    #repo.remotes.origin.fetch("{}:workbranch".format(branch))
+    #repo.git.checkout("workbranch")
     print("== Fetching Commits to reformat...")
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
     print("== All has been fetched correctly")
