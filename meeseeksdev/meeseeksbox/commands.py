@@ -115,6 +115,7 @@ def _compute_pwd_changes():
     import black
     from difflib import SequenceMatcher
     from pathlib import Path
+    import glob
     post_changes = []
     for p in glob.glob('**/*.py', recursive=True):
         p = Path(p)
