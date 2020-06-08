@@ -161,7 +161,7 @@ def main():
         "autopep8": blackify,
         "reformat": blackify,
         "black": blackify,
-        "bsug": blackify,
+        "bsug": black_suggest,
         "ready": ready,
         "merge": merge,
         "say": say,
