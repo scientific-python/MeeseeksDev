@@ -310,6 +310,11 @@ def black_suggest(*, session, payload, arguments, local_config=None):
             except Exception:
                 # likely unprecessable entity out of range
                 pass
+    if os.path.exists(repo_name):
+        print("== Cleaning up repo... ")
+        subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        print("== Done cleaning ")
+
         
 
 @admin
