@@ -258,8 +258,8 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # )
 
     for path, start, end, body in changes:
-        print(f'== will suggest the following on {path}\n', body)
-        if start+1 == end:
+        print(f'== will suggest the following on {path} {start+1} to {end}\n', body)
+        if start+1 != end:
             data = {
                "body": body,
                "commit_id": head_sha,
