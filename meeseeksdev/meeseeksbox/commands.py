@@ -297,11 +297,15 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                "side": "RIGHT"
             }
 
-            resp = session.ghrequest(
-                 "POST",
-                 f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
-                 json=data,
-            )
+            try:
+                resp = session.ghrequest(
+                     "POST",
+                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
+                     json=data,
+                )
+            except Execption:
+                # likely unprecessable entity out of range
+                pass
 
         print(resp.json())
 
