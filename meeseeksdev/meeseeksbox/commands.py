@@ -128,11 +128,12 @@ def _compute_pwd_changes(whitelist):
         if p not in whitelist:
             # we don't touch files not in this PR.
             continue
+        patch = whitelist[p]
+        print('patch is:\n', patch)
         p = Path(p)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
         if new != old:
-            print("will differ")
             nl = new.splitlines()
             ol = old.splitlines()
             s = SequenceMatcher(None, ol, nl)
@@ -216,8 +217,9 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         "GET",
         f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/files",
     )
-    pr_files = [r["filename"] for r in files_response.json()]
-    print("== PR contains", len(pr_files), "files")
+    pr_files_patches = {r["filename"]:r["patch"] for r in files_response.json()}
+
+    print("== PR contains", len(pr_files_patches), "files")
 
     if os.path.exists(repo_name):
         print("== Cleaning up previsous work... ")
@@ -258,7 +260,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     print("== Computing changes....")
     os.chdir(repo_name)
-    changes = _compute_pwd_changes(pr_files)
+    changes = _compute_pwd_changes(pr_files_patches)
     os.chdir("..")
     print("... computed", len(changes), changes)
 
@@ -274,7 +276,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # )
 
     for path, start, end, body in changes:
-        print(f"== will suggest the following on {path} {start+1} to {end}\n", body)
+        print(f"== will suggest the following on lines {path} {start+1} to {end}\n")
         if start + 1 != end:
             data = {
                 "body": body,
@@ -287,7 +289,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
             }
 
             try:
-                resp = session.ghrequest(
+                session.ghrequest(
                     "POST",
                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
                     json=data,
@@ -307,7 +309,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
             }
 
             try:
-                resp = session.ghrequest(
+                session.ghrequest(
                     "POST",
                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
                     json=data,
@@ -317,7 +319,9 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                 pass
     if os.path.exists(repo_name):
         print("== Cleaning up repo... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        import shutil
+        shutil.rmtree(repo_name)
+        #subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
 
