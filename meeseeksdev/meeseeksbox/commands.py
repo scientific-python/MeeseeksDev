@@ -111,6 +111,26 @@ def replyadmin(*, session, payload, arguments, local_config=None):
     )
 
 
+def parsepatch(patch):
+    """
+    Attempt to parse a github patch to tell us on which lines we are able to comment.
+    """
+    ranges = []
+    for l in patch.splitlines():
+        if not l.startswith('@@'):
+            continue
+        s = l.split('@@')[1].strip()
+        ranges.append([int(x) for x in s.split(' ')[1].split(',')])
+    return [(s, s+x-1) for s, x in ranges]
+
+def in_ranges(needle, haystack):
+    n1, n2 = needle
+    for h1, h2 in haystack:
+        if (h1 < n1) and (n2 < h2):
+            return True
+    return False
+
+
 def _compute_pwd_changes(whitelist):
     import black
     from difflib import SequenceMatcher
@@ -129,6 +149,7 @@ def _compute_pwd_changes(whitelist):
             # we don't touch files not in this PR.
             continue
         patch = whitelist[p]
+        ranges = parsepatch(patch)
         print('patch is:\n', patch)
         p = Path(p)
         old = p.read_text()
@@ -138,6 +159,9 @@ def _compute_pwd_changes(whitelist):
             ol = old.splitlines()
             s = SequenceMatcher(None, ol, nl)
             for t, a1, a2, b1, b2 in s.get_opcodes():
+                if not in_ranges((a1, a2), ranges):
+                    print(f"-- we won't be able to suggest a change on {p}:{a1}-{a2}")
+                    continue
                 if t == "replace":
 
                     c = "```suggestion\n"
@@ -156,7 +180,6 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("===== reformatting suggestions. =====")
 
     prnumber = payload["issue"]["number"]
-    prtitle = payload["issue"]["title"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
 
@@ -178,7 +201,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     commits_url = pr_data["commits_url"]
 
-    commits_data = session.ghrequest("GET", commits_url).json()
+    # commits_data = session.ghrequest("GET", commits_url).json()
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
