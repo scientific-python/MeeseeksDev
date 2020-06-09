@@ -117,11 +117,12 @@ def parsepatch(patch):
     """
     ranges = []
     for l in patch.splitlines():
-        if not l.startswith('@@'):
+        if not l.startswith("@@"):
             continue
-        s = l.split('@@')[1].strip()
-        ranges.append([int(x) for x in s.split(' ')[1].split(',')])
-    return [(s, s+x-1) for s, x in ranges]
+        s = l.split("@@")[1].strip()
+        ranges.append([int(x) for x in s.split(" ")[1].split(",")])
+    return [(s, s + x - 1) for s, x in ranges]
+
 
 def in_ranges(needle, haystack):
     n1, n2 = needle
