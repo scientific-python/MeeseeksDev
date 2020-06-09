@@ -150,7 +150,7 @@ def _compute_pwd_changes(whitelist):
             continue
         patch = whitelist[p]
         ranges = parsepatch(patch)
-        print('patch is:\n', patch)
+        print("patch is:\n", patch)
         p = Path(p)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
@@ -240,7 +240,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         "GET",
         f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/files",
     )
-    pr_files_patches = {r["filename"]:r["patch"] for r in files_response.json()}
+    pr_files_patches = {r["filename"]: r["patch"] for r in files_response.json()}
 
     print("== PR contains", len(pr_files_patches), "files")
 
@@ -344,7 +344,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         print("== Cleaning up repo... ")
         import shutil
         shutil.rmtree(repo_name)
-        #subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        # subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
 
