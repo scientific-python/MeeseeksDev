@@ -536,6 +536,9 @@ def safe_backport(session, payload, arguments, local_config=None):
             "GET", f"https://api.github.com/repos/{org_name}/{repo_name}/branches"
         ).json()
         existing_branches_names = {b["name"] for b in existing_branches}
+        if target_branch not in existing_branches_names and target_branch.endswith("."):
+            target_branch = target_branch[:-1]
+
         if target_branch not in existing_branches_names:
             print(
                 red
