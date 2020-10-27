@@ -4,7 +4,7 @@ pyjwt==1.7.1
 gitpython==2.1.12
 there==0.0.9
 mock==3.0.5
-cryptography==2.8
+cryptography==3.2
 yieldbreaker==0.0.1
 black
 pyyaml==5.3
