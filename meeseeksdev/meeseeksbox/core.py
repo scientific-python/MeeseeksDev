@@ -401,6 +401,7 @@ class WebHookHandler(MainHandler):
                                     '"on-merge:" found in milestone description, but unable to parse command.',
                                     'Is "on-merge:" on a separate line?',
                                 )
+                                print(description)
                     else:
                         print(f"({repo}) Hum, closed, PR but not merged")
                 else:
