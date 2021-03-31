@@ -397,7 +397,7 @@ def blackify(*, session, payload, arguments, local_config=None):
 
     if os.path.exists(repo_name):
         print("== Cleaning up previsous work... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        subprocess.run("rm -rf {}".format(repo_name).split(" "), check=True)
         print("== Done cleaning ")
 
     print(
@@ -452,15 +452,15 @@ def blackify(*, session, payload, arguments, local_config=None):
         ]
     )
 
-    ## write the commit message
+    # write the commit message
     # msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
     # repo.git.commit("-am", msg)
 
-    ## Push the pep8ify work
+    # Push the pep8ify work
     print("== Pushing work....:")
     lpr(f"pushing with workbranch:{branch}")
     repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
-    repo.git.checkout("master")
+    repo.git.checkout(default_branch)
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
     comment_url = payload["issue"]["comments_url"]
@@ -635,7 +635,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 repo = git.Repo(repo_name)
                 print(f"FF: Git fetch {default_branch}")
                 repo.remotes.origin.fetch(default_branch)
-                repo.git.checkout("master")
+                repo.git.checkout(default_branch)
                 print(f"FF: Reset hard origin/{default_branch}")
                 subprocess.run(
                     ["git", "reset", "--hard", f"origin/{default_branch}"],
@@ -860,10 +860,10 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
             keen_stats()
             # TODO comment on issue
             print(e)
-        repo.git.checkout("master")
+        repo.git.checkout(default_branch)
         repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
-        # TODO checkout master and get rid of branch
+        # TODO checkout the default_branch and get rid of branch
 
         # Make the PR on GitHub
         print(
