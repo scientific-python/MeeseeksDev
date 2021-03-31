@@ -532,6 +532,9 @@ def safe_backport(session, payload, arguments, local_config=None):
     maybe_wrong_named_branch = False
     s_slug = f"{org_name}/{repo_name}"
     try:
+        default_branch = session.ghrequest(
+            "GET", f"https://api.github.com/repos/{org_name}/{repo_name}"
+        ).json()["default_branch"]
         existing_branches = session.ghrequest(
             "GET", f"https://api.github.com/repos/{org_name}/{repo_name}/branches"
         ).json()
@@ -630,12 +633,13 @@ def safe_backport(session, payload, arguments, local_config=None):
                 ).check_returncode()
 
                 repo = git.Repo(repo_name)
-                print("FF: Git fetch master")
-                repo.remotes.origin.fetch("master")
+                print(f"FF: Git fetch {default_branch}")
+                repo.remotes.origin.fetch(default_branch)
                 repo.git.checkout("master")
-                print("FF: Reset hard origin/master")
+                print(f"FF: Reset hard origin/{default_branch}")
                 subprocess.run(
-                    ["git", "reset", "--hard", "origin/master"], cwd=repo_name
+                    ["git", "reset", "--hard", f"origin/{default_branch}"],
+                    cwd=repo_name,
                 ).check_returncode()
                 print("FF: Git describe tags....")
                 subprocess.run(["git", "describe", "--tag"], cwd=repo_name)
