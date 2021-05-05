@@ -354,7 +354,7 @@ class WebHookHandler(MainHandler):
                         + f"(https://github.com/{repo}/pull/{num}) merged (action: {action}, merged:{merged}) by {login}"
                     )
                     if merged_by:
-                        description = ""
+                        description = []
                         try:
                             raw_labels = is_pr.get("labels", [])
                             if raw_labels:
@@ -366,21 +366,17 @@ class WebHookHandler(MainHandler):
                                         raw_label.get("url", ""),
                                         override_accept_header=ACCEPT_HEADER_SYMMETRA,
                                     ).json()
-                                    label_desc = label.get("description", "")
                                     # apparently can still be none-like ?
-                                    if not label_desc:
-                                        label_desc = ""
-                                    description += "\n" + label_desc.replace("&", "\n")
+                                    label_desc = label.get("description", "") or ""
+                                    description.append(label_desc.replace("&", "\n"))
                         except:
                             import traceback
 
                             traceback.print_exc()
                         milestone = is_pr.get("milestone", {})
                         if milestone:
-                            e = milestone.get("description", "")
-                            if not e:
-                                e = ""
-                            description += e
+                            description.append(milestone.get("description", "") or "")
+                        description = "\n".join(description)
                         if (
                             "on-merge:" in description
                             and is_pr["base"]["ref"] == "master"
