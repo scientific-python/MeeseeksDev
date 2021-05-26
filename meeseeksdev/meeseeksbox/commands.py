@@ -592,8 +592,8 @@ def safe_backport(session, payload, arguments, local_config=None):
             milestone_number = int(milestone_number)
         labels_names = []
         try:
-            label_names = [l["name"] for l in pr_data["labels"]]
-            if not label_names and ("issue" in payload.keys()):
+            labels_names = [l["name"] for l in pr_data["labels"]]
+            if not labels_names and ("issue" in payload.keys()):
                 labels_names = [l["name"] for l in payload["issue"]["labels"]]
         except KeyError:
             print("Did not find labels|", pr_data)
