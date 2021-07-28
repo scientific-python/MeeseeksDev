@@ -377,9 +377,9 @@ class WebHookHandler(MainHandler):
                         if milestone:
                             description.append(milestone.get("description", "") or "")
                         description = "\n".join(description)
-                        if (
-                            "on-merge:" in description
-                            and is_pr["base"]["ref"] == "master"
+                        if "on-merge:" in description and is_pr["base"]["ref"] in (
+                            "master",
+                            "main",
                         ):
                             did_backport = False
                             for description_line in description.splitlines():
