@@ -789,11 +789,13 @@ git push YOURFORK {target_branch}:{remote_submit_branch}
 
 5. Create a PR against branch {target_branch}, I would have named this PR:
 
-> "Backport PR #{prnumber} on branch {target_branch}"
+> "Backport PR #{prnumber} on branch {target_branch} ({prtitle})"
 
 And apply the correct labels and milestones.
 
-Congratulation you did some good work ! Hopefully your backport PR will be tested by the continuous integration and merged soon!
+Congratulation you did some good work! Hopefully your backport PR will be tested by the continuous integration and merged soon!
+
+Remember to remove `Still Needs Manual Backport` label once the PR gets merged.
 
 If these instruction are inaccurate, feel free to [suggest an improvement](https://github.com/MeeseeksBox/MeeseeksDev).
                 """,
