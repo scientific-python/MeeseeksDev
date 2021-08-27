@@ -155,7 +155,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("===== reformatting suggestions. =====")
 
     prnumber = payload["issue"]["number"]
-    prtitle = payload["issue"]["title"]
+    # prtitle = payload["issue"]["title"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
 
@@ -170,14 +170,14 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     )
     pr_data = r.json()
     head_sha = pr_data["head"]["sha"]
-    base_sha = pr_data["base"]["sha"]
-    branch = pr_data["head"]["ref"]
-    author_login = pr_data["head"]["repo"]["owner"]["login"]
+    # base_sha = pr_data["base"]["sha"]
+    # branch = pr_data["head"]["ref"]
+    # author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
 
-    commits_url = pr_data["commits_url"]
+    # commits_url = pr_data["commits_url"]
 
-    commits_data = session.ghrequest("GET", commits_url).json()
+    # commits_data = session.ghrequest("GET", commits_url).json()
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
@@ -287,7 +287,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
             }
 
             try:
-                resp = session.ghrequest(
+                _ = session.ghrequest(
                     "POST",
                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
                     json=data,
@@ -307,13 +307,13 @@ def black_suggest(*, session, payload, arguments, local_config=None):
             }
 
             try:
-                resp = session.ghrequest(
+                _ = session.ghrequest(
                     "POST",
                     f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}/comments",
                     json=data,
                 )
             except Exception:
-                # likely unprecessable entity out of range
+                # likely unprocessable entity out of range
                 pass
     if os.path.exists(repo_name):
         print("== Cleaning up repo... ")
@@ -327,7 +327,6 @@ def blackify(*, session, payload, arguments, local_config=None):
     print("===== ============ =====")
     # collect initial payload
     prnumber = payload["issue"]["number"]
-    prtitle = payload["issue"]["title"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
 
@@ -342,7 +341,6 @@ def blackify(*, session, payload, arguments, local_config=None):
     )
     pr_data = r.json()
     head_sha = pr_data["head"]["sha"]
-    base_sha = pr_data["base"]["sha"]
     branch = pr_data["head"]["ref"]
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
@@ -569,7 +567,6 @@ def safe_backport(session, payload, arguments, local_config=None):
         )
         pr_data = r.json()
         merge_sha = pr_data["merge_commit_sha"]
-        body = pr_data["body"]
         milestone = pr_data["milestone"]
         if milestone:
             milestone_number = pr_data["milestone"].get("number", None)
@@ -646,7 +643,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 re_fetch_delta = time.time() - re_fetch_epoch
                 print(blue + f"FF took {re_fetch_delta}s")
                 s_ff_time = re_fetch_delta
-            except Exception as e:
+            except Exception:
                 # something went wrong. Kill repository it's going to be
                 # recloned.
                 clean_epoch = time.time()
@@ -706,11 +703,8 @@ def safe_backport(session, payload, arguments, local_config=None):
         print(
             "== Fetching Commits to {mergesha} backport...".format(mergesha=merge_sha)
         )
-        repo.remotes.origin.fetch("{mergesha}".format(num=prnumber, mergesha=merge_sha))
+        repo.remotes.origin.fetch("{mergesha}".format(mergesha=merge_sha))
         print("== All has been fetched correctly")
-
-        # remove mentions from description, to avoid pings:
-        description = body.replace("@", " ").replace("#", " ")
 
         print("Cherry-picking %s" % merge_sha)
         args = ("-m", "1", merge_sha)
