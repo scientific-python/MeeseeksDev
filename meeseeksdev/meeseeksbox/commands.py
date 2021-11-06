@@ -760,19 +760,19 @@ There seem to be a conflict, please backport manually. Here are approximate inst
 1. Checkout backport branch and update it.
 
 ```
-$ git checkout {target_branch}
-$ git pull
+git checkout {target_branch}
+git pull
 ```
 
 2. Cherry pick the first parent branch of the this PR on top of the older branch:
 ```
-$ git cherry-pick -m1 {merge_sha}
+git cherry-pick -m1 {merge_sha}
 ```
 
 3. You will likely have some merge/cherry-pick conflict here, fix them and commit:
 
 ```
-$ git commit -am {msg!r}
+git commit -am {msg!r}
 ```
 
 4. Push to a named branch :
