@@ -192,16 +192,16 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     ##     comment_url = payload["issue"]["comments_url"]
     ##     session.post_comment(
     ##         comment_url,
-    ##         body="Would you mind installing me on your fork so that I can update your branch ? \n"
+    ##         body="Would you mind installing me on your fork so that I can update your branch? \n"
     ##         "Click [here](https://github.com/apps/meeseeksdev/installations/new)"
-    ##         "to do that, and follow the instruction to add your fork."
+    ##         "to do that, and follow the instructions to add your fork."
     ##         "I'm going to try to push as a maintainer but this may not work."
     ##     )
     # if not target_session:
     #     comment_url = payload["issue"]["comments_url"]
     #     session.post_comment(
     #         comment_url,
-    #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
+    #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository?\n"
     #         "Click [here](https://github.com/apps/meeseeksdev/installations/new) to do that.".format(
     #             botname="meeseeksdev"
     #         ),
@@ -220,12 +220,12 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== PR contains", len(pr_files), "files")
 
     if os.path.exists(repo_name):
-        print("== Cleaning up previsous work... ")
+        print("== Cleaning up previous work ... ")
         subprocess.run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
     print(
-        f"== Cloning repository from {org_name}/{repo_name}, this can take some time.."
+        f"== Cloning repository from {org_name}/{repo_name}, this can take some time ..."
     )
     process = subprocess.run(
         [
@@ -247,12 +247,12 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
     # branch = master
-    # print(f"== Fetching branch `{branch}`  ...")
+    # print(f"== Fetching branch `{branch}` ...")
     # repo.remotes.origin.fetch("{}:workbranch".format(branch))
     # repo.git.checkout("workbranch")
-    print("== Fetching Commits to reformat...")
+    print("== Fetching Commits to reformat ...")
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
-    print("== All has been fetched correctly")
+    print("== All have been fetched correctly")
     repo.git.checkout(head_sha)
     print(f"== checked PR head {head_sha}")
 
@@ -374,16 +374,16 @@ def blackify(*, session, payload, arguments, local_config=None):
         comment_url = payload["issue"]["comments_url"]
         session.post_comment(
             comment_url,
-            body="Would you mind installing me on your fork so that I can update your branch ? \n"
+            body="Would you mind installing me on your fork so that I can update your branch? \n"
             "Click [here](https://github.com/apps/meeseeksdev/installations/new)"
-            "to do that, and follow the instruction to add your fork."
+            "to do that, and follow the instructions to add your fork."
             "I'm going to try to push as a maintainer but this may not work.",
         )
     # if not target_session:
     #     comment_url = payload["issue"]["comments_url"]
     #     session.post_comment(
     #         comment_url,
-    #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
+    #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository?\n"
     #         "Click [here](https://github.com/apps/meeseeksdev/installations/new) to do that.".format(
     #             botname="meeseeksdev"
     #         ),
@@ -394,12 +394,12 @@ def blackify(*, session, payload, arguments, local_config=None):
     # this process can take some time, regen token
 
     if os.path.exists(repo_name):
-        print("== Cleaning up previsous work... ")
+        print("== Cleaning up previsous work ... ")
         subprocess.run("rm -rf {}".format(repo_name).split(" "), check=True)
         print("== Done cleaning ")
 
     print(
-        f"== Cloning repository from {author_login}/{repo_name}, this can take some time.."
+        f"== Cloning repository from {author_login}/{repo_name}, this can take some time ..."
     )
     process = subprocess.run(
         [
@@ -423,9 +423,9 @@ def blackify(*, session, payload, arguments, local_config=None):
     print(f"== Fetching branch `{branch}` to pep8ify on ...")
     repo.remotes.origin.fetch("{}:workbranch".format(branch))
     repo.git.checkout("workbranch")
-    print("== Fetching Commits to pep8ify...")
+    print("== Fetching Commits to pep8ify ...")
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
-    print("== All has been fetched correctly")
+    print("== All have been fetched correctly")
 
     os.chdir(repo_name)
 
@@ -557,7 +557,7 @@ def safe_backport(session, payload, arguments, local_config=None):
     try:
 
         # collect extended payload on the PR
-        print("== Collecting data on Pull-request...")
+        print("== Collecting data on Pull-request ...")
         r = session.ghrequest(
             "GET",
             "https://api.github.com/repos/{}/{}/pulls/{}".format(
@@ -581,7 +581,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             parts = milestone_title.split(".")
             parts[-1] = "x"
             infered_target_branch = ".".join(parts)
-            print("inferring branch....", infered_target_branch)
+            print("inferring branch ...", infered_target_branch)
             target_branch = infered_target_branch
             keen.add_event("backport_infering_branch", {"infering_remove_x": 1})
 
@@ -648,7 +648,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 # recloned.
                 clean_epoch = time.time()
                 if os.path.exists(repo_name):
-                    print("== Cleaning up previsous work... ")
+                    print("== Cleaning up previous work... ")
                     subprocess.run("rm -rf {}".format(repo_name).split(" "))
                     print("== Done cleaning ")
                 s_clean_time = time.time() - clean_epoch
@@ -682,8 +682,8 @@ def safe_backport(session, payload, arguments, local_config=None):
                 "git",
                 "remote",
                 action,
-                session.personnal_account_name,
-                f"https://x-access-token:{session.personnal_account_token}@github.com/{session.personnal_account_name}/{repo_name}",
+                session.personal_account_name,
+                f"https://x-access-token:{session.personal_account_token}@github.com/{session.personal_account_name}/{repo_name}",
             ],
             cwd=repo_name,
         )
@@ -775,7 +775,7 @@ git cherry-pick -m1 {merge_sha}
 git commit -am {msg!r}
 ```
 
-4. Push to a named branch :
+4. Push to a named branch:
 
 ```
 git push YOURFORK {target_branch}:{remote_submit_branch}
@@ -787,11 +787,11 @@ git push YOURFORK {target_branch}:{remote_submit_branch}
 
 And apply the correct labels and milestones.
 
-Congratulation you did some good work! Hopefully your backport PR will be tested by the continuous integration and merged soon!
+Congratulations — you did some good work! Hopefully your backport PR will be tested by the continuous integration and merged soon!
 
-Remember to remove `Still Needs Manual Backport` label once the PR gets merged.
+Remember to remove the `Still Needs Manual Backport` label once the PR gets merged.
 
-If these instruction are inaccurate, feel free to [suggest an improvement](https://github.com/MeeseeksBox/MeeseeksDev).
+If these instructions are inaccurate, feel free to [suggest an improvement](https://github.com/MeeseeksBox/MeeseeksDev).
                 """,
                 )
                 org = payload["repository"]["owner"]["login"]
@@ -809,7 +809,7 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
             else:
                 session.post_comment(
                     comment_url,
-                    "Oops, something went wrong applying the patch... Please have  a look at my logs.",
+                    "Oops, something went wrong applying the patch ... Please have a look at my logs.",
                 )
                 print(e.stderr)
                 print("----")
@@ -842,9 +842,9 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
         print("== Pushing work....:")
         try:
             print(
-                f"Tryign to push to {remote_submit_branch} of {session.personnal_account_name}"
+                f"Tryign to push to {remote_submit_branch} of {session.personal_account_name}"
             )
-            repo.remotes[session.personnal_account_name].push(
+            repo.remotes[session.personal_account_name].push(
                 "workbranch:{}".format(remote_submit_branch)
             )
         except Exception as e:
@@ -875,7 +875,7 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
                 "title": f"Backport PR #{prnumber} on branch {target_branch} ({prtitle})",
                 "body": msg,
                 "head": "{}:{}".format(
-                    session.personnal_account_name, remote_submit_branch
+                    session.personal_account_name, remote_submit_branch
                 ),
                 "base": target_branch,
             },
@@ -893,15 +893,15 @@ If these instruction are inaccurate, feel free to [suggest an improvement](https
     except Exception as e:
         extra_info = ""
         if maybe_wrong_named_branch:
-            extra_info = "\n\n It seem that the branch you are trying to backport to  does not exists."
+            extra_info = "\n\n It seems that the branch you are trying to backport to does not exist."
         session.post_comment(
             comment_url,
-            "Something went wrong ... Please have  a look at my logs." + extra_info,
+            "Something went wrong ... Please have a look at my logs." + extra_info,
         )
         keen.add_event("error", {"unknown_crash": 1})
         print("Something went wrong")
         print(e)
-        s_reason = "Remote branches does not exists"
+        s_reason = "Remote branch does not exist"
         keen_stats()
         raise
 
@@ -1011,7 +1011,7 @@ def tag(session, payload, arguments, local_config=None):
             comment_url,
             f"Aww {user}, I was not able to apply the following label(s): `{lf}`. Either "
             "because they are not existing labels on this repository or because you do not have the permission to apply these."
-            "I tried my best to guess by looking at the casing, but was unable to find matching labels.",
+            "I tried my best to guess by looking at the casing, but I was unable to find matching labels.",
         )
 
 

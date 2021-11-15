@@ -41,8 +41,8 @@ class Config:
     at_botname = None
     integration_id = None
     webhook_secret = None
-    personnal_account_name = None
-    personnal_account_token = None
+    personal_account_name = None
+    personal_account_token = None
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -665,8 +665,8 @@ class MeeseeksBox:
         self.auth = Authenticator(
             self.config.integration_id,
             self.config.key,
-            self.config.personnal_account_token,
-            self.config.personnal_account_name,
+            self.config.personal_account_token,
+            self.config.personal_account_name,
         )
         self.auth._build_auth_id_mapping()
 
