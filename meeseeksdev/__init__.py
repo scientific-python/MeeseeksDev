@@ -99,8 +99,8 @@ def load_config_from_env():
     # for some functionalities of mr-meeseeks. Indeed, github does not allow
     # cross repositories pull-requests with Applications, so I use a personal
     # account just for that.
-    config["personnal_account_name"] = os.environ.get("PERSONAL_ACCOUNT_NAME")
-    config["personnal_account_token"] = os.environ.get("PERSONAL_ACCOUNT_TOKEN")
+    config["personal_account_name"] = os.environ.get("PERSONAL_ACCOUNT_NAME")
+    config["personal_account_token"] = os.environ.get("PERSONAL_ACCOUNT_TOKEN")
 
     return Config(**config).validate()
 

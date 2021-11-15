@@ -80,15 +80,15 @@ def fix_comment_body(body, original_poster, original_url, original_org, original
 
 class Authenticator:
     def __init__(
-        self, integration_id, rsadata, personnal_account_token, personnal_account_name
+        self, integration_id, rsadata, personal_account_token, personal_account_name
     ):
         self.since = int(datetime.datetime.now().timestamp())
         self.duration = 60 * 10
         self._token = None
         self.integration_id = integration_id
         self.rsadata = rsadata
-        self.personnal_account_token = personnal_account_token
-        self.personnal_account_name = personnal_account_name
+        self.personal_account_token = personal_account_token
+        self.personal_account_name = personal_account_name
         # TODO: this mapping is built at startup, we should update it when we
         # have new / deleted installations
         self.idmap = {}
@@ -104,8 +104,8 @@ class Authenticator:
             self.integration_id,
             self.rsadata,
             installation_id,
-            self.personnal_account_token,
-            self.personnal_account_name,
+            self.personal_account_token,
+            self.personal_account_name,
         )
 
     def list_installations(self):
@@ -173,11 +173,11 @@ class Session(Authenticator):
         integration_id,
         rsadata,
         installation_id,
-        personnal_account_token,
-        personnal_account_name,
+        personal_account_token,
+        personal_account_name,
     ):
         super().__init__(
-            integration_id, rsadata, personnal_account_token, personnal_account_name
+            integration_id, rsadata, personal_account_token, personal_account_name
         )
         self.installation_id = installation_id
 
@@ -205,7 +205,7 @@ class Session(Authenticator):
 
         def prepare():
             headers = {
-                "Authorization": "token {}".format(self.personnal_account_token),
+                "Authorization": "token {}".format(self.personal_account_token),
                 "Host": "api.github.com",
                 "User-Agent": "python/requests",
             }
