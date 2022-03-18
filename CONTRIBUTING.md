@@ -15,13 +15,13 @@ heroku login
 If creating, run:
 
 ```bash
-heroku create meeseeksdev
+heroku create meeseeksdev-$USER
 ```
 
 Otherwise, run:
 
 ```bash
-heroku git:remote -a meeseeksdev
+heroku git:remote -a meeseeksdev-$USER
 ```
 
 Then run:
