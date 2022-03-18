@@ -321,8 +321,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         print("== Done cleaning ")
 
 
-
-def run_command_and_push(name, command, session, paylog, arguments, local_config=None):
+def run_command_and_push(name, command, session, payload, arguments, local_config=None):
     print(f"===== running command {name} =====")
     print("===== ============ =====")
     # collect initial payload
@@ -330,6 +329,15 @@ def run_command_and_push(name, command, session, paylog, arguments, local_config
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
     comment_url = payload["issue"]["comments_url"]
+    author_association = payload["issue"]["comment"]["author_association"]
+    commenter =  payload["issue"]["comment"]["user"]["login"]
+
+    # Check if maintainer
+    if author_association not in ["COLLABORATOR", "MEMBER", "OWNER"]:
+        session.post_comment(
+            comment_url,
+            body=f"Cannot run this command on behalf of {commenter} with association {author_association}.",
+        )
 
     # collect extended payload on the PR
     print("== Collecting data on Pull-request...")
@@ -363,7 +371,6 @@ def run_command_and_push(name, command, session, paylog, arguments, local_config
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
-    # TODO, check if maintainer
     target_session = yield "{}/{}".format(author_login, repo_name)
     if target_session:
         print("installed on target repository")
@@ -371,7 +378,6 @@ def run_command_and_push(name, command, session, paylog, arguments, local_config
     else:
         print("use allow edit as maintainer")
         atk = session.token()
-        comment_url = payload["issue"]["comments_url"]
         session.post_comment(
             comment_url,
             body="Would you mind installing me on your fork so that I can update your branch? \n"
@@ -436,7 +442,6 @@ def run_command_and_push(name, command, session, paylog, arguments, local_config
         ]
     )
 
-
     if process.returncode != 0:
         session.post_comment(
             comment_url,
@@ -452,9 +457,15 @@ def run_command_and_push(name, command, session, paylog, arguments, local_config
     print("== Pushing work....:")
     lpr(f"pushing with workbranch:{branch}")
     repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
+
+    # Clean up
+    default_branch = session.ghrequest(
+        "GET", f"https://api.github.com/repos/{org_name}/{repo_name}"
+    ).json()["default_branch"]
     repo.git.checkout(default_branch)
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
+    # Tell the caller we've finished
     session.post_comment(
         comment_url,
         body=dedent(
@@ -469,7 +480,7 @@ def run_command_and_push(name, command, session, paylog, arguments, local_config
 
 @admin
 def precommit(*, session, payload, arguments, local_config=None):
-    run_command_and_push("pre-commit", "pre-commit --all-files --hook-stage=manual")
+    run_command_and_push("pre-commit", "pre-commit run --all-files --hook-stage=manual")
 
 
 @admin
