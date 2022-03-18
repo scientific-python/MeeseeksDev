@@ -668,7 +668,8 @@ class MeeseeksBox:
             self.config.personal_account_token,
             self.config.personal_account_name,
         )
-        self.auth._build_auth_id_mapping()
+        if self.config.personal_account_name:
+            self.auth._build_auth_id_mapping()
 
     def sig_handler(self, sig, frame):
         print(yellow, "Caught signal: %s, Shutting down..." % sig, normal)

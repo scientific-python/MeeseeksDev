@@ -42,9 +42,11 @@ This needs to be setup on the [Heroku Application settings](https://dashboard.he
 
 On the `Config Vars`. section set a key `GITHUB_ACCESS_TOKEN` with the value of the generated token.
 
+heroku webhooks:add -i api:dyno -l notify -u https://example.com/hooks
+
 GITHUB_INTEGRATION_ID="10"
 B64KEY="aGVsbG8="
 GITHUB_BOT_NAME="meeseeksdev-test"
-WEBHOOK_SECRET="fake"
+WEBHOOK_SECRET=<value from the webhooks add above"
 PERSONAL_ACCOUNT_NAME="fake"
 PERSONAL_ACCOUNT_TOKEN="fake"
