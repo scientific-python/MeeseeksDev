@@ -321,14 +321,15 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         print("== Done cleaning ")
 
 
-@admin
-def blackify(*, session, payload, arguments, local_config=None):
-    print("===== reformatting =====")
+
+def run_command_and_push(name, command, session, paylog, arguments, local_config=None):
+    print(f"===== running command {name} =====")
     print("===== ============ =====")
     # collect initial payload
     prnumber = payload["issue"]["number"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
+    comment_url = payload["issue"]["comments_url"]
 
     # collect extended payload on the PR
     print("== Collecting data on Pull-request...")
@@ -351,7 +352,6 @@ def blackify(*, session, payload, arguments, local_config=None):
 
     for commit in commits_data:
         if len(commit["parents"]) != 1:
-            comment_url = payload["issue"]["comments_url"]
             session.post_comment(
                 comment_url,
                 body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n",
@@ -379,22 +379,9 @@ def blackify(*, session, payload, arguments, local_config=None):
             "to do that, and follow the instructions to add your fork."
             "I'm going to try to push as a maintainer but this may not work.",
         )
-    # if not target_session:
-    #     comment_url = payload["issue"]["comments_url"]
-    #     session.post_comment(
-    #         comment_url,
-    #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository?\n"
-    #         "Click [here](https://github.com/apps/meeseeksdev/installations/new) to do that.".format(
-    #             botname="meeseeksdev"
-    #         ),
-    #     )
-    #     return
-
-    # clone locally
-    # this process can take some time, regen token
 
     if os.path.exists(repo_name):
-        print("== Cleaning up previsous work ... ")
+        print("== Cleaning up previous work ... ")
         subprocess.run("rm -rf {}".format(repo_name).split(" "), check=True)
         print("== Done cleaning ")
 
@@ -418,12 +405,12 @@ def blackify(*, session, payload, arguments, local_config=None):
     )
     subprocess.run("git config --global user.name FriendlyBot".split(" "))
 
-    # do the pep8ify on local filesystem
+    # do the command on local filesystem
     repo = git.Repo(repo_name)
-    print(f"== Fetching branch `{branch}` to pep8ify on ...")
+    print(f"== Fetching branch `{branch}` to run {name} on ...")
     repo.remotes.origin.fetch("{}:workbranch".format(branch))
     repo.git.checkout("workbranch")
-    print("== Fetching Commits to pep8ify ...")
+    print(f"== Fetching Commits to run {name} on ...")
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
     print("== All have been fetched correctly")
 
@@ -433,46 +420,61 @@ def blackify(*, session, payload, arguments, local_config=None):
         print("Should run:", *args)
 
     lpr(
-        'git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
+        f'git rebase -x "{command} . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
         to_rebase_on,
     )
 
-    ## todo check error code.
-    subprocess.run(
+    process = subprocess.run(
         [
             "git",
             "rebase",
             "-x",
-            "black --fast . && git commit -a --amend --no-edit",
+            f"{command} . && git commit -a --amend --no-edit",
             "--strategy-option=theirs",
             "--autosquash",
             to_rebase_on,
         ]
     )
 
-    # write the commit message
-    # msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
-    # repo.git.commit("-am", msg)
 
-    # Push the pep8ify work
+    if process.returncode != 0:
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                f"""
+            I was unable to run "{name}" due to an error.
+            """
+            ),
+        )
+        return
+
+    # Push the work
     print("== Pushing work....:")
     lpr(f"pushing with workbranch:{branch}")
     repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
     repo.git.checkout(default_branch)
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
-    comment_url = payload["issue"]["comments_url"]
     session.post_comment(
         comment_url,
         body=dedent(
-            """
-        I've rebased this Pull Request, applied `black` on all the
+            f"""
+        I've rebased this Pull Request, applied {name} on all the
         individual commits, and pushed. You may have trouble pushing further
-        commits, but feel free to force push and ask me to reformat again.   
+        commits, but feel free to force push and ask me to reformat again.
         """
         ),
     )
-    # os.chdir("..")
+
+
+@admin
+def precommit(*, session, payload, arguments, local_config=None):
+    run_command_and_push("pre-commit", "pre-commit --all-files --hook-stage=manual")
+
+
+@admin
+def blackify(*, session, payload, arguments, local_config=None):
+    run_command_and_push("black", "black --fast .")
 
 
 @write

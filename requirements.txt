@@ -11,3 +11,4 @@ pyyaml==5.4.1
 gitdb2==2.0.6
 gitdb==0.6.4
 keen
+pre-commit
