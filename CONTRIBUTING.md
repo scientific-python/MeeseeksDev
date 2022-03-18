@@ -16,6 +16,7 @@ If creating, run:
 
 ```bash
 heroku create meeseeksdev-$USER
+heroku addons:create keen
 ```
 
 Otherwise, run:
