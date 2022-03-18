@@ -334,15 +334,6 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
     comment_url = payload["issue"]["comments_url"]
-    author_association = payload["issue"]["comment"]["author_association"]
-    commenter =  payload["issue"]["comment"]["user"]["login"]
-
-    # Check if maintainer
-    if author_association not in ["COLLABORATOR", "MEMBER", "OWNER"]:
-        session.post_comment(
-            comment_url,
-            body=f"Cannot run this command on behalf of {commenter} with association {author_association}.",
-        )
 
     # collect extended payload on the PR
     print("== Collecting data on Pull-request...")
@@ -450,34 +441,51 @@ def precommit(*, session, payload, arguments, local_config=None):
     prep_for_command("precommit", session, payload, arguments, local_config=local_config)
 
     cmd = "pre-commit run --all-files --hook-stage=manual"
+    comment_url = payload["issue"]["comments_url"]
 
+    # Run the command
     lpr(cmd)
     process = subprocess.run(cmd)
 
-    # See if the pre-commit failed.
+    # See if the pre-commit succeeded, meaning there was nothing to do
+    if process.returncode == 0:
+        # Clean up the pre-commit files
+        subprocess.run(["pre-commit run clean"])
+
+        # Alert the caller and bail.
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                f"""
+            I was unable to run "pre-commit" because there was nothing to do.
+            """
+            ),
+        )
+        return
+
+    # Add any changed files.
+    subprocess.run('git commit -a -m "Apply pre-commit"')
+
+    # Run again to see if we've auto-fixed
+    process = subprocess.run(cmd)
+
+    # If that fails, then we can't auto-fix
     if process.returncode != 0:
-        # Add any changed files, and try again.
-        subprocess.run('git add .')
-        process = subprocess.run(cmd)
+        # Clean up the pre-commit files
+        subprocess.run(["pre-commit run clean"])
 
-        # If that fails, then we can't auto-fix.
-        if process.returncode != 0:
-            # Clean up the pre-commit files
-            subprocess.run(["pre-commit run clean"])
+        # Alert the caller and bail.
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                f"""
+            I was unable to run "pre-commit" due to an error, changes must be made manually.
+            """
+            ),
+        )
+        return
 
-            # Alert the caller and bail.
-            comment_url = payload["issue"]["comments_url"]
-            session.post_comment(
-                comment_url,
-                body=dedent(
-                    f"""
-                I was unable to run "pre-commit" due to an error, changes must be made manually.
-                """
-                ),
-            )
-            return
-
-    # Clean up the pre-commit files.
+    # Clean up the pre-commit files
     subprocess.run(["pre-commit run clean"])
 
     push_the_work(session, payload, arguments, local_config=local_config)
