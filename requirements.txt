@@ -6,7 +6,7 @@ there==0.0.9
 mock==4.0
 cryptography==36.0
 yieldbreaker==0.0.1
-black==2.21
+black==22.1
 pyyaml==6.0
 keen==0.7
 gitdb2==2.0.6
