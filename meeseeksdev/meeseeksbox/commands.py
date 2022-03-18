@@ -9,7 +9,6 @@ import subprocess
 import git
 import pipes
 import mock
-import keen
 import time
 import traceback
 
@@ -19,6 +18,7 @@ from textwrap import dedent
 # from friendlyautopep8 import run_on_cwd
 
 from .utils import Session, fix_issue_body, fix_comment_body
+from .utils import add_event
 
 from .scopes import admin, everyone, write
 
@@ -588,7 +588,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         nonlocal s_fork_time
         nonlocal s_clean_time
         nonlocal s_ff_time
-        keen.add_event(
+        add_event(
             "backport_stats",
             {
                 "slug": s_slug,
@@ -674,7 +674,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             infered_target_branch = ".".join(parts)
             print("inferring branch ...", infered_target_branch)
             target_branch = infered_target_branch
-            keen.add_event("backport_infering_branch", {"infering_remove_x": 1})
+            add_event("backport_infering_branch", {"infering_remove_x": 1})
 
         if milestone_number:
             milestone_number = int(milestone_number)
@@ -698,7 +698,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         for i in range(5):
             ff = session.personal_request("GET", frk["url"], raise_for_status=False)
             if ff.status_code == 200:
-                keen.add_event("fork_wait", {"n": i})
+                add_event("fork_wait", {"n": i})
                 break
             time.sleep(1)
         s_fork_time = time.time() - fork_epoch
@@ -915,7 +915,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             )
             print("\n" + e.stderr.decode("utf8", "replace"), file=sys.stderr)
             print("\n" + repo.git.status(), file=sys.stderr)
-            keen.add_event("error", {"git_crash": 1})
+            add_event("error", {"git_crash": 1})
             s_reason = "Unknown error line 501"
             keen_stats()
 
@@ -989,7 +989,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             comment_url,
             "Something went wrong ... Please have a look at my logs." + extra_info,
         )
-        keen.add_event("error", {"unknown_crash": 1})
+        add_event("error", {"unknown_crash": 1})
         print("Something went wrong")
         print(e)
         s_reason = "Remote branch does not exist"

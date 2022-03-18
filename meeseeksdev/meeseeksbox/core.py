@@ -7,8 +7,6 @@ import yaml
 import base64
 import json
 
-import keen
-
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
@@ -19,6 +17,7 @@ from concurrent.futures import ThreadPoolExecutor as Pool
 
 from .utils import Authenticator
 from .utils import ACCEPT_HEADER_SYMMETRA
+from .utils import add_event
 from .scopes import Permission
 
 from yieldbreaker import YieldBreaker
@@ -162,7 +161,7 @@ class WebHookHandler(MainHandler):
 
                 traceback.print_exc()
         if "X-Hub-Signature" not in self.request.headers:
-            keen.add_event("attack", {"type": "no X-Hub-Signature"})
+            add_event("attack", {"type": "no X-Hub-Signature"})
             return self.error("WebHook not configured with secret")
 
         if not verify_signature(
@@ -170,7 +169,7 @@ class WebHookHandler(MainHandler):
             self.request.headers["X-Hub-Signature"],
             self.config.webhook_secret,
         ):
-            keen.add_event("attack", {"type": "wrong signature"})
+            add_event("attack", {"type": "wrong signature"})
             return self.error(
                 "Cannot validate GitHub payload with provided WebHook secret"
             )
@@ -194,23 +193,23 @@ class WebHookHandler(MainHandler):
             "created",
             "submitted",
         ]:
-            keen.add_event("ignore_org_missing", {"edited": "reason"})
+            add_event("ignore_org_missing", {"edited": "reason"})
         else:
             if hasattr(self.config, "org_whitelist") and (
                 org not in self.config.org_whitelist
             ):
-                keen.add_event("post", {"reject_organisation": org})
+                add_event("post", {"reject_organisation": org})
 
         sender = payload.get("sender", {}).get("login", {})
         if hasattr(self.config, "user_blacklist") and (
             sender in self.config.user_blacklist
         ):
-            keen.add_event("post", {"blocked_user": sender})
+            add_event("post", {"blocked_user": sender})
             self.finish("Blocked user.")
             return
 
         action = payload.get("action", None)
-        keen.add_event("post", {"accepted_action": action})
+        add_event("post", {"accepted_action": action})
         unknown_repo = red + "<unknown repo>" + normal
         repo = payload.get("repository", {}).get("full_name", unknown_repo)
         if repo == unknown_repo:
@@ -475,7 +474,7 @@ class WebHookHandler(MainHandler):
         command_args = process_mentionning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
-            keen.add_event(
+            add_event(
                 "dispatch",
                 {
                     "mention": {
@@ -657,7 +656,7 @@ class WebHookHandler(MainHandler):
 class MeeseeksBox:
     def __init__(self, commands, config):
 
-        keen.add_event("status", {"state": "starting"})
+        add_event("status", {"state": "starting"})
         self.commands = commands
         self.application = None
         self.config = config
@@ -673,7 +672,7 @@ class MeeseeksBox:
 
     def sig_handler(self, sig, frame):
         print(yellow, "Caught signal: %s, Shutting down..." % sig, normal)
-        keen.add_event("status", {"state": "stopping"})
+        add_event("status", {"state": "stopping"})
         IOLoop.instance().add_callback(self.shutdown)
 
     def shutdown(self):

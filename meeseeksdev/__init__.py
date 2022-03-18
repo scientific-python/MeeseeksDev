@@ -144,8 +144,10 @@ def main():
     app_v = os.environ.get("HEROKU_RELEASE_VERSION", None)
     if app_v:
         import keen
-
-        keen.add_event("deploy", {"version": int(app_v[1:])})
+        try:
+            keen.add_event("deploy", {"version": int(app_v[1:])})
+        except Exception as e:
+            print(e)
     config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
     config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
     config.user_blacklist = usr_blacklist + [u.lower() for u in usr_blacklist]

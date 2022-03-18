@@ -16,7 +16,6 @@ If creating, run:
 
 ```bash
 heroku create meeseeksdev-$USER
-heroku addons:create keen
 ```
 
 Otherwise, run:
@@ -43,6 +42,11 @@ This needs to be setup on the [Heroku Application settings](https://dashboard.he
 On the `Config Vars`. section set a key `GITHUB_ACCESS_TOKEN` with the value of the generated token.
 
 heroku webhooks:add -i api:dyno -l notify -u https://example.com/hooks
+
+Create a webhook:
+https://<your-app-name>.herokuapp.com/gh_hook
+Use: application/json
+
 
 GITHUB_INTEGRATION_ID="10"
 B64KEY="aGVsbG8="

@@ -4,6 +4,7 @@ Utility functions to work with github.
 import jwt
 import datetime
 import json
+import keen
 import requests
 import re
 
@@ -29,6 +30,16 @@ Pay attention to not relink things like foo#23 as they already point to a
 specific repository.
 """
 RELINK_RE = re.compile("(?:(?<=[:,\s])|(?<=^))(#\d+)\\b")
+
+
+def add_event(*args, **kwargs):
+    """Attempt to add an event to keen, print the event otherwise"""
+    try:
+        keen.add_event(*args, **kwargs)
+    except Exception:
+        print('Failed to log keen event')
+        print(args)
+        print(kwargs)
 
 
 def fix_issue_body(
