@@ -325,6 +325,7 @@ def run_command_and_push(name, command, session, payload, arguments, local_confi
     print(f"===== running command {name} =====")
     print("===== ============ =====")
     # collect initial payload
+    # https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#issue_comment
     prnumber = payload["issue"]["number"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
@@ -480,12 +481,17 @@ def run_command_and_push(name, command, session, payload, arguments, local_confi
 
 @admin
 def precommit(*, session, payload, arguments, local_config=None):
-    run_command_and_push("pre-commit", "pre-commit run --all-files --hook-stage=manual")
+    cmd = "pre-commit run --all-files --hook-stage=manual"
+    try:
+        run_command_and_push("pre-commit", cmd, session, payload, arguments, local_config=local_config)
+    finally:
+        # Remove the installed pre-commit files
+        subprocess.run(["pre-commit run clean"])
 
 
 @admin
 def blackify(*, session, payload, arguments, local_config=None):
-    run_command_and_push("black", "black --fast .")
+    run_command_and_push("black", "black --fast .", session, payload, arguments, local_config=local_config)
 
 
 @write
