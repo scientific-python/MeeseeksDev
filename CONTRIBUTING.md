@@ -53,5 +53,5 @@ GITHUB_INTEGRATION_ID="10"
 B64KEY="aGVsbG8="
 GITHUB_BOT_NAME="meeseeksdev-test"
 WEBHOOK_SECRET=<value from the webhooks add above>
-PERSONAL_ACCOUNT_NAME="fake"
-PERSONAL_ACCOUNT_TOKEN="fake"
+PERSONAL_ACCOUNT_NAME="<account name>"
+PERSONAL_ACCOUNT_TOKEN="<github personal access token with repo access"
