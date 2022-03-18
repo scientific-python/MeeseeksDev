@@ -321,7 +321,11 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         print("== Done cleaning ")
 
 
-def run_command_and_push(name, command, session, payload, arguments, local_config=None):
+def lpr(*args):
+    print("Should run:", *args)
+
+
+def prep_for_command(name, session, payload, arguments, local_config=None):
     print(f"===== running command {name} =====")
     print("===== ============ =====")
     # collect initial payload
@@ -354,21 +358,6 @@ def run_command_and_push(name, command, session, payload, arguments, local_confi
     branch = pr_data["head"]["ref"]
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
-
-    commits_url = pr_data["commits_url"]
-
-    commits_data = session.ghrequest("GET", commits_url).json()
-
-    for commit in commits_data:
-        if len(commit["parents"]) != 1:
-            session.post_comment(
-                comment_url,
-                body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n",
-            )
-            return
-
-    # so far we assume that the commit we rebase on is the first.
-    to_rebase_on = commits_data[0]["parents"][0]["sha"]
 
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
@@ -423,36 +412,25 @@ def run_command_and_push(name, command, session, payload, arguments, local_confi
 
     os.chdir(repo_name)
 
-    def lpr(*args):
-        print("Should run:", *args)
 
-    lpr(
-        f'git rebase -x "{command} . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
-        to_rebase_on,
+def push_the_work(session, payload, arguments, local_config=None):
+    prnumber = payload["issue"]["number"]
+    org_name = payload["repository"]["owner"]["login"]
+    repo_name = payload["repository"]["name"]
+
+    # collect extended payload on the PR
+    print("== Collecting data on Pull-request...")
+    r = session.ghrequest(
+        "GET",
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(
+            org_name, repo_name, prnumber
+        ),
+        json=None,
     )
-
-    process = subprocess.run(
-        [
-            "git",
-            "rebase",
-            "-x",
-            f"{command} . && git commit -a --amend --no-edit",
-            "--strategy-option=theirs",
-            "--autosquash",
-            to_rebase_on,
-        ]
-    )
-
-    if process.returncode != 0:
-        session.post_comment(
-            comment_url,
-            body=dedent(
-                f"""
-            I was unable to run "{name}" due to an error.
-            """
-            ),
-        )
-        return
+    pr_data = r.json()
+    branch = pr_data["head"]["ref"]
+    repo_name = pr_data["head"]["repo"]["name"]
+    repo = git.Repo(repo_name)
 
     # Push the work
     print("== Pushing work....:")
@@ -466,32 +444,118 @@ def run_command_and_push(name, command, session, payload, arguments, local_confi
     repo.git.checkout(default_branch)
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
+
+@admin
+def precommit(*, session, payload, arguments, local_config=None):
+    prep_for_command("precommit", session, payload, arguments, local_config=local_config)
+
+    cmd = "pre-commit run --all-files --hook-stage=manual"
+
+    lpr(cmd)
+    process = subprocess.run(cmd)
+
+    # See if the pre-commit failed.
+    if process.returncode != 0:
+        # Add any changed files, and try again.
+        subprocess.run('git add .')
+        process = subprocess.run(cmd)
+
+        # If that fails, then we can't auto-fix.
+        if process.returncode != 0:
+            # Clean up the pre-commit files
+            subprocess.run(["pre-commit run clean"])
+
+            # Alert the caller and bail.
+            comment_url = payload["issue"]["comments_url"]
+            session.post_comment(
+                comment_url,
+                body=dedent(
+                    f"""
+                I was unable to run "pre-commit" due to an error, changes must be made manually.
+                """
+                ),
+            )
+            return
+
+    # Clean up the pre-commit files.
+    subprocess.run(["pre-commit run clean"])
+
+    push_the_work(session, payload, arguments, local_config=local_config)
+
     # Tell the caller we've finished
+    comment_url = payload["issue"]["comments_url"]
     session.post_comment(
         comment_url,
         body=dedent(
             f"""
-        I've rebased this Pull Request, applied {name} on all the
-        individual commits, and pushed. You may have trouble pushing further
-        commits, but feel free to force push and ask me to reformat again.
+        I've applied "pre-commit" and pushed. You may have trouble pushing further
+        commits, but feel free to force push and ask me to run again.
         """
         ),
     )
 
 
 @admin
-def precommit(*, session, payload, arguments, local_config=None):
-    cmd = "pre-commit run --all-files --hook-stage=manual"
-    try:
-        run_command_and_push("pre-commit", cmd, session, payload, arguments, local_config=local_config)
-    finally:
-        # Remove the installed pre-commit files
-        subprocess.run(["pre-commit run clean"])
-
-
-@admin
 def blackify(*, session, payload, arguments, local_config=None):
-    run_command_and_push("black", "black --fast .", session, payload, arguments, local_config=local_config)
+
+    prep_for_command("blackify", session, payload, arguments, local_config=local_config)
+
+    comment_url = payload["issue"]["comments_url"]
+    commits_url = payload["repository"]["commits_url"]
+    commits_data = session.ghrequest("GET", commits_url).json()
+
+    for commit in commits_data:
+        if len(commit["parents"]) != 1:
+            session.post_comment(
+                comment_url,
+                body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n",
+            )
+            return
+
+    # so far we assume that the commit we rebase on is the first.
+    to_rebase_on = commits_data[0]["parents"][0]["sha"]
+
+    lpr(
+        f'git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
+        to_rebase_on,
+    )
+
+    process = subprocess.run(
+        [
+            "git",
+            "rebase",
+            "-x",
+            f"black --fast . && git commit -a --amend --no-edit",
+            "--strategy-option=theirs",
+            "--autosquash",
+            to_rebase_on,
+        ]
+    )
+
+    if process.returncode != 0:
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                f"""
+            I was unable to run "blackify" due to an error.
+            """
+            ),
+        )
+        return
+
+    push_the_work(session, payload, arguments, local_config=local_config)
+
+    # Tell the caller we've finished
+    session.post_comment(
+        comment_url,
+        body=dedent(
+            f"""
+        I've rebased this Pull Request, applied `blackify` on all the
+        individual commits, and pushed. You may have trouble pushing further
+        commits, but feel free to force push and ask me to reformat again.
+        """
+        ),
+    )
 
 
 @write
