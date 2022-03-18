@@ -32,14 +32,13 @@ specific repository.
 RELINK_RE = re.compile("(?:(?<=[:,\s])|(?<=^))(#\d+)\\b")
 
 
-def add_event(*args, **kwargs):
+def add_event(*args):
     """Attempt to add an event to keen, print the event otherwise"""
     try:
-        keen.add_event(*args, **kwargs)
+        keen.add_event(*args)
     except Exception:
-        print('Failed to log keen event')
-        print(args)
-        print(kwargs)
+        print('Failed to log keen event:')
+        print(f'   {args}')
 
 
 def fix_issue_body(

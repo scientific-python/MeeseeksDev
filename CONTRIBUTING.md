@@ -44,13 +44,14 @@ On the `Config Vars`. section set a key `GITHUB_ACCESS_TOKEN` with the value of 
 heroku webhooks:add -i api:dyno -l notify -u https://example.com/hooks
 
 Create a webhook:
-https://<your-app-name>.herokuapp.com/gh_hook
-Use: application/json
+Payload URL: ttps://<your-app-name>.herokuapp.com/webhook
+Content Type: application/json
+Secret: <value from the webhooks add above>
 
 
 GITHUB_INTEGRATION_ID="10"
 B64KEY="aGVsbG8="
 GITHUB_BOT_NAME="meeseeksdev-test"
-WEBHOOK_SECRET=<value from the webhooks add above"
+WEBHOOK_SECRET=<value from the webhooks add above>
 PERSONAL_ACCOUNT_NAME="fake"
 PERSONAL_ACCOUNT_TOKEN="fake"
