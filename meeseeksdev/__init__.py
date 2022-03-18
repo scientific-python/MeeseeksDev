@@ -142,7 +142,8 @@ def main():
     config = load_config_from_env()
 
     app_v = os.environ.get("HEROKU_RELEASE_VERSION", None)
-    if app_v:
+    keen_project_id = os.environ.get("KEEN_PROJECT_ID")
+    if app_v and keen_project_id:
         import keen
 
         keen.add_event("deploy", {"version": int(app_v[1:])})

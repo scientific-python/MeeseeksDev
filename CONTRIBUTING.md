@@ -41,9 +41,9 @@ This needs to be setup on the [Heroku Application settings](https://dashboard.he
 
 On the `Config Vars`. section set a key `GITHUB_ACCESS_TOKEN` with the value of the generated token.
 
-GITHUB_INTEGRATION_ID
-B64KEY
-GITHUB_BOT_NAME
-WEBHOOK_SECRET
-PERSONAL_ACCOUNT_NAME
-PERSONAL_ACCOUNT_TOKEN
+GITHUB_INTEGRATION_ID="10"
+B64KEY="aGVsbG8="
+GITHUB_BOT_NAME="meeseeksdev-test"
+WEBHOOK_SECRET="fake"
+PERSONAL_ACCOUNT_NAME="fake"
+PERSONAL_ACCOUNT_TOKEN="fake"
