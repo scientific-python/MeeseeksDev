@@ -668,7 +668,7 @@ class MeeseeksBox:
             self.config.personal_account_token,
             self.config.personal_account_name,
         )
-        if self.config.personal_account_name:
+        if self.config.personal_account_name != "fake":
             self.auth._build_auth_id_mapping()
 
     def sig_handler(self, sig, frame):
