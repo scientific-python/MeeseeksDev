@@ -198,7 +198,7 @@ class Session(Authenticator):
         url = f"https://api.github.com/app/installations/{self.installation_id}/access_tokens"
         resp = self._integration_authenticated_request(method, url)
         if resp.status_code == 403:
-            raise Forbidden(installation_id)
+            raise Forbidden(self.installation_id)
 
         try:
             self._token = json.loads(resp.content.decode())["token"]
