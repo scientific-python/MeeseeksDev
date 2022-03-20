@@ -17,6 +17,7 @@ from .scopes import Permission
 API_COLLABORATORS_TEMPLATE = (
     "https://api.github.com/repos/{org}/{repo}/collaborators/{username}/permission"
 )
+ACCEPT_HEADER_V3 = "application/vnd.github.v3+json"
 ACCEPT_HEADER = "application/vnd.github.machine-man-preview"
 ACCEPT_HEADER_KORA = "json,application/vnd.github.korra-preview"
 ACCEPT_HEADER_SYMMETRA = "application/vnd.github.symmetra-preview+json"
@@ -40,7 +41,7 @@ def fix_issue_body(
 ):
     """
     This, for now does only simple fixes, like link to the original issue.
-    
+
     This should be improved to quote mention of people
     """
 
@@ -48,24 +49,21 @@ def fix_issue_body(
         "{org}/{repo}\\1".format(org=original_org, repo=original_repo), body
     )
 
-    return (
-        body
-        + """\n\n---- 
+    return body + """\n\n---- 
     \nOriginally opened as {org}/{repo}#{number} by @{reporter}, migration requested by @{requester}
     """.format(
-            org=original_org,
-            repo=original_repo,
-            number=original_number,
-            reporter=original_poster,
-            requester=migration_requester,
-        )
+        org=original_org,
+        repo=original_repo,
+        number=original_number,
+        reporter=original_poster,
+        requester=migration_requester,
     )
 
 
 def fix_comment_body(body, original_poster, original_url, original_org, original_repo):
     """
     This, for now does only simple fixes, like link to the original comment.
-    
+
     This should be improved to quote mention of people
     """
 
@@ -137,11 +135,15 @@ class Authenticator:
         for installation in installations:
             iid = installation["id"]
             session = self.session(iid)
-            repositories = session.ghrequest(
-                "GET", installation["repositories_url"], json=None
-            ).json()
-            for repo in repositories["repositories"]:
-                self.idmap[repo["full_name"]] = iid
+            try:
+                repositories = session.ghrequest(
+                    "GET", installation["repositories_url"], json=None
+                ).json()
+                for repo in repositories["repositories"]:
+                    self.idmap[repo["full_name"]] = iid
+            except Forbidden:
+                print("Forbidden for", iid)
+                continue
 
     def _integration_authenticated_request(self, method, url):
         self.since = int(datetime.datetime.now().timestamp())
@@ -157,7 +159,7 @@ class Authenticator:
 
         headers = {
             "Authorization": "Bearer {}".format(tok.decode()),
-            "Accept": ACCEPT_HEADER,
+            "Accept": ACCEPT_HEADER_V3,
             "Host": "api.github.com",
             "User-Agent": "python/requests",
         }
@@ -165,6 +167,10 @@ class Authenticator:
         prepared = req.prepare()
         with requests.Session() as s:
             return s.send(prepared)
+
+
+class Forbidden(Exception):
+    pass
 
 
 class Session(Authenticator):
@@ -191,6 +197,9 @@ class Session(Authenticator):
         method = "POST"
         url = f"https://api.github.com/app/installations/{self.installation_id}/access_tokens"
         resp = self._integration_authenticated_request(method, url)
+        if resp.status_code == 403:
+            raise Forbidden(installation_id)
+
         try:
             self._token = json.loads(resp.content.decode())["token"]
         except:
@@ -294,8 +303,7 @@ class Session(Authenticator):
         return getattr(Permission, permission)
 
     def has_permission(self, org, repo, username, level=None):
-        """
-        """
+        """ """
         if not level:
             level = Permission.none
 
@@ -305,8 +313,10 @@ class Session(Authenticator):
         self.ghrequest("POST", comment_url, json={"body": body})
 
     def get_collaborator_list(self, org, repo):
-        get_collaborators_query = "https://api.github.com/repos/{org}/{repo}/collaborators".format(
-            org=org, repo=repo
+        get_collaborators_query = (
+            "https://api.github.com/repos/{org}/{repo}/collaborators".format(
+                org=org, repo=repo
+            )
         )
         resp = self.ghrequest("GET", get_collaborators_query, None)
         if resp.status_code == 200:
