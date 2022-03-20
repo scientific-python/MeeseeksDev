@@ -7,5 +7,5 @@ mock==3.0.5
 cryptography==2.8
 yieldbreaker==0.0.1
 black
-pyyaml==5.3
+pyyaml==5.4.1
 keen
