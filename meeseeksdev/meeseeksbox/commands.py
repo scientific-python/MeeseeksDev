@@ -536,6 +536,10 @@ def blackify(*, session, payload, arguments, local_config=None):
     # so far we assume that the commit we rebase on is the first.
     to_rebase_on = commits_data[0]["parents"][0]["sha"]
 
+
+    # TODO: fatal: not a git repository (or any parent up to mount point /)
+    # somehthin went wrong with the checkout from prep_for_command
+
     lpr(
         f'git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
         to_rebase_on,
