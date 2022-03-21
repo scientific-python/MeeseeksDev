@@ -59,7 +59,7 @@ def fix_issue_body(
         "{org}/{repo}\\1".format(org=original_org, repo=original_repo), body
     )
 
-    return body + """\n\n---- 
+    return body + """\n\n----
     \nOriginally opened as {org}/{repo}#{number} by @{reporter}, migration requested by @{requester}
     """.format(
         org=original_org,
@@ -168,7 +168,7 @@ class Authenticator:
         tok = jwt.encode(payload, key=self.rsadata, algorithm="RS256")
 
         headers = {
-            "Authorization": "Bearer {}".format(tok.decode()),
+            "Authorization": f"Bearer {tok.decode()}",
             "Accept": ACCEPT_HEADER_V3,
             "Host": "api.github.com",
             "User-Agent": "python/requests",

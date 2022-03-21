@@ -41,17 +41,19 @@ This needs to be setup on the [Heroku Application settings](https://dashboard.he
 
 On the `Config Vars`. section set a key `GITHUB_ACCESS_TOKEN` with the value of the generated token.
 
-heroku webhooks:add -i api:dyno -l notify -u https://example.com/hooks
+Create a GitHub App for testing on your account
+Homepage URL: https://meeseeksdev-$USER.herokuapp.com/
+Webhook URL: https://meeseeksdev.herokuapp.com/webhook
+Webhook Secret: Set and store as WEBHOOK_SECRET env variable
+Private Key: Generate and store as B64KEY env variable
 
-Create a webhook:
-Payload URL: ttps://<your-app-name>.herokuapp.com/webhook
-Content Type: application/json
-Secret: <value from the webhooks add above>
+Grant write access to content, issues, and users.
 
+Install the application on your user account.
 
-GITHUB_INTEGRATION_ID="10"
-B64KEY="aGVsbG8="
-GITHUB_BOT_NAME="meeseeksdev-test"
+GITHUB_INTEGRATION_ID="<App ID of the Application>"
+B64KEY="<(B64 part of pem file)>"
+GITHUB_BOT_NAME="meeseeksdev-$USER"
 WEBHOOK_SECRET=<value from the webhooks add above>
 PERSONAL_ACCOUNT_NAME="<account name>"
 PERSONAL_ACCOUNT_TOKEN="<github personal access token with repo access"
