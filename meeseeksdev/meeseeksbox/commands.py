@@ -509,7 +509,20 @@ def blackify(*, session, payload, arguments, local_config=None):
     prep_for_command("blackify", session, payload, arguments, local_config=local_config)
 
     comment_url = payload["issue"]["comments_url"]
-    commits_url = payload["repository"]["commits_url"]
+
+    prnumber = payload["issue"]["number"]
+    org_name = payload["repository"]["owner"]["login"]
+    repo_name = payload["repository"]["name"]
+
+    r = session.ghrequest(
+        "GET",
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(
+            org_name, repo_name, prnumber
+        ),
+        json=None,
+    )
+    pr_data = r.json()
+    commits_url = pr_data["commits_url"]
     commits_data = session.ghrequest("GET", commits_url).json()
 
     for commit in commits_data:

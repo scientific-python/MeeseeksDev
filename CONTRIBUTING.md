@@ -4,7 +4,7 @@
 
 - Install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#download-and-install).
 
-You will need to have an account in both Heroku.
+You will need to have an account in Heroku.
 
 Log in to Heroku:
 
@@ -31,29 +31,32 @@ git push heroku $(git rev-parse --abbrev-ref HEAD):master
 heroku open
 ```
 
-Browse to `/hooks/github` and verify page render.
-
-### Heroku Configuration
-
-You will need a Github token with access to cancel builds. This 
-
-This needs to be setup on the [Heroku Application settings](https://dashboard.heroku.com/apps/jupyterlab-bot/settings)
-
-On the `Config Vars`. section set a key `GITHUB_ACCESS_TOKEN` with the value of the generated token.
+### GitHub App Configuration
 
 Create a GitHub App for testing on your account
 Homepage URL: https://meeseeksdev-$USER.herokuapp.com/
-Webhook URL: https://meeseeksdev.herokuapp.com/webhook
+Webhook URL: https://meeseeksdev-$USER.herokuapp.com/webhook
 Webhook Secret: Set and store as WEBHOOK_SECRET env variable
 Private Key: Generate and store as B64KEY env variable
 
 Grant write access to content, issues, and users.
+Subscribe to Issue and Issue Comment Events.
 
-Install the application on your user account.
+Install the application on your user account, at least in your MeeseeksDev fork.
 
+### Heroku Configuration
+
+You will need a Github token with access to cancel builds. This
+
+This needs to be setup on the [Heroku Application settings](https://dashboard.heroku.com/apps/jupyterlab-bot/settings)
+
+On the `Config Vars`. section set the following keys::
+
+```
 GITHUB_INTEGRATION_ID="<App ID of the Application>"
-B64KEY="<(B64 part of pem file)>"
-GITHUB_BOT_NAME="meeseeksdev-$USER"
-WEBHOOK_SECRET=<value from the webhooks add above>
+B64KEY="<B64 encoding of entire pem file>"
+GITHUB_BOT_NAME=">meeseeksdev-$USER>"
+WEBHOOK_SECRET="<value from the webhooks add above>""
 PERSONAL_ACCOUNT_NAME="<account name>"
-PERSONAL_ACCOUNT_TOKEN="<github personal access token with repo access"
+PERSONAL_ACCOUNT_TOKEN="<github personal access token with repo access>"
+```

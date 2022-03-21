@@ -448,7 +448,7 @@ class WebHookHandler(MainHandler):
         """
 
         # to dispatch to commands
-        installation_id = payload.get("installation", {}).get("id", "10")
+        installation_id = payload["installation"]["id"]
         org = payload["repository"]["owner"]["login"]
         repo = payload["repository"]["name"]
         pull_request = payload.get("issue", payload).get("pull_request")
