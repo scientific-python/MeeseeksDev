@@ -4,7 +4,6 @@ Utility functions to work with github.
 import jwt
 import datetime
 import json
-import keen
 import requests
 import re
 
@@ -35,6 +34,7 @@ RELINK_RE = re.compile("(?:(?<=[:,\s])|(?<=^))(#\d+)\\b")
 def add_event(*args):
     """Attempt to add an event to keen, print the event otherwise"""
     try:
+        import keen
         keen.add_event(*args)
     except Exception:
         print('Failed to log keen event:')
@@ -285,9 +285,7 @@ class Session(Authenticator):
                 else:
                     repo_name = "multiple-matches"
 
-                import keen
-
-                keen.add_event(
+                add_event(
                     "gh-rate",
                     {
                         "limit": int(rate_limit),
