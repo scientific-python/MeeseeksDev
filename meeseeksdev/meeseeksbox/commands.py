@@ -441,7 +441,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
 
     # Run the command
-    process = run(cmd)
+    process = run(cmd.split(" "))
 
     # See if the pre-commit succeeded, meaning there was nothing to do
     if process.returncode == 0:
