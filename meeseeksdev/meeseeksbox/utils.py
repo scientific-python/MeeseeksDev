@@ -43,10 +43,10 @@ def add_event(*args):
         print(f'   {args}')
 
 
-def run(*args, **kwargs):
+def run(cmd, **kwargs):
     """Print a command and then run it."""
-    print(" ".join(map(pipes.quote, args)))
-    return subprocess.run(*args, **kwargs)
+    print(" ".join(map(pipes.quote, cmd)))
+    return subprocess.run(cmd, **kwargs)
 
 
 def fix_issue_body(
