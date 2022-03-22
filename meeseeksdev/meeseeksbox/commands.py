@@ -767,7 +767,7 @@ def safe_backport(session, payload, arguments, local_config=None):
 
         s_clone_time = time.time() - clone_epoch
 
-        process = .run(
+        process = run(
             [
                 "git",
                 "remote",
