@@ -416,7 +416,9 @@ def push_the_work(session, payload, arguments, local_config=None):
     pr_data = r.json()
     branch = pr_data["head"]["ref"]
     repo_name = pr_data["head"]["repo"]["name"]
-    repo = git.Repo(repo_name)
+
+    # Open the repo in the cwd
+    repo = git.Repo('.')
 
     # Push the work
     print("== Pushing work....:")
