@@ -165,6 +165,7 @@ def main():
         "reformat": blackify,
         "black": blackify,
         "suggestions": black_suggest,
+        "pre-commit": precommit,
         "precommit": precommit,
         "ready": ready,
         "merge": merge,
