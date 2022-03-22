@@ -446,7 +446,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     # See if the pre-commit succeeded, meaning there was nothing to do
     if process.returncode == 0:
         # Clean up the pre-commit files
-        run("pre-commit run clean")
+        run("pre-commit clean")
 
         # Alert the caller and bail.
         session.post_comment(
@@ -468,7 +468,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     # If that fails, then we can't auto-fix
     if process.returncode != 0:
         # Clean up the pre-commit files
-        run("pre-commit run clean")
+        run("pre-commit clean")
 
         # Alert the caller and bail.
         session.post_comment(
