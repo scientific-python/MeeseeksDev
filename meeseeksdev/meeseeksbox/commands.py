@@ -446,7 +446,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     # See if the pre-commit succeeded, meaning there was nothing to do
     if process.returncode == 0:
         # Clean up the pre-commit files
-        run(["pre-commit run clean"])
+        run("pre-commit run clean".split(" "))
 
         # Alert the caller and bail.
         session.post_comment(
@@ -460,7 +460,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         return
 
     # Add any changed files.
-    run('git commit -a -m "Apply pre-commit"')
+    run('git commit -a -m "Apply pre-commit"'.split(" "))
 
     # Run again to see if we've auto-fixed
     process = run(cmd)
@@ -468,7 +468,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     # If that fails, then we can't auto-fix
     if process.returncode != 0:
         # Clean up the pre-commit files
-        run(["pre-commit run clean"])
+        run("pre-commit run clean".split(" "))
 
         # Alert the caller and bail.
         session.post_comment(
@@ -482,7 +482,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         return
 
     # Clean up the pre-commit files
-    run(["pre-commit run clean"])
+    run("pre-commit run clean".split(" "))
 
     push_the_work(session, payload, arguments, local_config=local_config)
 
