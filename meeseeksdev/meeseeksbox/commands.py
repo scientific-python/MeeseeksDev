@@ -433,7 +433,7 @@ def push_the_work(session, payload, arguments, local_config=None):
 
 @admin
 def precommit(*, session, payload, arguments, local_config=None):
-    yield prep_for_command("precommit", session, payload, arguments, local_config=local_config)
+    yield from prep_for_command("precommit", session, payload, arguments, local_config=local_config)
 
     cmd = "pre-commit run --all-files --hook-stage=manual"
     comment_url = payload["issue"]["comments_url"]
@@ -499,7 +499,7 @@ def precommit(*, session, payload, arguments, local_config=None):
 
 @admin
 def blackify(*, session, payload, arguments, local_config=None):
-    yield prep_for_command("blackify", session, payload, arguments, local_config=local_config)
+    yield from prep_for_command("blackify", session, payload, arguments, local_config=local_config)
 
     comment_url = payload["issue"]["comments_url"]
 
