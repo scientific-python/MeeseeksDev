@@ -7,6 +7,7 @@ import json
 import pipes
 import requests
 import re
+import shlex
 import subprocess
 
 green = "\033[0;32m"
@@ -45,6 +46,8 @@ def add_event(*args):
 
 def run(cmd, **kwargs):
     """Print a command and then run it."""
+    if isinstance(cmd, str):
+        cmd = shlex.split(cmd)
     print(" ".join(map(pipes.quote, cmd)))
     return subprocess.run(cmd, **kwargs)
 

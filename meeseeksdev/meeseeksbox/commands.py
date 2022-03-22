@@ -220,7 +220,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
-        run("rm -rf {}".format(repo_name).split(" "))
+        run("rm -rf {}".format(repo_name))
         print("== Done cleaning ")
 
     print(
@@ -239,9 +239,9 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     process.check_returncode()
 
     run(
-        "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+        "git config --global user.email meeseeksmachine@gmail.com"
     )
-    run("git config --global user.name FriendlyBot".split(" "))
+    run("git config --global user.name FriendlyBot")
 
     # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
@@ -316,7 +316,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                 pass
     if os.path.exists(repo_name):
         print("== Cleaning up repo... ")
-        run("rm -rf {}".format(repo_name).split(" "))
+        run("rm -rf {}".format(repo_name))
         print("== Done cleaning ")
 
 
@@ -364,7 +364,7 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
-        run("rm -rf {}".format(repo_name).split(" "), check=True)
+        run("rm -rf {}".format(repo_name), check=True)
         print("== Done cleaning ")
 
     print(
@@ -383,9 +383,9 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
     process.check_returncode()
 
     run(
-        "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+        "git config --global user.email meeseeksmachine@gmail.com"
     )
-    run("git config --global user.name FriendlyBot".split(" "))
+    run("git config --global user.name FriendlyBot")
 
     # do the command on local filesystem
     repo = git.Repo(repo_name)
@@ -441,12 +441,12 @@ def precommit(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
 
     # Run the command
-    process = run(cmd.split(" "))
+    process = run(cmd)
 
     # See if the pre-commit succeeded, meaning there was nothing to do
     if process.returncode == 0:
         # Clean up the pre-commit files
-        run("pre-commit run clean".split(" "))
+        run("pre-commit run clean")
 
         # Alert the caller and bail.
         session.post_comment(
@@ -460,7 +460,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         return
 
     # Add any changed files.
-    run('git commit -a -m "Apply pre-commit"'.split(" "))
+    run('git commit -a -m "Apply pre-commit"')
 
     # Run again to see if we've auto-fixed
     process = run(cmd)
@@ -468,7 +468,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     # If that fails, then we can't auto-fix
     if process.returncode != 0:
         # Clean up the pre-commit files
-        run("pre-commit run clean".split(" "))
+        run("pre-commit run clean")
 
         # Alert the caller and bail.
         session.post_comment(
@@ -482,7 +482,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         return
 
     # Clean up the pre-commit files
-    run("pre-commit run clean".split(" "))
+    run("pre-commit run clean")
 
     push_the_work(session, payload, arguments, local_config=local_config)
 
@@ -740,7 +740,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 clean_epoch = time.time()
                 if os.path.exists(repo_name):
                     print("== Cleaning up previous work... ")
-                    run("rm -rf {}".format(repo_name).split(" "))
+                    run("rm -rf {}".format(repo_name))
                     print("== Done cleaning ")
                 s_clean_time = time.time() - clean_epoch
                 import traceback
@@ -782,9 +782,9 @@ def safe_backport(session, payload, arguments, local_config=None):
         process.check_returncode()
 
         run(
-            "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+            "git config --global user.email meeseeksmachine@gmail.com"
         )
-        run("git config --global user.name MeeseeksDev[bot]".split(" "))
+        run("git config --global user.name MeeseeksDev[bot]")
 
         # do the backport on local filesystem
         repo = git.Repo(repo_name)
