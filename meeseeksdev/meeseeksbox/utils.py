@@ -4,8 +4,10 @@ Utility functions to work with github.
 import jwt
 import datetime
 import json
+import pipes
 import requests
 import re
+import subprocess
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
@@ -39,6 +41,12 @@ def add_event(*args):
     except Exception:
         print('Failed to log keen event:')
         print(f'   {args}')
+
+
+def run(*args, **kwargs):
+    """Print a command and then run it."""
+    print(" ".join(map(pipes.quote, args)))
+    return subprocess.run(*args, **kwargs)
 
 
 def fix_issue_body(

@@ -5,7 +5,6 @@ Define a few commands
 import random
 import os
 import re
-import subprocess
 import git
 import pipes
 import mock
@@ -18,7 +17,7 @@ from textwrap import dedent
 # from friendlyautopep8 import run_on_cwd
 
 from .utils import Session, fix_issue_body, fix_comment_body
-from .utils import add_event
+from .utils import add_event, run
 
 from .scopes import admin, everyone, write
 
@@ -221,13 +220,13 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
 
     print(
         f"== Cloning repository from {org_name}/{repo_name}, this can take some time ..."
     )
-    process = subprocess.run(
+    process = run(
         [
             "git",
             "clone",
@@ -239,10 +238,10 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run(
+    run(
         "git config --global user.email meeseeksmachine@gmail.com".split(" ")
     )
-    subprocess.run("git config --global user.name FriendlyBot".split(" "))
+    run("git config --global user.name FriendlyBot".split(" "))
 
     # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
@@ -317,12 +316,8 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                 pass
     if os.path.exists(repo_name):
         print("== Cleaning up repo... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        run("rm -rf {}".format(repo_name).split(" "))
         print("== Done cleaning ")
-
-
-def lpr(*args):
-    print("Should run:", *args)
 
 
 def prep_for_command(name, session, payload, arguments, local_config=None):
@@ -369,13 +364,13 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "), check=True)
+        run("rm -rf {}".format(repo_name).split(" "), check=True)
         print("== Done cleaning ")
 
     print(
         f"== Cloning repository from {author_login}/{repo_name}, this can take some time ..."
     )
-    process = subprocess.run(
+    process = run(
         [
             "git",
             "clone",
@@ -387,10 +382,10 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run(
+    run(
         "git config --global user.email meeseeksmachine@gmail.com".split(" ")
     )
-    subprocess.run("git config --global user.name FriendlyBot".split(" "))
+    run("git config --global user.name FriendlyBot".split(" "))
 
     # do the command on local filesystem
     repo = git.Repo(repo_name)
@@ -425,7 +420,7 @@ def push_the_work(session, payload, arguments, local_config=None):
 
     # Push the work
     print("== Pushing work....:")
-    lpr(f"pushing with workbranch:{branch}")
+    print(f"pushing with workbranch:{branch}")
     repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
 
     # Clean up
@@ -444,13 +439,12 @@ def precommit(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
 
     # Run the command
-    lpr(cmd)
-    process = subprocess.run(cmd)
+    process = run(cmd)
 
     # See if the pre-commit succeeded, meaning there was nothing to do
     if process.returncode == 0:
         # Clean up the pre-commit files
-        subprocess.run(["pre-commit run clean"])
+        run(["pre-commit run clean"])
 
         # Alert the caller and bail.
         session.post_comment(
@@ -464,15 +458,15 @@ def precommit(*, session, payload, arguments, local_config=None):
         return
 
     # Add any changed files.
-    subprocess.run('git commit -a -m "Apply pre-commit"')
+    run('git commit -a -m "Apply pre-commit"')
 
     # Run again to see if we've auto-fixed
-    process = subprocess.run(cmd)
+    process = run(cmd)
 
     # If that fails, then we can't auto-fix
     if process.returncode != 0:
         # Clean up the pre-commit files
-        subprocess.run(["pre-commit run clean"])
+        run(["pre-commit run clean"])
 
         # Alert the caller and bail.
         session.post_comment(
@@ -486,7 +480,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         return
 
     # Clean up the pre-commit files
-    subprocess.run(["pre-commit run clean"])
+    run(["pre-commit run clean"])
 
     push_the_work(session, payload, arguments, local_config=local_config)
 
@@ -536,16 +530,7 @@ def blackify(*, session, payload, arguments, local_config=None):
     # so far we assume that the commit we rebase on is the first.
     to_rebase_on = commits_data[0]["parents"][0]["sha"]
 
-
-    # TODO: fatal: not a git repository (or any parent up to mount point /)
-    # somehthin went wrong with the checkout from prep_for_command
-
-    lpr(
-        f'git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
-        to_rebase_on,
-    )
-
-    process = subprocess.run(
+    process = run(
         [
             "git",
             "rebase",
@@ -725,8 +710,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         if os.path.exists(repo_name):
             try:
                 re_fetch_epoch = time.time()
-                print("FF: Git set-url origin")
-                subprocess.run(
+                run(
                     [
                         "git",
                         "remote",
@@ -741,13 +725,11 @@ def safe_backport(session, payload, arguments, local_config=None):
                 print(f"FF: Git fetch {default_branch}")
                 repo.remotes.origin.fetch(default_branch)
                 repo.git.checkout(default_branch)
-                print(f"FF: Reset hard origin/{default_branch}")
-                subprocess.run(
+                run(
                     ["git", "reset", "--hard", f"origin/{default_branch}"],
                     cwd=repo_name,
                 ).check_returncode()
-                print("FF: Git describe tags....")
-                subprocess.run(["git", "describe", "--tag"], cwd=repo_name)
+                run(["git", "describe", "--tag"], cwd=repo_name)
                 re_fetch_delta = time.time() - re_fetch_epoch
                 print(blue + f"FF took {re_fetch_delta}s")
                 s_ff_time = re_fetch_delta
@@ -757,7 +739,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 clean_epoch = time.time()
                 if os.path.exists(repo_name):
                     print("== Cleaning up previous work... ")
-                    subprocess.run("rm -rf {}".format(repo_name).split(" "))
+                    run("rm -rf {}".format(repo_name).split(" "))
                     print("== Done cleaning ")
                 s_clean_time = time.time() - clean_epoch
                 import traceback
@@ -770,7 +752,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         what_was_done = "Fast-Forwarded"
         if not os.path.exists(repo_name):
             print("== Cloning current repository, this can take some time..")
-            process = subprocess.run(
+            process = run(
                 [
                     "git",
                     "clone",
@@ -785,7 +767,7 @@ def safe_backport(session, payload, arguments, local_config=None):
 
         s_clone_time = time.time() - clone_epoch
 
-        process = subprocess.run(
+        process = .run(
             [
                 "git",
                 "remote",
@@ -798,10 +780,10 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("==", what_was_done)
         process.check_returncode()
 
-        subprocess.run(
+        run(
             "git config --global user.email meeseeksmachine@gmail.com".split(" ")
         )
-        subprocess.run("git config --global user.name MeeseeksDev[bot]".split(" "))
+        run("git config --global user.name MeeseeksDev[bot]".split(" "))
 
         # do the backport on local filesystem
         repo = git.Repo(repo_name)
