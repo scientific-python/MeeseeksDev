@@ -499,8 +499,9 @@ def precommit(*, session, payload, arguments, local_config=None):
 
 @admin
 def blackify(*, session, payload, arguments, local_config=None):
-
+    print("***in blackify")
     prep_for_command("blackify", session, payload, arguments, local_config=local_config)
+    print("should have called pre_for_command")
 
     comment_url = payload["issue"]["comments_url"]
 
