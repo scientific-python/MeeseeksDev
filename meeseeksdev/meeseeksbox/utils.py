@@ -40,10 +40,11 @@ def add_event(*args):
     """Attempt to add an event to keen, print the event otherwise"""
     try:
         import keen
+
         keen.add_event(*args)
     except Exception:
-        print('Failed to log keen event:')
-        print(f'   {args}')
+        print("Failed to log keen event:")
+        print(f"   {args}")
 
 
 def run(cmd, **kwargs):
@@ -68,15 +69,14 @@ def fix_issue_body(
     This should be improved to quote mention of people
     """
 
-    body = RELINK_RE.sub(
-        "{org}/{repo}\\1".format(org=original_org, repo=original_repo), body
-    )
+    body = RELINK_RE.sub("{org}/{repo}\\1".format(org=original_org, repo=original_repo), body)
 
     return (
         body
         + """\n\n----
     \nOriginally opened as {org}/{repo}#{number} by @{reporter}, migration requested by @{requester}
-    """).format(
+    """
+    ).format(
         org=original_org,
         repo=original_repo,
         number=original_number,
@@ -92,9 +92,7 @@ def fix_comment_body(body, original_poster, original_url, original_org, original
     This should be improved to quote mention of people
     """
 
-    body = RELINK_RE.sub(
-        "{org}/{repo}\\1".format(org=original_org, repo=original_repo), body
-    )
+    body = RELINK_RE.sub("{org}/{repo}\\1".format(org=original_org, repo=original_repo), body)
 
     return """[`@{op}` commented]({original_url}): {body}""".format(
         op=original_poster, original_url=original_url, body=body
@@ -102,9 +100,7 @@ def fix_comment_body(body, original_poster, original_url, original_org, original
 
 
 class Authenticator:
-    def __init__(
-        self, integration_id, rsadata, personal_account_token, personal_account_name
-    ):
+    def __init__(self, integration_id, rsadata, personal_account_token, personal_account_name):
         self.since = int(datetime.datetime.now().timestamp())
         self.duration = 60 * 10
         self._token = None
@@ -209,9 +205,7 @@ class Session(Authenticator):
         personal_account_token,
         personal_account_name,
     ):
-        super().__init__(
-            integration_id, rsadata, personal_account_token, personal_account_name
-        )
+        super().__init__(integration_id, rsadata, personal_account_token, personal_account_name)
         self.installation_id = installation_id
 
     def token(self):
@@ -291,9 +285,7 @@ class Session(Authenticator):
             rate_limit = response.headers.get("X-RateLimit-Limit", -1)
             rate_remaining = response.headers.get("X-RateLimit-Limit", -1)
             if rate_limit:
-                repo_name_list = [
-                    k for k, v in self.idmap.items() if v == self.installation_id
-                ]
+                repo_name_list = [k for k, v in self.idmap.items() if v == self.installation_id]
                 repo_name = "no-repo"
                 if len(repo_name_list) == 1:
                     repo_name = repo_name_list[0]
@@ -338,10 +330,8 @@ class Session(Authenticator):
         self.ghrequest("POST", comment_url, json={"body": body})
 
     def get_collaborator_list(self, org, repo):
-        get_collaborators_query = (
-            "https://api.github.com/repos/{org}/{repo}/collaborators".format(
-                org=org, repo=repo
-            )
+        get_collaborators_query = "https://api.github.com/repos/{org}/{repo}/collaborators".format(
+            org=org, repo=repo
         )
         resp = self.ghrequest("GET", get_collaborators_query, None)
         if resp.status_code == 200:

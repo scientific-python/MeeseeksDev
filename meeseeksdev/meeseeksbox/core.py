@@ -45,9 +45,7 @@ class Config:
             if not attr.startswith("_") and getattr(self, attr) is None and attr != "webhook_secret"
         ]
         if missing:
-            raise ValueError(
-                "The following configuration options are missing : {}".format(missing)
-            )
+            raise ValueError("The following configuration options are missing : {}".format(missing))
         return self
 
 
@@ -134,9 +132,7 @@ class WebHookHandler(MainHandler):
                                 "X-Hub-Signature",
                             )
                         }
-                        req = requests.Request(
-                            "POST", url, headers=headers, data=req.body
-                        )
+                        req = requests.Request("POST", url, headers=headers, data=req.body)
                         prepared = req.prepare()
                         with requests.Session() as s:
                             res = s.send(prepared)
@@ -162,19 +158,12 @@ class WebHookHandler(MainHandler):
             self.config.webhook_secret,
         ):
             add_event("attack", {"type": "wrong signature"})
-            return self.error(
-                "Cannot validate GitHub payload with provided WebHook secret"
-            )
+            return self.error("Cannot validate GitHub payload with provided WebHook secret")
 
         payload = tornado.escape.json_decode(self.request.body)
         org = payload.get("repository", {}).get("owner", {}).get("login")
         if not org:
-            org = (
-                payload.get("issue", {})
-                .get("repository", {})
-                .get("owner", {})
-                .get("login")
-            )
+            org = payload.get("issue", {}).get("repository", {}).get("owner", {}).get("login")
             print("org in issue", org)
 
         if payload.get("action", None) in [
@@ -187,15 +176,11 @@ class WebHookHandler(MainHandler):
         ]:
             add_event("ignore_org_missing", {"edited": "reason"})
         else:
-            if hasattr(self.config, "org_whitelist") and (
-                org not in self.config.org_whitelist
-            ):
+            if hasattr(self.config, "org_whitelist") and (org not in self.config.org_whitelist):
                 add_event("post", {"reject_organisation": org})
 
         sender = payload.get("sender", {}).get("login", {})
-        if hasattr(self.config, "user_blacklist") and (
-            sender in self.config.user_blacklist
-        ):
+        if hasattr(self.config, "user_blacklist") and (sender in self.config.user_blacklist):
             add_event("post", {"blocked_user": sender})
             self.finish("Blocked user.")
             return
@@ -237,9 +222,7 @@ class WebHookHandler(MainHandler):
                 "push",
                 "create",
             }:
-                print(
-                    f"(https://github.com/{repo}) Not handling event type `{event_type}` yet."
-                )
+                print(f"(https://github.com/{repo}) Not handling event type `{event_type}` yet.")
                 return self.finish()
 
             print(f"({repo}) No action available for the webhook :", event_type)
@@ -251,9 +234,7 @@ class WebHookHandler(MainHandler):
 
     def dispatch_action(self, type_, payload):
         botname = self.config.botname
-        repo = payload.get("repository", {}).get(
-            "full_name", red + "<unknown repo>" + normal
-        )
+        repo = payload.get("repository", {}).get("full_name", red + "<unknown repo>" + normal)
         # new issue/PR opened
         if type_ == "opened":
             issue = payload.get("issue", None)
@@ -376,7 +357,7 @@ class WebHookHandler(MainHandler):
                             for description_line in description.splitlines():
                                 line = description_line.strip()
                                 if line.startswith("on-merge:"):
-                                    todo = line[len("on-merge:"):].strip()
+                                    todo = line[len("on-merge:") :].strip()
                                     self.dispatch_on_mention(
                                         "@meeseeksdev " + todo,
                                         payload,
@@ -492,11 +473,7 @@ class WebHookHandler(MainHandler):
                         raise_for_status=False,
                     )
                 except Exception:
-                    print(
-                        red
-                        + "An error occurred getting repository config file."
-                        + normal
-                    )
+                    print(red + "An error occurred getting repository config file." + normal)
                     import traceback
 
                     traceback.print_exc()
@@ -508,14 +485,8 @@ class WebHookHandler(MainHandler):
                     print(red + f"unknown status code {resp.status_code}" + normal)
                     resp.raise_for_status()
                 else:
-                    conf = yaml.safe_load(
-                        base64.decodebytes(resp.json()["content"].encode())
-                    )
-                    print(
-                        green
-                        + f"should test if {user} can {command} on {repo}/{org}"
-                        + normal
-                    )
+                    conf = yaml.safe_load(base64.decodebytes(resp.json()["content"].encode()))
+                    print(green + f"should test if {user} can {command} on {repo}/{org}" + normal)
                     # print(green + json.dumps(conf, indent=2) + normal)
 
                 if user in conf.get("blacklisted_users", []):
@@ -612,8 +583,7 @@ class WebHookHandler(MainHandler):
                                 if target_session.has_permission(
                                     torg, trepo, user, Permission.write
                                 ) or (
-                                    pr_origin_org_repo == org_repo
-                                    and allow_edit_from_maintainer
+                                    pr_origin_org_repo == org_repo and allow_edit_from_maintainer
                                 ):
                                     gen.send(target_session)
                                 else:
@@ -666,7 +636,7 @@ class MeeseeksBox:
         IOLoop.instance().add_callback_from_signal(self.shutdown)
 
     def shutdown(self):
-        print('in shutdown')
+        print("in shutdown")
         self.server.stop()
 
         io_loop = IOLoop.instance()

@@ -49,12 +49,10 @@ def open(*, session, payload, arguments, local_config=None):
 
 
 @write
-def migrate_issue_request(
-    *, session: Session, payload: dict, arguments: str, local_config=None
-):
+def migrate_issue_request(*, session: Session, payload: dict, arguments: str, local_config=None):
     """[to] {org}/{repo}
 
-Need to be admin on target repo. Replicate all comments on target repo and close current on.
+    Need to be admin on target repo. Replicate all comments on target repo and close current on.
     """
 
     """Todo:
@@ -92,9 +90,7 @@ Need to be admin on target repo. Replicate all comments on target repo and close
     if original_labels:
         available_labels = target_session.ghrequest(
             "GET",
-            "https://api.github.com/repos/{org}/{repo}/labels".format(
-                org=org, repo=repo
-            ),
+            "https://api.github.com/repos/{org}/{repo}/labels".format(org=org, repo=repo),
             None,
         ).json()
 
@@ -121,9 +117,7 @@ Need to be admin on target repo. Replicate all comments on target repo and close
     new_issue = new_response.json()
     new_comment_url = new_issue["comments_url"]
 
-    original_comments = session.ghrequest(
-        "GET", payload["issue"]["comments_url"], None
-    ).json()
+    original_comments = session.ghrequest("GET", payload["issue"]["comments_url"], None).json()
 
     for comment in original_comments:
         if comment["id"] == request_id:
@@ -137,9 +131,7 @@ Need to be admin on target repo. Replicate all comments on target repo and close
         )
 
     if not_set_labels:
-        body = "I was not able to apply the following label(s): %s " % ",".join(
-            not_set_labels
-        )
+        body = "I was not able to apply the following label(s): %s " % ",".join(not_set_labels)
         target_session.post_comment(new_comment_url, body=body)
 
     session.post_comment(
@@ -178,9 +170,7 @@ def merge(*, session, payload, arguments, method="merge", local_config=None):
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(
-            org_name, repo_name, prnumber
-        ),
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
         json=None,
     )
     pr_data = r.json()

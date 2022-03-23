@@ -101,9 +101,7 @@ def zen(*, session, payload, arguments, local_config=None):
 def replyadmin(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
     user = payload["issue"]["user"]["login"]
-    session.post_comment(
-        comment_url, "Hello @{user}. Waiting for your orders.".format(user=user)
-    )
+    session.post_comment(comment_url, "Hello @{user}. Waiting for your orders.".format(user=user))
 
 
 def _compute_pwd_changes(whitelist):
@@ -159,9 +157,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(
-            org_name, repo_name, prnumber
-        ),
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
         json=None,
     )
     pr_data = r.json()
@@ -220,9 +216,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         run("rm -rf {}".format(repo_name))
         print("== Done cleaning ")
 
-    print(
-        f"== Cloning repository from {org_name}/{repo_name}, this can take some time ..."
-    )
+    print(f"== Cloning repository from {org_name}/{repo_name}, this can take some time ...")
     process = run(
         [
             "git",
@@ -235,9 +229,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    run(
-        "git config --global user.email meeseeksmachine@gmail.com"
-    )
+    run("git config --global user.email meeseeksmachine@gmail.com")
     run("git config --global user.name FriendlyBot")
 
     # do the pep8ify on local filesystem
@@ -332,9 +324,7 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(
-            org_name, repo_name, prnumber
-        ),
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
         json=None,
     )
     pr_data = r.json()
@@ -365,24 +355,18 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
         run("rm -rf {}".format(repo_name), check=True)
         print("== Done cleaning ")
 
-    print(
-        f"== Cloning repository from {author_login}/{repo_name}, this can take some time ..."
-    )
+    print(f"== Cloning repository from {author_login}/{repo_name}, this can take some time ...")
     process = run(
         [
             "git",
             "clone",
-            "https://x-access-token:{}@github.com/{}/{}".format(
-                atk, author_login, repo_name
-            ),
+            "https://x-access-token:{}@github.com/{}/{}".format(atk, author_login, repo_name),
         ]
     )
     print("== Cloned..")
     process.check_returncode()
 
-    run(
-        "git config --global user.email meeseeksmachine@gmail.com"
-    )
+    run("git config --global user.email meeseeksmachine@gmail.com")
     run("git config --global user.name FriendlyBot")
 
     # do the command on local filesystem
@@ -407,9 +391,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(
-            org_name, repo_name, prnumber
-        ),
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
         json=None,
     )
     pr_data = r.json()
@@ -417,7 +399,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     repo_name = pr_data["head"]["repo"]["name"]
 
     # Open the repo in the cwd
-    repo = git.Repo('.')
+    repo = git.Repo(".")
 
     # Push the work
     print("== Pushing work....:")
@@ -512,9 +494,7 @@ def blackify(*, session, payload, arguments, local_config=None):
 
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(
-            org_name, repo_name, prnumber
-        ),
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
         json=None,
     )
     pr_data = r.json()
@@ -655,9 +635,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("== Collecting data on Pull-request ...")
         r = session.ghrequest(
             "GET",
-            "https://api.github.com/repos/{}/{}/pulls/{}".format(
-                org_name, repo_name, prnumber
-            ),
+            "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
             json=None,
         )
         pr_data = r.json()
@@ -758,9 +736,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 [
                     "git",
                     "clone",
-                    "https://x-access-token:{}@github.com/{}/{}".format(
-                        atk, org_name, repo_name
-                    ),
+                    "https://x-access-token:{}@github.com/{}/{}".format(atk, org_name, repo_name),
                 ]
             )
             process.check_returncode()
@@ -782,9 +758,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("==", what_was_done)
         process.check_returncode()
 
-        run(
-            "git config --global user.email meeseeksmachine@gmail.com"
-        )
+        run("git config --global user.email meeseeksmachine@gmail.com")
         run("git config --global user.name MeeseeksDev[bot]")
 
         # do the backport on local filesystem
@@ -792,9 +766,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("== Fetching branch to backport on ... {}".format(target_branch))
         repo.remotes.origin.fetch("refs/heads/{}:workbranch".format(target_branch))
         repo.git.checkout("workbranch")
-        print(
-            "== Fetching Commits to {mergesha} backport...".format(mergesha=merge_sha)
-        )
+        print("== Fetching Commits to {mergesha} backport...".format(mergesha=merge_sha))
         repo.remotes.origin.fetch("{mergesha}".format(mergesha=merge_sha))
         print("== All has been fetched correctly")
 
@@ -810,18 +782,14 @@ def safe_backport(session, payload, arguments, local_config=None):
                     repo.git.cherry_pick(*args)
                 except git.GitCommandError as e:
                     if "is not a merge." in e.stderr:
-                        print(
-                            "Likely not a merge PR...Attempting squash and merge picking."
-                        )
+                        print("Likely not a merge PR...Attempting squash and merge picking.")
                         args = (merge_sha,)
                         repo.git.cherry_pick(*args)
                     else:
                         raise
 
         except git.GitCommandError as e:
-            if ("git commit --allow-empty" in e.stderr) or (
-                "git commit --allow-empty" in e.stdout
-            ):
+            if ("git commit --allow-empty" in e.stderr) or ("git commit --allow-empty" in e.stdout):
                 session.post_comment(
                     comment_url,
                     "Can't Dooooo.... It seem like this is already backported (commit is empty)."
@@ -891,9 +859,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
                 num = payload.get("issue", payload).get("number")
                 url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels"
                 print("trying to apply still needs manual backport")
-                reply = session.ghrequest(
-                    "POST", url, json=["Still Needs Manual Backport"]
-                )
+                reply = session.ghrequest("POST", url, json=["Still Needs Manual Backport"])
                 print("Should be applied:", reply)
                 s_reason = "conflicts"
                 keen_stats()
@@ -933,9 +899,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         # Push the backported work
         print("== Pushing work....:")
         try:
-            print(
-                f"Tryign to push to {remote_submit_branch} of {session.personal_account_name}"
-            )
+            print(f"Tryign to push to {remote_submit_branch} of {session.personal_account_name}")
             repo.remotes[session.personal_account_name].push(
                 "workbranch:{}".format(remote_submit_branch)
             )
@@ -966,9 +930,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             json={
                 "title": f"Backport PR #{prnumber} on branch {target_branch} ({prtitle})",
                 "body": msg,
-                "head": "{}:{}".format(
-                    session.personal_account_name, remote_submit_branch
-                ),
+                "head": "{}:{}".format(session.personal_account_name, remote_submit_branch),
                 "base": target_branch,
             },
         ).json()
@@ -976,16 +938,16 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         new_number = new_pr["number"]
         resp = session.ghrequest(
             "PATCH",
-            "https://api.github.com/repos/{}/{}/issues/{}".format(
-                org_name, repo_name, new_number
-            ),
+            "https://api.github.com/repos/{}/{}/issues/{}".format(org_name, repo_name, new_number),
             json={"milestone": milestone_number, "labels": labels_names},
         )
         # print(resp.json())
     except Exception as e:
         extra_info = ""
         if maybe_wrong_named_branch:
-            extra_info = "\n\n It seems that the branch you are trying to backport to does not exist."
+            extra_info = (
+                "\n\n It seems that the branch you are trying to backport to does not exist."
+            )
         session.post_comment(
             comment_url,
             "Something went wrong ... Please have a look at my logs." + extra_info,
@@ -1115,9 +1077,7 @@ def untag(session, payload, arguments, local_config=None):
     num = payload.get("issue", payload.get("pull_request")).get("number")
     tags = [arg.strip() for arg in arguments.split(",")]
     name = "{name}"
-    url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels/{name}".format(
-        **locals()
-    )
+    url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels/{name}".format(**locals())
     no_untag = []
     for tag in tags:
         try:
@@ -1128,9 +1088,7 @@ def untag(session, payload, arguments, local_config=None):
 
 
 @write
-def migrate_issue_request(
-    *, session: Session, payload: dict, arguments: str, local_config=None
-):
+def migrate_issue_request(*, session: Session, payload: dict, arguments: str, local_config=None):
     """Todo:
 
     - Works through pagination of comments
@@ -1146,9 +1104,7 @@ def migrate_issue_request(
 
     target_session = yield org_repo
     if not target_session:
-        session.post_comment(
-            payload["issue"]["comments_url"], "It appears that I can't do that"
-        )
+        session.post_comment(payload["issue"]["comments_url"], "It appears that I can't do that")
         return
 
     issue_title = payload["issue"]["title"]
@@ -1164,9 +1120,7 @@ def migrate_issue_request(
     if original_labels:
         available_labels = target_session.ghrequest(
             "GET",
-            "https://api.github.com/repos/{org}/{repo}/labels".format(
-                org=org, repo=repo
-            ),
+            "https://api.github.com/repos/{org}/{repo}/labels".format(org=org, repo=repo),
             None,
         ).json()
 
@@ -1193,9 +1147,7 @@ def migrate_issue_request(
     new_issue = new_response.json()
     new_comment_url = new_issue["comments_url"]
 
-    original_comments = session.ghrequest(
-        "GET", payload["issue"]["comments_url"], None
-    ).json()
+    original_comments = session.ghrequest("GET", payload["issue"]["comments_url"], None).json()
 
     for comment in original_comments:
         if comment["id"] == request_id:
@@ -1209,9 +1161,7 @@ def migrate_issue_request(
         )
 
     if not_set_labels:
-        body = "I was not able to apply the following label(s): %s " % ",".join(
-            not_set_labels
-        )
+        body = "I was not able to apply the following label(s): %s " % ",".join(not_set_labels)
         target_session.post_comment(new_comment_url, body=body)
 
     session.post_comment(
