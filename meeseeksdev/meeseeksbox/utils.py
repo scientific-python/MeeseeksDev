@@ -76,7 +76,7 @@ def fix_issue_body(
         body
         + """\n\n----
     \nOriginally opened as {org}/{repo}#{number} by @{reporter}, migration requested by @{requester}
-    """.format(
+    """).format(
         org=original_org,
         repo=original_repo,
         number=original_number,
