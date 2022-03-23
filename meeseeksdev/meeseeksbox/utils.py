@@ -185,7 +185,7 @@ class Authenticator:
         tok = jwt.encode(payload, key=self.rsadata, algorithm="RS256")
 
         headers = {
-            "Authorization": f"Bearer {tok.decode()}",
+            "Authorization": f"Bearer {tok}",
             "Accept": ACCEPT_HEADER_V3,
             "Host": "api.github.com",
             "User-Agent": "python/requests",
