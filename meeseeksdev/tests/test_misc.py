@@ -1,11 +1,12 @@
-from ..meeseeksbox.core import process_mentionning_comment
-import textwrap
 import re
+import textwrap
+
+from ..meeseeksbox.core import process_mentionning_comment
 
 
 def test1():
     botname = "meeseeksdev"
-    reg = re.compile("@?" + re.escape(botname) + "(?:\[bot\])?", re.IGNORECASE)
+    reg = re.compile("@?" + re.escape(botname) + r"(?:\[bot\])?", re.IGNORECASE)
 
     assert (
         process_mentionning_comment(
@@ -15,7 +16,7 @@ def test1():
         @meeseeksdev[bot] do nothing
         meeseeksdev[bot] do something
 
-                                
+
     """
             ),
             reg,

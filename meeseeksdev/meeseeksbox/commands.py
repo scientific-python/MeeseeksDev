@@ -2,25 +2,20 @@
 Define a few commands
 """
 
-import random
 import os
-import re
-import subprocess
-import git
 import pipes
-import mock
-import keen
+import random
+import re
+import sys
 import time
 import traceback
-
-import sys
 from textwrap import dedent
 
-# from friendlyautopep8 import run_on_cwd
-
-from .utils import Session, fix_issue_body, fix_comment_body
+import git
+import mock
 
 from .scopes import admin, everyone, write
+from .utils import Session, add_event, fix_comment_body, fix_issue_body, run
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
@@ -112,10 +107,11 @@ def replyadmin(*, session, payload, arguments, local_config=None):
 
 
 def _compute_pwd_changes(whitelist):
-    import black
+    import glob
     from difflib import SequenceMatcher
     from pathlib import Path
-    import glob
+
+    import black
 
     post_changes = []
     import os
@@ -221,13 +217,13 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        run("rm -rf {}".format(repo_name))
         print("== Done cleaning ")
 
     print(
         f"== Cloning repository from {org_name}/{repo_name}, this can take some time ..."
     )
-    process = subprocess.run(
+    process = run(
         [
             "git",
             "clone",
@@ -239,10 +235,10 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run(
-        "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+    run(
+        "git config --global user.email meeseeksmachine@gmail.com"
     )
-    subprocess.run("git config --global user.name FriendlyBot".split(" "))
+    run("git config --global user.name FriendlyBot")
 
     # do the pep8ify on local filesystem
     repo = git.Repo(repo_name)
@@ -317,18 +313,20 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                 pass
     if os.path.exists(repo_name):
         print("== Cleaning up repo... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "))
+        run("rm -rf {}".format(repo_name))
         print("== Done cleaning ")
 
 
-@admin
-def blackify(*, session, payload, arguments, local_config=None):
-    print("===== reformatting =====")
+def prep_for_command(name, session, payload, arguments, local_config=None):
+    """Prepare to run a command against a local checkout of a repo."""
+    print(f"===== running command {name} =====")
     print("===== ============ =====")
     # collect initial payload
+    # https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#issue_comment
     prnumber = payload["issue"]["number"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
+    comment_url = payload["issue"]["comments_url"]
 
     # collect extended payload on the PR
     print("== Collecting data on Pull-request...")
@@ -345,25 +343,8 @@ def blackify(*, session, payload, arguments, local_config=None):
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
 
-    commits_url = pr_data["commits_url"]
-
-    commits_data = session.ghrequest("GET", commits_url).json()
-
-    for commit in commits_data:
-        if len(commit["parents"]) != 1:
-            comment_url = payload["issue"]["comments_url"]
-            session.post_comment(
-                comment_url,
-                body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n",
-            )
-            return
-
-    # so far we assume that the commit we rebase on is the first.
-    to_rebase_on = commits_data[0]["parents"][0]["sha"]
-
     # that will likely fail, as if PR, we need to bypass the fact that the
     # requester has technically no access to committer repo.
-    # TODO, check if maintainer
     target_session = yield "{}/{}".format(author_login, repo_name)
     if target_session:
         print("installed on target repository")
@@ -371,7 +352,6 @@ def blackify(*, session, payload, arguments, local_config=None):
     else:
         print("use allow edit as maintainer")
         atk = session.token()
-        comment_url = payload["issue"]["comments_url"]
         session.post_comment(
             comment_url,
             body="Would you mind installing me on your fork so that I can update your branch? \n"
@@ -379,29 +359,16 @@ def blackify(*, session, payload, arguments, local_config=None):
             "to do that, and follow the instructions to add your fork."
             "I'm going to try to push as a maintainer but this may not work.",
         )
-    # if not target_session:
-    #     comment_url = payload["issue"]["comments_url"]
-    #     session.post_comment(
-    #         comment_url,
-    #         body="I'm afraid I can't do that. Maybe I need to be installed on target repository?\n"
-    #         "Click [here](https://github.com/apps/meeseeksdev/installations/new) to do that.".format(
-    #             botname="meeseeksdev"
-    #         ),
-    #     )
-    #     return
-
-    # clone locally
-    # this process can take some time, regen token
 
     if os.path.exists(repo_name):
-        print("== Cleaning up previsous work ... ")
-        subprocess.run("rm -rf {}".format(repo_name).split(" "), check=True)
+        print("== Cleaning up previous work ... ")
+        run("rm -rf {}".format(repo_name), check=True)
         print("== Done cleaning ")
 
     print(
         f"== Cloning repository from {author_login}/{repo_name}, this can take some time ..."
     )
-    process = subprocess.run(
+    process = run(
         [
             "git",
             "clone",
@@ -413,32 +380,159 @@ def blackify(*, session, payload, arguments, local_config=None):
     print("== Cloned..")
     process.check_returncode()
 
-    subprocess.run(
-        "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+    run(
+        "git config --global user.email meeseeksmachine@gmail.com"
     )
-    subprocess.run("git config --global user.name FriendlyBot".split(" "))
+    run("git config --global user.name FriendlyBot")
 
-    # do the pep8ify on local filesystem
+    # do the command on local filesystem
     repo = git.Repo(repo_name)
-    print(f"== Fetching branch `{branch}` to pep8ify on ...")
+    print(f"== Fetching branch `{branch}` to run {name} on ...")
     repo.remotes.origin.fetch("{}:workbranch".format(branch))
     repo.git.checkout("workbranch")
-    print("== Fetching Commits to pep8ify ...")
+    print(f"== Fetching Commits to run {name} on ...")
     repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
     print("== All have been fetched correctly")
 
     os.chdir(repo_name)
 
-    def lpr(*args):
-        print("Should run:", *args)
 
-    lpr(
-        'git rebase -x "black --fast . && git commit -a --amend --no-edit" --strategy-option=theirs --autosquash',
-        to_rebase_on,
+def push_the_work(session, payload, arguments, local_config=None):
+    """Push the work down in a local repo to the remote repo."""
+    prnumber = payload["issue"]["number"]
+    org_name = payload["repository"]["owner"]["login"]
+    repo_name = payload["repository"]["name"]
+
+    # collect extended payload on the PR
+    print("== Collecting data on Pull-request...")
+    r = session.ghrequest(
+        "GET",
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(
+            org_name, repo_name, prnumber
+        ),
+        json=None,
+    )
+    pr_data = r.json()
+    branch = pr_data["head"]["ref"]
+    repo_name = pr_data["head"]["repo"]["name"]
+
+    # Open the repo in the cwd
+    repo = git.Repo('.')
+
+    # Push the work
+    print("== Pushing work....:")
+    print(f"pushing with workbranch:{branch}")
+    repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
+
+    # Clean up
+    default_branch = session.ghrequest(
+        "GET", f"https://api.github.com/repos/{org_name}/{repo_name}"
+    ).json()["default_branch"]
+    repo.git.checkout(default_branch)
+    repo.branches.workbranch.delete(repo, "workbranch", force=True)
+
+
+@admin
+def precommit(*, session, payload, arguments, local_config=None):
+    """Run pre-commit against a PR and push the changes."""
+    yield from prep_for_command("precommit", session, payload, arguments, local_config=local_config)
+
+    cmd = "pre-commit run --all-files --hook-stage=manual"
+    comment_url = payload["issue"]["comments_url"]
+
+    # Run the command
+    process = run(cmd)
+
+    # See if the pre-commit succeeded, meaning there was nothing to do
+    if process.returncode == 0:
+        # Clean up the pre-commit files
+        run("pre-commit clean")
+
+        # Alert the caller and bail.
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                """
+            I was unable to run "pre-commit" because there was nothing to do.
+            """
+            ),
+        )
+        return
+
+    # Add any changed files.
+    run('git commit -a -m "Apply pre-commit"')
+
+    # Run again to see if we've auto-fixed
+    process = run(cmd)
+
+    # If that fails, then we can't auto-fix
+    if process.returncode != 0:
+        # Clean up the pre-commit files
+        run("pre-commit clean")
+
+        # Alert the caller and bail.
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                """
+            I was unable to run "pre-commit" due to an error, changes must be made manually.
+            """
+            ),
+        )
+        return
+
+    # Clean up the pre-commit files
+    run("pre-commit run clean")
+
+    push_the_work(session, payload, arguments, local_config=local_config)
+
+    # Tell the caller we've finished
+    comment_url = payload["issue"]["comments_url"]
+    session.post_comment(
+        comment_url,
+        body=dedent(
+            """
+        I've applied "pre-commit" and pushed. You may have trouble pushing further
+        commits, but feel free to force push and ask me to run again.
+        """
+        ),
     )
 
-    ## todo check error code.
-    subprocess.run(
+
+@admin
+def blackify(*, session, payload, arguments, local_config=None):
+    """Run black against all commits of on a PR and push the new commits."""
+    yield from prep_for_command("blackify", session, payload, arguments, local_config=local_config)
+
+    comment_url = payload["issue"]["comments_url"]
+
+    prnumber = payload["issue"]["number"]
+    org_name = payload["repository"]["owner"]["login"]
+    repo_name = payload["repository"]["name"]
+
+    r = session.ghrequest(
+        "GET",
+        "https://api.github.com/repos/{}/{}/pulls/{}".format(
+            org_name, repo_name, prnumber
+        ),
+        json=None,
+    )
+    pr_data = r.json()
+    commits_url = pr_data["commits_url"]
+    commits_data = session.ghrequest("GET", commits_url).json()
+
+    for commit in commits_data:
+        if len(commit["parents"]) != 1:
+            session.post_comment(
+                comment_url,
+                body="It looks like the history is not linear in this pull-request. I'm afraid I can't rebase.\n",
+            )
+            return
+
+    # so far we assume that the commit we rebase on is the first.
+    to_rebase_on = commits_data[0]["parents"][0]["sha"]
+
+    process = run(
         [
             "git",
             "rebase",
@@ -450,29 +544,30 @@ def blackify(*, session, payload, arguments, local_config=None):
         ]
     )
 
-    # write the commit message
-    # msg = "Autofix pep 8 of #%i: %s" % (prnumber, prtitle) + "\n\n"
-    # repo.git.commit("-am", msg)
+    if process.returncode != 0:
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                """
+            I was unable to run "blackify" due to an error.
+            """
+            ),
+        )
+        return
 
-    # Push the pep8ify work
-    print("== Pushing work....:")
-    lpr(f"pushing with workbranch:{branch}")
-    repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
-    repo.git.checkout(default_branch)
-    repo.branches.workbranch.delete(repo, "workbranch", force=True)
+    push_the_work(session, payload, arguments, local_config=local_config)
 
-    comment_url = payload["issue"]["comments_url"]
+    # Tell the caller we've finished
     session.post_comment(
         comment_url,
         body=dedent(
             """
         I've rebased this Pull Request, applied `black` on all the
         individual commits, and pushed. You may have trouble pushing further
-        commits, but feel free to force push and ask me to reformat again.   
+        commits, but feel free to force push and ask me to reformat again.
         """
         ),
     )
-    # os.chdir("..")
 
 
 @write
@@ -497,7 +592,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         nonlocal s_fork_time
         nonlocal s_clean_time
         nonlocal s_ff_time
-        keen.add_event(
+        add_event(
             "backport_stats",
             {
                 "slug": s_slug,
@@ -583,7 +678,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             infered_target_branch = ".".join(parts)
             print("inferring branch ...", infered_target_branch)
             target_branch = infered_target_branch
-            keen.add_event("backport_infering_branch", {"infering_remove_x": 1})
+            add_event("backport_infering_branch", {"infering_remove_x": 1})
 
         if milestone_number:
             milestone_number = int(milestone_number)
@@ -607,7 +702,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         for i in range(5):
             ff = session.personal_request("GET", frk["url"], raise_for_status=False)
             if ff.status_code == 200:
-                keen.add_event("fork_wait", {"n": i})
+                add_event("fork_wait", {"n": i})
                 break
             time.sleep(1)
         s_fork_time = time.time() - fork_epoch
@@ -617,8 +712,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         if os.path.exists(repo_name):
             try:
                 re_fetch_epoch = time.time()
-                print("FF: Git set-url origin")
-                subprocess.run(
+                run(
                     [
                         "git",
                         "remote",
@@ -633,13 +727,11 @@ def safe_backport(session, payload, arguments, local_config=None):
                 print(f"FF: Git fetch {default_branch}")
                 repo.remotes.origin.fetch(default_branch)
                 repo.git.checkout(default_branch)
-                print(f"FF: Reset hard origin/{default_branch}")
-                subprocess.run(
+                run(
                     ["git", "reset", "--hard", f"origin/{default_branch}"],
                     cwd=repo_name,
                 ).check_returncode()
-                print("FF: Git describe tags....")
-                subprocess.run(["git", "describe", "--tag"], cwd=repo_name)
+                run(["git", "describe", "--tag"], cwd=repo_name)
                 re_fetch_delta = time.time() - re_fetch_epoch
                 print(blue + f"FF took {re_fetch_delta}s")
                 s_ff_time = re_fetch_delta
@@ -649,7 +741,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 clean_epoch = time.time()
                 if os.path.exists(repo_name):
                     print("== Cleaning up previous work... ")
-                    subprocess.run("rm -rf {}".format(repo_name).split(" "))
+                    run("rm -rf {}".format(repo_name))
                     print("== Done cleaning ")
                 s_clean_time = time.time() - clean_epoch
                 import traceback
@@ -662,7 +754,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         what_was_done = "Fast-Forwarded"
         if not os.path.exists(repo_name):
             print("== Cloning current repository, this can take some time..")
-            process = subprocess.run(
+            process = run(
                 [
                     "git",
                     "clone",
@@ -677,7 +769,7 @@ def safe_backport(session, payload, arguments, local_config=None):
 
         s_clone_time = time.time() - clone_epoch
 
-        process = subprocess.run(
+        process = run(
             [
                 "git",
                 "remote",
@@ -690,10 +782,10 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("==", what_was_done)
         process.check_returncode()
 
-        subprocess.run(
-            "git config --global user.email meeseeksmachine@gmail.com".split(" ")
+        run(
+            "git config --global user.email meeseeksmachine@gmail.com"
         )
-        subprocess.run("git config --global user.name MeeseeksDev[bot]".split(" "))
+        run("git config --global user.name MeeseeksDev[bot]")
 
         # do the backport on local filesystem
         repo = git.Repo(repo_name)
@@ -824,7 +916,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             )
             print("\n" + e.stderr.decode("utf8", "replace"), file=sys.stderr)
             print("\n" + repo.git.status(), file=sys.stderr)
-            keen.add_event("error", {"git_crash": 1})
+            add_event("error", {"git_crash": 1})
             s_reason = "Unknown error line 501"
             keen_stats()
 
@@ -898,7 +990,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             comment_url,
             "Something went wrong ... Please have a look at my logs." + extra_info,
         )
-        keen.add_event("error", {"unknown_crash": 1})
+        add_event("error", {"unknown_crash": 1})
         print("Something went wrong")
         print(e)
         s_reason = "Remote branch does not exist"

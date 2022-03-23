@@ -1,0 +1,72 @@
+name: Tests
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Run "pre-commit run --all-files"
+  pre-commit:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      # ref: https://github.com/pre-commit/action
+      - uses: pre-commit/action@v2.0.0
+      - name: Help message if pre-commit fail
+        if: ${{ failure() }}
+        run: |
+          echo "You can install pre-commit hooks to automatically run formatting"
+          echo "on each commit with:"
+          echo "    pre-commit install"
+          echo "or you can run by hand on staged files with"
+          echo "    pre-commit run"
+          echo "or after-the-fact on already committed files with"
+          echo "    pre-commit run --all-files"
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Install the Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Run the tests
+        run: python -m pytest -vv -raXs || python -m pytest -vv -raXs --lf
+      - name: Start the App
+        env:
+          GITHUB_INTEGRATION_ID: 812
+          B64KEY: ${{ secrets.B64KEY }}
+          GITHUB_BOT_NAME: meeseeksdev-test
+          WEBHOOK_SECRET: foo
+          PERSONAL_ACCOUNT_NAME: snuffy
+          PERSONAL_ACCOUNT_TOKEN: token
+        run: |
+          set -eux
+          python -m meeseeksdev &
+          TASK_PID=$!
+          # Make sure the task is running
+          ps -p $TASK_PID
+          # Connect to the task
+          python .github/workflows/connect.py
+          # Kill the task
+          kill $TASK_PID
+          wait $TASK_PID

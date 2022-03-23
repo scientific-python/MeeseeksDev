@@ -1,18 +1,23 @@
 """
 Utility functions to work with github.
 """
-import jwt
 import datetime
 import json
-import requests
+import pipes
 import re
+import shlex
+import subprocess
+
+import jwt
+import requests
+
+from .scopes import Permission
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
 red = "\033[0;31m"
 normal = "\033[0m"
 
-from .scopes import Permission
 
 API_COLLABORATORS_TEMPLATE = (
     "https://api.github.com/repos/{org}/{repo}/collaborators/{username}/permission"
@@ -28,7 +33,25 @@ Regular expression to relink issues/pr comments correctly.
 Pay attention to not relink things like foo#23 as they already point to a
 specific repository.
 """
-RELINK_RE = re.compile("(?:(?<=[:,\s])|(?<=^))(#\d+)\\b")
+RELINK_RE = re.compile(r"(?:(?<=[:,\s])|(?<=^))(#\d+)\\b")
+
+
+def add_event(*args):
+    """Attempt to add an event to keen, print the event otherwise"""
+    try:
+        import keen
+        keen.add_event(*args)
+    except Exception:
+        print('Failed to log keen event:')
+        print(f'   {args}')
+
+
+def run(cmd, **kwargs):
+    """Print a command and then run it."""
+    if isinstance(cmd, str):
+        cmd = shlex.split(cmd)
+    print(" ".join(map(pipes.quote, cmd)))
+    return subprocess.run(cmd, **kwargs)
 
 
 def fix_issue_body(
@@ -49,9 +72,11 @@ def fix_issue_body(
         "{org}/{repo}\\1".format(org=original_org, repo=original_repo), body
     )
 
-    return body + """\n\n---- 
+    return (
+        body
+        + """\n\n----
     \nOriginally opened as {org}/{repo}#{number} by @{reporter}, migration requested by @{requester}
-    """.format(
+    """).format(
         org=original_org,
         repo=original_repo,
         number=original_number,
@@ -144,6 +169,8 @@ class Authenticator:
             except Forbidden:
                 print("Forbidden for", iid)
                 continue
+            for repo in repositories["repositories"]:
+                self.idmap[repo["full_name"]] = iid
 
     def _integration_authenticated_request(self, method, url):
         self.since = int(datetime.datetime.now().timestamp())
@@ -158,7 +185,7 @@ class Authenticator:
         tok = jwt.encode(payload, key=self.rsadata, algorithm="RS256")
 
         headers = {
-            "Authorization": "Bearer {}".format(tok.decode()),
+            "Authorization": f"Bearer {tok}",
             "Accept": ACCEPT_HEADER_V3,
             "Host": "api.github.com",
             "User-Agent": "python/requests",
@@ -202,7 +229,7 @@ class Session(Authenticator):
 
         try:
             self._token = json.loads(resp.content.decode())["token"]
-        except:
+        except Exception:
             raise ValueError(resp.content, url)
 
     def personal_request(self, method, url, json=None, raise_for_status=True):
@@ -275,9 +302,7 @@ class Session(Authenticator):
                 else:
                     repo_name = "multiple-matches"
 
-                import keen
-
-                keen.add_event(
+                add_event(
                     "gh-rate",
                     {
                         "limit": int(rate_limit),

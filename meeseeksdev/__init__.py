@@ -1,9 +1,17 @@
 """
 Meeseeksbox main app module
 """
-import os
 import base64
+import os
 import signal
+
+from .commands import close, help_make, merge, migrate_issue_request
+from .commands import open as _open
+from .commands import ready
+from .meeseeksbox.commands import (black_suggest, blackify, debug, party,
+                                   precommit, replyuser, safe_backport, say,
+                                   tag, untag, zen)
+from .meeseeksbox.core import Config, MeeseeksBox
 
 org_whitelist = [
     "MeeseeksBox",
@@ -105,30 +113,6 @@ def load_config_from_env():
     return Config(**config).validate()
 
 
-from .meeseeksbox.core import MeeseeksBox
-from .meeseeksbox.core import Config
-from .meeseeksbox.commands import (
-    replyuser,
-    zen,
-    tag,
-    untag,
-    blackify,
-    black_suggest,
-    quote,
-    say,
-    debug,
-    party,
-    safe_backport,
-)
-from .commands import (
-    close,
-    open as _open,
-    migrate_issue_request,
-    ready,
-    merge,
-    help_make,
-)
-
 green = "\x1b[0;32m"
 yellow = "\x1b[0;33m"
 blue = "\x1b[0;34m"
@@ -143,8 +127,10 @@ def main():
     app_v = os.environ.get("HEROKU_RELEASE_VERSION", None)
     if app_v:
         import keen
-
-        keen.add_event("deploy", {"version": int(app_v[1:])})
+        try:
+            keen.add_event("deploy", {"version": int(app_v[1:])})
+        except Exception as e:
+            print(e)
     config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
     config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
     config.user_blacklist = usr_blacklist + [u.lower() for u in usr_blacklist]
@@ -162,6 +148,8 @@ def main():
         "reformat": blackify,
         "black": blackify,
         "suggestions": black_suggest,
+        "pre-commit": precommit,
+        "precommit": precommit,
         "ready": ready,
         "merge": merge,
         "say": say,

@@ -7,10 +7,11 @@ Mainly writte to use the (currently Beta) new GitHub "Integration" API, and
 handle authencation of user.
 """
 
-import os
 import base64
+import os
+
+from .core import MeeseeksBox  # noqa
 from .core import Config
-from .core import MeeseeksBox
 
 version_info = (0, 0, 2)
 
