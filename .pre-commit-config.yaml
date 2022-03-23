@@ -22,8 +22,23 @@ repos:
         'flake8-implicit-str-concat==0.2.0',
     ]
 
+- repo: https://github.com/psf/black
+  rev: 22.1.0
+  hooks:
+    - id: black
+      args: ["--line-length", "100"]
+
 - repo: https://github.com/PyCQA/isort
   rev: 5.7.0
   hooks:
   - id: isort
     files: \.py$
+
+- repo: https://github.com/sirosen/check-jsonschema
+  rev: 0.10.2
+  hooks:
+    - id: check-jsonschema
+      name: "Check GitHub Workflows"
+      files: ^\.github/workflows/
+      types: [yaml]
+      args: ["--schemafile", "https://json.schemastore.org/github-workflow"]
