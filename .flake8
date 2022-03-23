@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 88
+enable-extensions = G
+extend-ignore =
+    G200, G202,
+    # E501 line too long
+    E501
+    # E741 ambiguous variable name
+    E741
+    # E266 too many leading '#' for block commen
+    E266
+    # E731 do not assign a lambda expression, use a def
+    E731
+per-file-ignores =
