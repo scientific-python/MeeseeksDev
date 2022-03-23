@@ -46,7 +46,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
       - name: Run the tests
-          python -m pytest -vv -raXs || python -m pytest -vv -raXs --lf
+        run: python -m pytest -vv -raXs || python -m pytest -vv -raXs --lf
       - name: Start the App
         env:
           GITHUB_INTEGRATION_ID=812
