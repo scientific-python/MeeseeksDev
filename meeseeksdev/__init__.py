@@ -1,9 +1,17 @@
 """
 Meeseeksbox main app module
 """
-import os
 import base64
+import os
 import signal
+
+from .commands import close, help_make, merge, migrate_issue_request
+from .commands import open as _open
+from .commands import ready
+from .meeseeksbox.commands import (black_suggest, blackify, debug, party,
+                                   precommit, replyuser, safe_backport, say,
+                                   tag, untag, zen)
+from .meeseeksbox.core import Config, MeeseeksBox
 
 org_whitelist = [
     "MeeseeksBox",
@@ -104,31 +112,6 @@ def load_config_from_env():
 
     return Config(**config).validate()
 
-
-from .meeseeksbox.core import MeeseeksBox
-from .meeseeksbox.core import Config
-from .meeseeksbox.commands import (
-    replyuser,
-    zen,
-    tag,
-    untag,
-    blackify,
-    black_suggest,
-    precommit,
-    quote,
-    say,
-    debug,
-    party,
-    safe_backport,
-)
-from .commands import (
-    close,
-    open as _open,
-    migrate_issue_request,
-    ready,
-    merge,
-    help_make,
-)
 
 green = "\x1b[0;32m"
 yellow = "\x1b[0;33m"

@@ -8,17 +8,17 @@ See what is a [Meeseeks and a MeeseeksBox](https://www.youtube.com/watch?v=qUYvI
 
 We host MeeseeksBox(es) and will expose them as GitHub Integrations so you don't
 have to host and run your own. You can if you want, it should be pretty
-simple. 
+simple.
 
 The advantage of having one and only one box, is to do cross repository
-operations (and fix security bugs). 
+operations (and fix security bugs).
 
 The drawback is if there is a security issue, then we're screwed.
 
-## Activate on your Repo 
+## Activate on your Repo
 
 1) Head [there](https://github.com/apps/meeseeksdev/) and activate
-MeeseeksDev on repos you have access to. 
+MeeseeksDev on repos you have access to.
 
 2) On a repository with MeeseeksDev installed say: `@MeeseeksDev Hello` to be
 sure MeeseeksDev is correctly installed.
@@ -26,9 +26,9 @@ sure MeeseeksDev is correctly installed.
 3) Enjoy
 
 Beta Phase: During Beta phase repository/users need to be vetted/whitelisted
-open an issue if you wish to participate. 
+open an issue if you wish to participate.
 
-You might also want to tell your CI-integration (like travis-ci) **not** to test the **push** __and__ **the merge**. 
+You might also want to tell your CI-integration (like travis-ci) **not** to test the **push** __and__ **the merge**.
 To do so use:
 ```
 branches:
@@ -54,7 +54,7 @@ users:
       - ...
 ```
 
-This will allow `<username>` to ask `@meeseeksdev` to perform above commands. 
+This will allow `<username>` to ask `@meeseeksdev` to perform above commands.
 The conf file is the one that sits on the repository default  branch (usually
 `master`).
 
@@ -65,9 +65,9 @@ The conf file is the one that sits on the repository default  branch (usually
 
 Comment on a Pr or issue.
 
-You _may_ put multiple commands, one per line. 
+You _may_ put multiple commands, one per line.
 
-MrMeeseeks _may_ not like what you ask, and just ignore you. 
+MrMeeseeks _may_ not like what you ask, and just ignore you.
 
 ### @MeeseeksDev hello
 
@@ -82,9 +82,9 @@ To test whether a Meeseeks understand you.
 If issued from a  PR which is merged, attempt to backport (cherry-pick the
 merge commit) on an older branch and submit a PR with this backport (on said branch)
 
-Apply origin-pr labels and milestone to backport. 
+Apply origin-pr labels and milestone to backport.
 
-- No option to push directly (yet), if implemented should apply only with clean backport. 
+- No option to push directly (yet), if implemented should apply only with clean backport.
 - Investigate what to do in case of conflict
     - likely commit with conflict, and let maintainers resolve conflict
 
@@ -92,30 +92,51 @@ Repo admins only
 
 Note: Cloning can take a long-time. So expect MrMeeseeks to be busy while this
 happen. Also heroku has a 2min deadline and other limitations, so MrMeeseeks can
-likely be killed. I haven't implemented a queue yet. 
+likely be killed. I haven't implemented a queue yet.
+
+### @MeeseeksDev black
+
+If issued from a PR, will apply black to commits made in this PR and push
+the updated commits.
+
+Repo admins only, we plan to make it available to PR authors as well.
+
+MeeseeksDev Bot needs to be installed on the PR source repository for this to work.
+If it's not it will ask you to do so.
+
+### @MeeseeksDev pre-commit
+
+If issued from a PR, will apply pre-commit to this PR and push
+a commit with the changes made.  If no changes are made, or the changes
+cannot be automatically fixed, it will show a comment in the PR and bail.
+
+Repo admins only, we plan to make it available to PR authors as well.
+
+MeeseeksDev Bot needs to be installed on the PR source repository for this to work.
+If it's not it will ask you to do so.
 
 ### @MeeseeksDev pep8ify
 
 (in progress)
 
 If issued from a PR, will apply autopep8 to the current lines changed by this
-PR, and push an extra commit to it that fixes pep8. 
+PR, and push an extra commit to it that fixes pep8.
 
 Code in progress and due to GitHub API limitation only works if MeeseeksDev
-also available on Source repo of the PR. 
+also available on Source repo of the PR.
 
-Repo admins only, plan to make it available to PR author as well. 
+Repo admins only, plan to make it available to PR author as well.
 
 MeeseeksDev Bot need to be installed on the PR source repository for this to work.
-If it's not it will ask you to do so. 
+If it's not it will ask you to do so.
 
 ### @MeeseeksDev migrate [to] {target org/repo}
 
 Needs MeeseeksBox to be installed on both current and target repo. Command
-issuer to be admin on both. 
+issuer to be admin on both.
 
 MeeseeksDev will open a similar issue, replicate all comments with links to
-first, migrate labels (if possible). 
+first, migrate labels (if possible).
 
 
 ### @MeeseeksDev close
@@ -136,7 +157,7 @@ Remove said tags if present (comma separated, need to be exact match)
 
 ### @MeeseeksDev merge [merge|squash|rebase]
 
-Issuer needs at least write permission. 
+Issuer needs at least write permission.
 
 If Mergeable, Merge current PR using said methods (`merge` if no arguments)
 
@@ -188,19 +209,13 @@ def foo(*, session, payload, argument):
 GitHub API does not allow to change permissions once given (yet). We don't want
 you to go though the process of reinstalling all integrations.
 
-We would like to request less permission if necessary. 
+We would like to request less permission if necessary.
 
 
 # Setup.
 
-These are the environment variable that need to be set.
+See CONTIBUTING.md for for information.
 
- - `INTEGRATION_ID` The integration ID given to you by GitHub when you create
-   an integration
- - `BOTNAME` Name of the integration on GitHub, should be without the leading
-   `@`, and with the `[bot]`. This is used for the bot to react to his own name, and not reply to itself...
-
-   TODO
 
 # Warnings
 

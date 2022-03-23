@@ -1,26 +1,20 @@
-import re
-import hmac
-import time
-import inspect
-
-import yaml
 import base64
+import hmac
+import inspect
 import json
-
-import tornado.web
-import tornado.httpserver
-import tornado.ioloop
-from tornado.ioloop import IOLoop
-
+import re
+import time
 from concurrent.futures import ThreadPoolExecutor as Pool
 
-
-from .utils import Authenticator
-from .utils import ACCEPT_HEADER_SYMMETRA
-from .utils import add_event
-from .scopes import Permission
-
+import tornado.httpserver
+import tornado.ioloop
+import tornado.web
+import yaml
+from tornado.ioloop import IOLoop
 from yieldbreaker import YieldBreaker
+
+from .scopes import Permission
+from .utils import ACCEPT_HEADER_SYMMETRA, Authenticator, add_event
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
@@ -28,8 +22,6 @@ red = "\033[0;31m"
 normal = "\033[0m"
 
 pool = Pool(6)
-
-import time
 
 
 class Config:
@@ -72,8 +64,8 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_status(500)
         self.write({"status": "error", "message": message})
 
-    def success(self, message="", payload={}):
-        self.write({"status": "success", "message": message, "data": payload})
+    def success(self, message="", payload=None):
+        self.write({"status": "success", "message": message, "data": payload or {}})
 
 
 class MainHandler(BaseHandler):
@@ -149,13 +141,13 @@ class WebHookHandler(MainHandler):
                         with requests.Session() as s:
                             res = s.send(prepared)
                         return res
-                    except:
+                    except Exception:
                         import traceback
 
                         traceback.print_exc()
 
                 pool.submit(fn, self.request, self.config.forward_staging_url)
-            except:
+            except Exception:
                 print(red + "failure to forward")
                 import traceback
 
@@ -255,7 +247,7 @@ class WebHookHandler(MainHandler):
     @property
     def mention_bot_re(self):
         botname = self.config.botname
-        return re.compile("@?" + re.escape(botname) + "(?:\[bot\])?", re.IGNORECASE)
+        return re.compile("@?" + re.escape(botname) + r"(?:\[bot\])?", re.IGNORECASE)
 
     def dispatch_action(self, type_, payload):
         botname = self.config.botname
@@ -368,7 +360,7 @@ class WebHookHandler(MainHandler):
                                     # apparently can still be none-like ?
                                     label_desc = label.get("description", "") or ""
                                     description.append(label_desc.replace("&", "\n"))
-                        except:
+                        except Exception:
                             import traceback
 
                             traceback.print_exc()
@@ -384,7 +376,7 @@ class WebHookHandler(MainHandler):
                             for description_line in description.splitlines():
                                 line = description_line.strip()
                                 if line.startswith("on-merge:"):
-                                    todo = line[len("on-merge:") :].strip()
+                                    todo = line[len("on-merge:"):].strip()
                                     self.dispatch_on_mention(
                                         "@meeseeksdev " + todo,
                                         payload,
@@ -655,7 +647,6 @@ class WebHookHandler(MainHandler):
 
 class MeeseeksBox:
     def __init__(self, commands, config):
-
         add_event("status", {"state": "starting"})
         self.commands = commands
         self.application = None
@@ -672,14 +663,13 @@ class MeeseeksBox:
     def sig_handler(self, sig, frame):
         print(yellow, "Caught signal: %s, Shutting down..." % sig, normal)
         add_event("status", {"state": "stopping"})
-        IOLoop.instance().add_callback(self.shutdown)
+        IOLoop.instance().add_callback_from_signal(self.shutdown)
 
     def shutdown(self):
+        print('in shutdown')
         self.server.stop()
 
         io_loop = IOLoop.instance()
-
-        deadline = time.time() + 10
 
         def stop_loop():
             print(red, "stopping now...", normal)
@@ -705,6 +695,6 @@ class MeeseeksBox:
         )
 
         self.server = tornado.httpserver.HTTPServer(self.application)
-
         self.server.listen(self.port)
-        tornado.ioloop.IOLoop.instance().start()
+
+        IOLoop.instance().start()

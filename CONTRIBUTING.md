@@ -55,8 +55,8 @@ On the `Config Vars`. section set the following keys::
 ```
 GITHUB_INTEGRATION_ID="<App ID of the Application>"
 B64KEY="<B64 encoding of entire pem file>"
-GITHUB_BOT_NAME=">meeseeksdev-$USER>"
-WEBHOOK_SECRET="<value from the webhooks add above>""
+GITHUB_BOT_NAME="<meeseeksdev-$USER>"
+WEBHOOK_SECRET="<value from the webhooks add above>"
 PERSONAL_ACCOUNT_NAME="<account name>"
 PERSONAL_ACCOUNT_TOKEN="<github personal access token with repo access>"
 ```

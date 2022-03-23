@@ -2,24 +2,20 @@
 Define a few commands
 """
 
-import random
 import os
-import re
-import git
 import pipes
-import mock
+import random
+import re
+import sys
 import time
 import traceback
-
-import sys
 from textwrap import dedent
 
-# from friendlyautopep8 import run_on_cwd
-
-from .utils import Session, fix_issue_body, fix_comment_body
-from .utils import add_event, run
+import git
+import mock
 
 from .scopes import admin, everyone, write
+from .utils import Session, add_event, fix_comment_body, fix_issue_body, run
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
@@ -111,10 +107,11 @@ def replyadmin(*, session, payload, arguments, local_config=None):
 
 
 def _compute_pwd_changes(whitelist):
-    import black
+    import glob
     from difflib import SequenceMatcher
     from pathlib import Path
-    import glob
+
+    import black
 
     post_changes = []
     import os
@@ -321,6 +318,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
 
 def prep_for_command(name, session, payload, arguments, local_config=None):
+    """Prepare to run a command against a local checkout of a repo."""
     print(f"===== running command {name} =====")
     print("===== ============ =====")
     # collect initial payload
@@ -400,6 +398,7 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
 
 
 def push_the_work(session, payload, arguments, local_config=None):
+    """Push the work down in a local repo to the remote repo."""
     prnumber = payload["issue"]["number"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
@@ -435,6 +434,7 @@ def push_the_work(session, payload, arguments, local_config=None):
 
 @admin
 def precommit(*, session, payload, arguments, local_config=None):
+    """Run pre-commit against a PR and push the changes."""
     yield from prep_for_command("precommit", session, payload, arguments, local_config=local_config)
 
     cmd = "pre-commit run --all-files --hook-stage=manual"
@@ -452,7 +452,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         session.post_comment(
             comment_url,
             body=dedent(
-                f"""
+                """
             I was unable to run "pre-commit" because there was nothing to do.
             """
             ),
@@ -474,7 +474,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         session.post_comment(
             comment_url,
             body=dedent(
-                f"""
+                """
             I was unable to run "pre-commit" due to an error, changes must be made manually.
             """
             ),
@@ -491,7 +491,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     session.post_comment(
         comment_url,
         body=dedent(
-            f"""
+            """
         I've applied "pre-commit" and pushed. You may have trouble pushing further
         commits, but feel free to force push and ask me to run again.
         """
@@ -501,6 +501,7 @@ def precommit(*, session, payload, arguments, local_config=None):
 
 @admin
 def blackify(*, session, payload, arguments, local_config=None):
+    """Run black against all commits of on a PR and push the new commits."""
     yield from prep_for_command("blackify", session, payload, arguments, local_config=local_config)
 
     comment_url = payload["issue"]["comments_url"]
@@ -536,7 +537,7 @@ def blackify(*, session, payload, arguments, local_config=None):
             "git",
             "rebase",
             "-x",
-            f"black --fast . && git commit -a --amend --no-edit",
+            "black --fast . && git commit -a --amend --no-edit",
             "--strategy-option=theirs",
             "--autosquash",
             to_rebase_on,
@@ -547,7 +548,7 @@ def blackify(*, session, payload, arguments, local_config=None):
         session.post_comment(
             comment_url,
             body=dedent(
-                f"""
+                """
             I was unable to run "blackify" due to an error.
             """
             ),
@@ -560,7 +561,7 @@ def blackify(*, session, payload, arguments, local_config=None):
     session.post_comment(
         comment_url,
         body=dedent(
-            f"""
+            """
         I've rebased this Pull Request, applied `black` on all the
         individual commits, and pushed. You may have trouble pushing further
         commits, but feel free to force push and ask me to reformat again.

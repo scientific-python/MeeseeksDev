@@ -2,11 +2,11 @@
 Define a few commands
 """
 
-from .meeseeksbox.utils import Session, fix_issue_body, fix_comment_body
-
-from .meeseeksbox.scopes import admin, write, everyone
-
 from textwrap import dedent
+
+from .meeseeksbox.commands import tag, untag
+from .meeseeksbox.scopes import everyone, pr_author, write
+from .meeseeksbox.utils import Session, fix_comment_body, fix_issue_body
 
 
 def _format_doc(function, name):
@@ -52,7 +52,7 @@ def open(*, session, payload, arguments, local_config=None):
 def migrate_issue_request(
     *, session: Session, payload: dict, arguments: str, local_config=None
 ):
-    """[to] {org}/{repo} 
+    """[to] {org}/{repo}
 
 Need to be admin on target repo. Replicate all comments on target repo and close current on.
     """
@@ -75,9 +75,7 @@ Need to be admin on target repo. Replicate all comments on target repo and close
         session.post_comment(
             payload["issue"]["comments_url"],
             body="I'm afraid I can't do that. Maybe I need to be installed on target repository ?\n"
-            "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.".format(
-                botname="meeseeksdev"
-            ),
+            "Click [here](https://github.com/integrations/meeseeksdev/installations/new) to do that.",
         )
         return
 
@@ -151,17 +149,13 @@ Need to be admin on target repo. Replicate all comments on target repo and close
     session.ghrequest("PATCH", payload["issue"]["url"], json={"state": "closed"})
 
 
-from .meeseeksbox.scopes import pr_author, write
-from .meeseeksbox.commands import tag, untag
-
-
 @pr_author
 @write
 def ready(*, session, payload, arguments, local_config=None):
     """{no arguments}
 
     Remove "waiting for author" tag, adds "need review" tag. Can also be issued
-    if you are the current PR author even if you are not admin. 
+    if you are the current PR author even if you are not admin.
     """
     tag(session, payload, "need review")
     untag(session, payload, "waiting for author")
