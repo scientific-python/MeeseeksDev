@@ -40,18 +40,16 @@ def app():
     return application
 
 
-@pytest.mark.gen_test
-def test_get(http_client, base_url):
-    response = yield http_client.fetch(base_url)
+async def test_get(http_server_client):
+    response = await http_server_client.fetch("/")
     assert response.code == 200
 
 
-@pytest.mark.gen_test
-def test_post(http_client, base_url):
+async def test_post(http_server_client):
     body = "{}"
     secret = config.webhook_secret
     assert secret is not None
     sig = "sha1=" + hmac.new(secret.encode("utf8"), body.encode("utf8"), "sha1").hexdigest()
     headers = {"X-Hub-Signature": sig}
-    response = yield http_client.fetch(base_url, method="POST", body=body, headers=headers)
+    response = await http_server_client.fetch("/", method="POST", body=body, headers=headers)
     assert response.code == 200
