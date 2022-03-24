@@ -103,7 +103,8 @@ def load_config_from_env():
     at_botname = "@" + botname
     integration_id = int(integration_id)
 
-    config["key"] = base64.b64decode(bytes(os.environ.get("B64KEY"), "ASCII"))
+    if "B64KEY" in os.environ:
+        config["key"] = base64.b64decode(bytes(os.environ["B64KEY"], "ASCII"))
     config["botname"] = botname
     config["at_botname"] = at_botname
     config["integration_id"] = integration_id

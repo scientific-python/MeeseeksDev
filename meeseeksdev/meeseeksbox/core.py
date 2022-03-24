@@ -42,7 +42,7 @@ class Config:
         missing = [
             attr
             for attr in dir(self)
-            if not attr.startswith("_") and getattr(self, attr) is None and attr != "webhook_secret"
+            if not attr.startswith("_") and getattr(self, attr) is None and attr != "key"
         ]
         if missing:
             raise ValueError("The following configuration options are missing : {}".format(missing))

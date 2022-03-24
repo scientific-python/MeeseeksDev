@@ -151,7 +151,8 @@ class Authenticator:
         Build an organisation/repo -> installation_id mappingg in order to be able
         to do cross repository operations.
         """
-
+        if not self.rsadata:
+            return
         installations = self.list_installations()
         for installation in installations:
             iid = installation["id"]
@@ -165,8 +166,6 @@ class Authenticator:
             except Forbidden:
                 print("Forbidden for", iid)
                 continue
-            for repo in repositories["repositories"]:
-                self.idmap[repo["full_name"]] = iid
 
     def _integration_authenticated_request(self, method, url):
         self.since = int(datetime.datetime.now().timestamp())
