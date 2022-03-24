@@ -152,6 +152,7 @@ class Authenticator:
         to do cross repository operations.
         """
         if not self.rsadata:
+            print("Skipping auth_id_mapping build since there is no B64KEY set")
             return
         installations = self.list_installations()
         for installation in installations:
