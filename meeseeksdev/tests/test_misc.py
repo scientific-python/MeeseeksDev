@@ -15,11 +15,19 @@ def test1():
         @meeseeksdev nothing
         @meeseeksdev[bot] do nothing
         meeseeksdev[bot] do something
+        @meeseeksdev please nothing
+        @meeseeksdev run something
 
 
     """
             ),
             reg,
         )
-        == [["nothing", None], ["do", "nothing"], ["do", "something"]]
+        == [
+            ["nothing", None],
+            ["do", "nothing"],
+            ["do", "something"],
+            ["nothing", None],
+            ["something", None],
+        ]
     )

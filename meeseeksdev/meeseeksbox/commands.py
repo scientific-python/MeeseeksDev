@@ -339,6 +339,7 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
     if target_session:
         print("installed on target repository")
         atk = target_session.token()
+        session.post_comment(comment_url, body=f"Running {name} on this Pull Request...")
     else:
         print("use allow edit as maintainer")
         atk = session.token()
@@ -442,29 +443,39 @@ def precommit(*, session, payload, arguments, local_config=None):
         return
 
     # Add any changed files.
-    run('git commit -a -m "Apply pre-commit"')
+    process = run('git commit -a -m "Apply pre-commit"')
+    made_changes = process.returncode == 0
 
     # Run again to see if we've auto-fixed
     process = run(cmd)
 
-    # If that fails, then we can't auto-fix
-    if process.returncode != 0:
-        # Clean up the pre-commit files
-        run("pre-commit clean")
+    # Clean up the pre-commit files
+    run("pre-commit clean")
 
-        # Alert the caller and bail.
+    # If second run fails, then we can't auto-fix
+    if process.returncode != 0:
+
+        if not made_changes:
+            # Alert the caller and bail.
+            session.post_comment(
+                comment_url,
+                body=dedent(
+                    """
+                I was unable to fix pre-commit errors automatically.
+                Try running `pre-commit run --all-files` locally.
+                """
+                ),
+            )
+            return
+
         session.post_comment(
             comment_url,
             body=dedent(
                 """
-            I was unable to run "pre-commit" due to an error, changes must be made manually.
-            """
+                I was unable to fix all of the pre-commit errors automatically.  Try running `pre-commit run --all-files` locally.
+                """
             ),
         )
-        return
-
-    # Clean up the pre-commit files
-    run("pre-commit run clean")
 
     push_the_work(session, payload, arguments, local_config=local_config)
 

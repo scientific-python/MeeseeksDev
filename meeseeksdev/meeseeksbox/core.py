@@ -71,11 +71,12 @@ class MainHandler(BaseHandler):
         self.finish("No")
 
 
-def _strip_please(c):
+def _strip_extras(c):
     if c.startswith("please "):
-        return c[6:].lstrip()
-    else:
-        return c
+        c = c[6:].lstrip()
+    if c.startswith("run "):
+        c = c[4:].lstrip()
+    return c
 
 
 def process_mentionning_comment(body, bot_re):
@@ -99,7 +100,7 @@ def process_mentionning_comment(body, bot_re):
         else:
             nl.append(bot_re.split(l)[-1].strip())
 
-    command_args = [_strip_please(l).split(" ", 1) for l in nl]
+    command_args = [_strip_extras(l).split(" ", 1) for l in nl]
     command_args = [c if len(c) > 1 else [c[0], None] for c in command_args]
     return command_args
 
@@ -112,7 +113,7 @@ class WebHookHandler(MainHandler):
         super().initialize(*args, **kwargs)
 
     def get(self):
-        self.getfinish("Webhook alive and listening")
+        self.finish("Webhook alive and listening")
 
     def post(self):
         if self.config.forward_staging_url:
