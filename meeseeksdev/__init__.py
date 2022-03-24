@@ -161,6 +161,7 @@ def main():
         "autopep8": blackify,
         "reformat": blackify,
         "black": blackify,
+        "blackify": blackify,
         "suggestions": black_suggest,
         "pre-commit": precommit,
         "precommit": precommit,
