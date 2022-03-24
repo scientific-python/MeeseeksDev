@@ -11,4 +11,6 @@ extend-ignore =
     E266
     # E731 do not assign a lambda expression, use a def
     E731
+    # E203 whitespace before ':'
+    E203
 per-file-ignores =

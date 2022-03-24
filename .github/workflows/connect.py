@@ -5,7 +5,7 @@ from urllib.error import URLError
 
 t0 = time.time()
 found = False
-url = 'http://localhost:5000'
+url = "http://localhost:5000"
 
 while (time.time() - t0) < 60:
     try:
@@ -20,4 +20,4 @@ while (time.time() - t0) < 60:
 
 
 if not found:
-    raise ValueError(f'Could not connect to {url}')
+    raise ValueError(f"Could not connect to {url}")

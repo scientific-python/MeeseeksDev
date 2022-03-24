@@ -8,9 +8,19 @@ import signal
 from .commands import close, help_make, merge, migrate_issue_request
 from .commands import open as _open
 from .commands import ready
-from .meeseeksbox.commands import (black_suggest, blackify, debug, party,
-                                   precommit, replyuser, safe_backport, say,
-                                   tag, untag, zen)
+from .meeseeksbox.commands import (
+    black_suggest,
+    blackify,
+    debug,
+    party,
+    precommit,
+    replyuser,
+    safe_backport,
+    say,
+    tag,
+    untag,
+    zen,
+)
 from .meeseeksbox.core import Config, MeeseeksBox
 
 org_whitelist = [
@@ -93,7 +103,10 @@ def load_config_from_env():
     at_botname = "@" + botname
     integration_id = int(integration_id)
 
-    config["key"] = base64.b64decode(bytes(os.environ.get("B64KEY"), "ASCII"))
+    if "B64KEY" in os.environ:
+        config["key"] = base64.b64decode(bytes(os.environ["B64KEY"], "ASCII"))
+    elif "TESTING" not in os.environ:
+        raise ValueError("Missing B64KEY environment variable")
     config["botname"] = botname
     config["at_botname"] = at_botname
     config["integration_id"] = integration_id
@@ -127,6 +140,7 @@ def main():
     app_v = os.environ.get("HEROKU_RELEASE_VERSION", None)
     if app_v:
         import keen
+
         try:
             keen.add_event("deploy", {"version": int(app_v[1:])})
         except Exception as e:
