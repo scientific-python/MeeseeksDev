@@ -99,6 +99,8 @@ likely be killed. I haven't implemented a queue yet.
 If issued from a PR, will apply black to commits made in this PR and push
 the updated commits.
 
+You can also use "blackify" as an alias.
+
 Repo admins only, we plan to make it available to PR authors as well.
 
 MeeseeksDev Bot needs to be installed on the PR source repository for this to work.
@@ -109,6 +111,8 @@ If it's not it will ask you to do so.
 If issued from a PR, will apply pre-commit to this PR and push
 a commit with the changes made.  If no changes are made, or the changes
 cannot be automatically fixed, it will show a comment in the PR and bail.
+
+You can also use "precommit" as an alias.
 
 Repo admins only, we plan to make it available to PR authors as well.
 
@@ -161,6 +165,11 @@ Issuer needs at least write permission.
 
 If Mergeable, Merge current PR using said methods (`merge` if no arguments)
 
+## Command Extras
+
+You can be polite and use "please" with any of the commands, e.g. "@Meeseeksdev please close".
+
+You can optionally use the word "run" in the command, e.g. "@Meeseeksdev please run pre-commit".
 
 ## Simple extension.
 
