@@ -105,6 +105,8 @@ def load_config_from_env():
 
     if "B64KEY" in os.environ:
         config["key"] = base64.b64decode(bytes(os.environ["B64KEY"], "ASCII"))
+    elif "TESTING" not in os.environ:
+        raise ValueError("Missing B64KEY environment variable")
     config["botname"] = botname
     config["at_botname"] = at_botname
     config["integration_id"] = integration_id

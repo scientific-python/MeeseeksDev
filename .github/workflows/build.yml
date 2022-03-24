@@ -58,6 +58,7 @@ jobs:
           WEBHOOK_SECRET: foo
           PERSONAL_ACCOUNT_NAME: snuffy
           PERSONAL_ACCOUNT_TOKEN: token
+          TESTING: true
         run: |
           set -eux
           python -m meeseeksdev &
