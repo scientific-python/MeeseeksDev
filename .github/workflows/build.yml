@@ -47,8 +47,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install the Python dependencies
         run: |
-          pip install -r requirements.txt
-          pip install pytest
+          pip install -r requirements-test.txt
       - name: Run the tests
         run: python -m pytest -vv -raXs || python -m pytest -vv -raXs --lf
       - name: Start the App
