@@ -346,7 +346,7 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
         session.post_comment(
             comment_url,
             body="Would you mind installing me on your fork so that I can update your branch? \n"
-            "Click [here](https://github.com/apps/meeseeksdev/installations/new)"
+            "Click [here](https://github.com/apps/meeseeksdev/installations/new) "
             "to do that, and follow the instructions to add your fork."
             "I'm going to try to push as a maintainer but this may not work.",
         )
@@ -782,7 +782,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("== All has been fetched correctly")
 
         print("Cherry-picking %s" % merge_sha)
-        args = ("-m", "1", merge_sha)
+        args = ("-x", "-m", "1", merge_sha)
 
         msg = "Backport PR #%i: %s" % (prnumber, prtitle)
         remote_submit_branch = f"auto-backport-of-pr-{prnumber}-on-{target_branch}"
@@ -910,7 +910,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         # Push the backported work
         print("== Pushing work....:")
         try:
-            print(f"Tryign to push to {remote_submit_branch} of {session.personal_account_name}")
+            print(f"Trying to push to {remote_submit_branch} of {session.personal_account_name}")
             repo.remotes[session.personal_account_name].push(
                 "workbranch:{}".format(remote_submit_branch)
             )
