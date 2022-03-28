@@ -422,7 +422,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     """Run pre-commit against a PR and push the changes."""
     yield from prep_for_command("precommit", session, payload, arguments, local_config=local_config)
 
-    # Install the package in if there are local hooks
+    # Make sure there is a pre-commit file.
     config = Path("./.pre-commit-config.yaml")
     if not config.exists():
         # Alert the caller and bail.
@@ -437,6 +437,7 @@ def precommit(*, session, payload, arguments, local_config=None):
         )
         return
 
+    # Install the package in editable mode if there are local hooks.
     if "repo: local" in config.read_text():
         run("pip install --user -e .")
 
