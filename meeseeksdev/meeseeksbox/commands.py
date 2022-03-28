@@ -9,8 +9,8 @@ import re
 import sys
 import time
 import traceback
-from textwrap import dedent
 from pathlib import Path
+from textwrap import dedent
 
 import git
 import mock
@@ -439,7 +439,6 @@ def precommit(*, session, payload, arguments, local_config=None):
 
     if "repo: local" in config.read_text():
         run("pip install --user -e .")
-
 
     cmd = "pre_commit run --all-files --hook-stage=manual"
 
