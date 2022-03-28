@@ -837,7 +837,7 @@ git pull
 
 2. Cherry pick the first parent branch of the this PR on top of the older branch:
 ```
-git cherry-pick -m1 {merge_sha}
+git cherry-pick -x -m1 {merge_sha}
 ```
 
 3. You will likely have some merge/cherry-pick conflict here, fix them and commit:
