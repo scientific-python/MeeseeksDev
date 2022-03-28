@@ -9,6 +9,7 @@ import re
 import sys
 import time
 import traceback
+from pathlib import Path
 from textwrap import dedent
 
 import git
@@ -107,7 +108,6 @@ def replyadmin(*, session, payload, arguments, local_config=None):
 def _compute_pwd_changes(whitelist):
     import glob
     from difflib import SequenceMatcher
-    from pathlib import Path
 
     import black
 
@@ -417,11 +417,31 @@ def push_the_work(session, payload, arguments, local_config=None):
 
 @admin
 def precommit(*, session, payload, arguments, local_config=None):
+    comment_url = payload["issue"]["comments_url"]
+
     """Run pre-commit against a PR and push the changes."""
     yield from prep_for_command("precommit", session, payload, arguments, local_config=local_config)
 
-    cmd = "pre-commit run --all-files --hook-stage=manual"
-    comment_url = payload["issue"]["comments_url"]
+    # Make sure there is a pre-commit file.
+    config = Path("./.pre-commit-config.yaml")
+    if not config.exists():
+        # Alert the caller and bail.
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                """
+            I was unable to fix pre-commit errors because there is no
+            ".pre-commit-config.yaml" file.
+            """
+            ),
+        )
+        return
+
+    # Install the package in editable mode if there are local hooks.
+    if "repo: local" in config.read_text():
+        run("pip install --user -e .")
+
+    cmd = "pre_commit run --all-files --hook-stage=manual"
 
     # Run the command
     process = run(cmd)
@@ -490,6 +510,8 @@ def precommit(*, session, payload, arguments, local_config=None):
         """
         ),
     )
+
+    run("pip cache purge")
 
 
 @admin
