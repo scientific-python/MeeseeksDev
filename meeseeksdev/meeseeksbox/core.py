@@ -490,7 +490,7 @@ class WebHookHandler(MainHandler):
                     print(green + f"should test if {user} can {command} on {repo}/{org}" + normal)
                     # print(green + json.dumps(conf, indent=2) + normal)
 
-                if user in conf.get("denied_users", []):
+                if user in conf.get("usr_denylist", []):
                     return False, {}
 
                 user_section = conf.get("users", {}).get(user, {})
