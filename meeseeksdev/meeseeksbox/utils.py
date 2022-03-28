@@ -361,3 +361,11 @@ class Session(Authenticator):
             "https://api.github.com/repos/{}/{}/issues".format(org, repo),
             json=arguments,
         )
+
+
+def clear_caches():
+    """Clear local caches"""
+    print("\n\n====Clearing all caches===")
+    run("pip cache purge")
+    run("pre-commit clean")
+    print("====Finished clearing caches===\n\n")

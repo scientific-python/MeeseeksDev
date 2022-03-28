@@ -448,8 +448,6 @@ def precommit(*, session, payload, arguments, local_config=None):
 
     # See if the pre-commit succeeded, meaning there was nothing to do
     if process.returncode == 0:
-        # Clean up the pre-commit files
-        run("pre-commit clean")
 
         # Alert the caller and bail.
         session.post_comment(
@@ -468,9 +466,6 @@ def precommit(*, session, payload, arguments, local_config=None):
 
     # Run again to see if we've auto-fixed
     process = run(cmd)
-
-    # Clean up the pre-commit files
-    run("pre-commit clean")
 
     # If second run fails, then we can't auto-fix
     if process.returncode != 0:
@@ -510,8 +505,6 @@ def precommit(*, session, payload, arguments, local_config=None):
         """
         ),
     )
-
-    run("pip cache purge")
 
 
 @admin
