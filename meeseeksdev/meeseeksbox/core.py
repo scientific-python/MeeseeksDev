@@ -14,7 +14,7 @@ from tornado.ioloop import IOLoop
 from yieldbreaker import YieldBreaker
 
 from .scopes import Permission
-from .utils import ACCEPT_HEADER_SYMMETRA, Authenticator, add_event
+from .utils import ACCEPT_HEADER_SYMMETRA, Authenticator, add_event, clear_caches
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
@@ -667,5 +667,10 @@ class MeeseeksBox:
 
         self.server = tornado.httpserver.HTTPServer(self.application)
         self.server.listen(self.port)
+
+        # Clear caches once per day.
+        callback_time_ms = 1000 * 60 * 60 * 24
+        clear_cache_callback = tornado.ioloop.PeriodicCallback(clear_caches, callback_time_ms)
+        clear_cache_callback.start()
 
         IOLoop.instance().start()
