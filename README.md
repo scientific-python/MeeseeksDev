@@ -25,7 +25,7 @@ sure MeeseeksDev is correctly installed.
 
 3) Enjoy
 
-Beta Phase: During Beta phase repository/users need to be vetted/whitelisted
+Beta Phase: During Beta phase repository/users need to be vetted/allowlisted
 open an issue if you wish to participate.
 
 You might also want to tell your CI-integration (like travis-ci) **not** to test the **push** __and__ **the merge**.
@@ -229,7 +229,7 @@ See CONTIBUTING.md for for information.
 # Warnings
 
 This is still alpha software, user and org that can use it are still hardcoded.
-If you want access open an issue for me to whitelist your org and users.
+If you want access open an issue for me to allowlist your org and users.
 
 Because of GitHub API limitation, MeeseeksBox can not yet make the distinction
 between read-only and read-write collaborators.

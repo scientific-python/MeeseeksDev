@@ -177,11 +177,11 @@ class WebHookHandler(MainHandler):
         ]:
             add_event("ignore_org_missing", {"edited": "reason"})
         else:
-            if hasattr(self.config, "org_whitelist") and (org not in self.config.org_whitelist):
+            if hasattr(self.config, "org_allowlist") and (org not in self.config.org_allowlist):
                 add_event("post", {"reject_organisation": org})
 
         sender = payload.get("sender", {}).get("login", {})
-        if hasattr(self.config, "user_blacklist") and (sender in self.config.user_blacklist):
+        if hasattr(self.config, "user_denylist") and (sender in self.config.user_denylist):
             add_event("post", {"blocked_user": sender})
             self.finish("Blocked user.")
             return
@@ -490,7 +490,7 @@ class WebHookHandler(MainHandler):
                     print(green + f"should test if {user} can {command} on {repo}/{org}" + normal)
                     # print(green + json.dumps(conf, indent=2) + normal)
 
-                if user in conf.get("blacklisted_users", []):
+                if user in conf.get("usr_denylist", []):
                     return False, {}
 
                 user_section = conf.get("users", {}).get(user, {})
