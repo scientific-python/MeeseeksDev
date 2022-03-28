@@ -105,7 +105,7 @@ def replyadmin(*, session, payload, arguments, local_config=None):
     session.post_comment(comment_url, "Hello @{user}. Waiting for your orders.".format(user=user))
 
 
-def _compute_pwd_changes(whitelist):
+def _compute_pwd_changes(allowlist):
     import glob
     from difflib import SequenceMatcher
 
@@ -118,8 +118,8 @@ def _compute_pwd_changes(whitelist):
     print("== listdir", os.listdir())
 
     for p in glob.glob("**/*.py", recursive=True):
-        print("=== scanning", p, p in whitelist)
-        if p not in whitelist:
+        print("=== scanning", p, p in allowlist)
+        if p not in allowlist:
             # we don't touch files not in this PR.
             continue
         p = Path(p)

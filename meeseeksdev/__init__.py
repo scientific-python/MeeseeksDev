@@ -23,11 +23,15 @@ from .meeseeksbox.commands import (
 )
 from .meeseeksbox.core import Config, MeeseeksBox
 
-org_whitelist = [
+org_allowlist = [
     "MeeseeksBox",
     "Jupyter",
     "IPython",
     "JupyterLab",
+    "jupyter-server",
+    "jupyter-widgets",
+    "voila-dashboards",
+    "jupyter-xeus",
     "Carreau",
     "matplotlib",
     "scikit-learn",
@@ -35,9 +39,9 @@ org_whitelist = [
     "scikit-image",
 ]
 
-usr_blacklist = []
+usr_denylist = []
 
-usr_whitelist = [
+usr_allowlist = [
     "Carreau",
     "gnestor",
     "ivanov",
@@ -57,6 +61,7 @@ usr_whitelist = [
     "lgpage",
     "jasongrout",
     "ian-r-rose",
+    "kevin-bates",
     # matplotlib people
     "tacaswell",
     "QuLogic",
@@ -145,9 +150,9 @@ def main():
             keen.add_event("deploy", {"version": int(app_v[1:])})
         except Exception as e:
             print(e)
-    config.org_whitelist = org_whitelist + [o.lower() for o in org_whitelist]
-    config.user_whitelist = usr_whitelist + [u.lower() for u in usr_whitelist]
-    config.user_blacklist = usr_blacklist + [u.lower() for u in usr_blacklist]
+    config.org_allowlist = org_allowlist + [o.lower() for o in org_allowlist]
+    config.user_allowlist = usr_allowlist + [u.lower() for u in usr_allowlist]
+    config.user_denylist = usr_denylist + [u.lower() for u in usr_denylist]
     commands = {
         "hello": replyuser,
         "zen": zen,
