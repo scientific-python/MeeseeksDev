@@ -1,0 +1,6 @@
+{
+  "name": "meeseeksdev",
+  "version": "1.0.0",
+  "description": "stub file for node.js buildpack",
+  "private": true
+}
