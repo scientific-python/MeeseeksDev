@@ -65,24 +65,14 @@ def fix_issue_body(
 ):
     """
     This, for now does only simple fixes, like link to the original issue.
-
     This should be improved to quote mention of people
     """
 
-    body = RELINK_RE.sub("{org}/{repo}\\1".format(org=original_org, repo=original_repo), body)
+    body = RELINK_RE.sub(f"{original_org}/{original_repo}\\1", body)
 
-    return (
-        body
-        + """\n\n----
-    \nOriginally opened as {org}/{repo}#{number} by @{reporter}, migration requested by @{requester}
+    return f"""{body}\n\n----
+    \nOriginally opened as {original_org}/{original_repo}#{original_number} by @{original_poster}, migration requested by @{migration_requester}
     """
-    ).format(
-        org=original_org,
-        repo=original_repo,
-        number=original_number,
-        reporter=original_poster,
-        requester=migration_requester,
-    )
 
 
 def fix_comment_body(body, original_poster, original_url, original_org, original_repo):
