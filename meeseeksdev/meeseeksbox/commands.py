@@ -387,7 +387,6 @@ def push_the_work(session, payload, arguments, local_config=None):
     prnumber = payload["issue"]["number"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
-    comment_url = payload["issue"]["comments_url"]
 
     # collect extended payload on the PR
     print("== Collecting data on Pull-request...")
@@ -406,11 +405,11 @@ def push_the_work(session, payload, arguments, local_config=None):
     # Push the work
     print("== Pushing work....:")
     print(f"pushing with workbranch:{branch}")
+    succeeded = True
     try:
         repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
     except Exception:
-        session.post_comment(comment_url, body="I was unable to push due to errors")
-        return
+        succeeded = False
 
     # Clean up
     default_branch = session.ghrequest(
@@ -418,6 +417,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     ).json()["default_branch"]
     repo.git.checkout(default_branch)
     repo.branches.workbranch.delete(repo, "workbranch", force=True)
+    return succeeded
 
 
 @admin
@@ -497,19 +497,22 @@ def precommit(*, session, payload, arguments, local_config=None):
             ),
         )
 
-    push_the_work(session, payload, arguments, local_config=local_config)
+    succeeded = push_the_work(session, payload, arguments, local_config=local_config)
 
     # Tell the caller we've finished
     comment_url = payload["issue"]["comments_url"]
-    session.post_comment(
-        comment_url,
-        body=dedent(
+    if succeeded:
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                """
+            I've applied "pre-commit" and pushed. You may have trouble pushing further
+            commits, but feel free to force push and ask me to run again.
             """
-        I've applied "pre-commit" and pushed. You may have trouble pushing further
-        commits, but feel free to force push and ask me to run again.
-        """
-        ),
-    )
+            ),
+        )
+    else:
+        session.post_comment(comment_url, body="I was unable to push due to errors")
 
 
 @admin
@@ -566,19 +569,22 @@ def blackify(*, session, payload, arguments, local_config=None):
         )
         return
 
-    push_the_work(session, payload, arguments, local_config=local_config)
+    succeeded = push_the_work(session, payload, arguments, local_config=local_config)
 
     # Tell the caller we've finished
-    session.post_comment(
-        comment_url,
-        body=dedent(
+    if succeeded:
+        session.post_comment(
+            comment_url,
+            body=dedent(
+                """
+            I've rebased this Pull Request, applied `black` on all the
+            individual commits, and pushed. You may have trouble pushing further
+            commits, but feel free to force push and ask me to reformat again.
             """
-        I've rebased this Pull Request, applied `black` on all the
-        individual commits, and pushed. You may have trouble pushing further
-        commits, but feel free to force push and ask me to reformat again.
-        """
-        ),
-    )
+            ),
+        )
+    else:
+        session.post_comment(comment_url, body="I was unable to push due to errors")
 
 
 @write
