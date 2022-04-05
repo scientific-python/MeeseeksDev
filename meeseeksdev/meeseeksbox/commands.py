@@ -345,9 +345,9 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
         atk = session.token()
         session.post_comment(
             comment_url,
-            body="Would you mind installing me on your fork so that I can update your branch? \n"
+            body=f"@{author_login}, would you mind installing me on your fork so that I can update your branch? \n"
             "Click [here](https://github.com/apps/meeseeksdev/installations/new) "
-            "to do that, and follow the instructions to add your fork."
+            "to do that, and follow the instructions to add your fork.  "
             "I'm going to try to push as a maintainer but this may not work.",
         )
 
@@ -387,6 +387,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     prnumber = payload["issue"]["number"]
     org_name = payload["repository"]["owner"]["login"]
     repo_name = payload["repository"]["name"]
+    comment_url = payload["issue"]["comments_url"]
 
     # collect extended payload on the PR
     print("== Collecting data on Pull-request...")
@@ -405,7 +406,11 @@ def push_the_work(session, payload, arguments, local_config=None):
     # Push the work
     print("== Pushing work....:")
     print(f"pushing with workbranch:{branch}")
-    repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
+    try:
+        repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
+    except Exception:
+        session.post_comment(comment_url, body="I was unable to push due to errors")
+        return
 
     # Clean up
     default_branch = session.ghrequest(
