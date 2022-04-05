@@ -441,7 +441,7 @@ def precommit(*, session, payload, arguments, local_config=None):
     if "repo: local" in config.read_text():
         run("pip install --user -e .")
 
-    cmd = "pre_commit run --all-files --hook-stage=manual"
+    cmd = "pre-commit run --all-files --hook-stage=manual"
 
     # Run the command
     process = run(cmd)
