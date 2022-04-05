@@ -321,6 +321,7 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
 
     # collect extended payload on the PR
+    # https://docs.github.com/en/rest/reference/pulls#get-a-pull-request
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
@@ -332,9 +333,9 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
     branch = pr_data["head"]["ref"]
     author_login = pr_data["head"]["repo"]["owner"]["login"]
     repo_name = pr_data["head"]["repo"]["name"]
+    maintainer_can_modify = pr_data["maintainer_can_modify"]
 
-    # that will likely fail, as if PR, we need to bypass the fact that the
-    # requester has technically no access to committer repo.
+    # Check to see if we can successfully push changees to the PR.
     target_session = yield "{}/{}".format(author_login, repo_name)
     if target_session:
         print("installed on target repository")
@@ -342,14 +343,21 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
         session.post_comment(comment_url, body=f"Running {name} on this Pull Request...")
     else:
         print("use allow edit as maintainer")
+        if maintainer_can_modify:
+            msg = "For now I will push as a maintainer since it is enabled."
+        else:
+            msg = 'I would push as a maintainer but I cannot unless "Allow edits from maintainers" is enabled for this Pull Request.'
         atk = session.token()
         session.post_comment(
             comment_url,
-            body=f"@{author_login}, would you mind installing me on your fork so that I can update your branch? \n"
+            body=f"@{author_login}, would you mind installing me on your fork so that I can update your branch?\n"
             "Click [here](https://github.com/apps/meeseeksdev/installations/new) "
-            "to do that, and follow the instructions to add your fork.  "
-            "I'm going to try to push as a maintainer but this may not work.",
+            "to do that, and follow the instructions to add your fork.\n\n"
+            f"{msg}",
         )
+        if not maintainer_can_modify:
+            print("=== Bailing since we do not have permissions")
+            return
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
