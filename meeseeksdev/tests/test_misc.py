@@ -1,7 +1,7 @@
 import re
 import textwrap
 
-from ..meeseeksbox.core import process_mentionning_comment
+from ..meeseeksbox.core import process_mentioning_comment
 
 
 def test1():
@@ -9,7 +9,7 @@ def test1():
     reg = re.compile("@?" + re.escape(botname) + r"(?:\[bot\])?", re.IGNORECASE)
 
     assert (
-        process_mentionning_comment(
+        process_mentioning_comment(
             textwrap.dedent(
                 """
         @meeseeksdev nothing

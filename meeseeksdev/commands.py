@@ -3,6 +3,7 @@ Define a few commands
 """
 
 from textwrap import dedent
+from typing import Generator, Optional
 
 from .meeseeksbox.commands import tag, untag
 from .meeseeksbox.scopes import everyone, pr_author, write
@@ -49,7 +50,9 @@ def open(*, session, payload, arguments, local_config=None):
 
 
 @write
-def migrate_issue_request(*, session: Session, payload: dict, arguments: str, local_config=None):
+def migrate_issue_request(
+    *, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+) -> Generator:
     """[to] {org}/{repo}
 
     Need to be admin on target repo. Replicate all comments on target repo and close current on.
