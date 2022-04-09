@@ -6,7 +6,6 @@ import re
 import time
 from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor as Pool
-from typing import Optional
 
 import tornado.httpserver
 import tornado.ioloop

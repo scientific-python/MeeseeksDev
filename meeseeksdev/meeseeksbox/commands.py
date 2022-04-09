@@ -936,8 +936,9 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             )
             if hasattr(e, "stderr"):
                 print(
-                    "\n" + e.stderr.decode("utf8", "replace"), file=sys.stderr
-                )  # type:ignore[attr-defined]
+                    "\n" + e.stderr.decode("utf8", "replace"),  # type:ignore[attr-defined]
+                    file=sys.stderr,
+                )
             print("\n" + repo.git.status(), file=sys.stderr)
             add_event("error", {"git_crash": 1})
             s_reason = "Unknown error line 501"
