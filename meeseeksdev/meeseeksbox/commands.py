@@ -338,8 +338,6 @@ def prep_for_command(
     repo_name = pr_data["head"]["repo"]["name"]
     maintainer_can_modify = pr_data["maintainer_can_modify"]
 
-    print(f"Got author login {author_login}")
-
     # Check to see if we can successfully push changees to the PR.
     target_session = yield "{}/{}".format(author_login, repo_name)
 
