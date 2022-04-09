@@ -41,7 +41,7 @@ repos:
   hooks:
   - id: mypy
     args: ["--config-file", ".mypy.ini"]
-    additional_dependencies: [types-requests, types-PyYAML, types-mock, tornado]
+    additional_dependencies: [types-requests, types-PyYAML, types-mock, tornado, black, pytest, gitpython, pyjwt]
     stages: [manual]
 
 - repo: https://github.com/sirosen/check-jsonschema

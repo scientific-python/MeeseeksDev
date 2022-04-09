@@ -175,6 +175,7 @@ class Authenticator:
             }
         )
 
+        assert self.rsadata is not None
         tok = jwt.encode(payload, key=self.rsadata, algorithm="RS256")
 
         headers = {

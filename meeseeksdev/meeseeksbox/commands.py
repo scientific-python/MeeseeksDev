@@ -430,7 +430,7 @@ def push_the_work(session, payload, arguments, local_config=None):
         "GET", f"https://api.github.com/repos/{org_name}/{repo_name}"
     ).json()["default_branch"]
     repo.git.checkout(default_branch)
-    repo.branches.workbranch.delete(repo, "workbranch", force=True)
+    repo.branches.workbranch.delete(repo, "workbranch", force=True)  # type:ignore[attr-defined]
     return succeeded
 
 
@@ -971,7 +971,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             # TODO comment on issue
             print(e)
         repo.git.checkout(default_branch)
-        repo.branches.workbranch.delete(repo, "workbranch", force=True)
+        repo.branches.workbranch.delete(repo, "workbranch", force=True)  # type:ignore[attr-defined]
 
         # TODO checkout the default_branch and get rid of branch
 
