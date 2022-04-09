@@ -415,7 +415,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     print(f"pushing with workbranch:{branch}")
     succeeded = True
     try:
-        repo.remotes.origin.push("workbranch:{}".format(branch), force=True)
+        repo.remotes.origin.push("workbranch:{}".format(branch), force=True).raise_if_error()
     except Exception:
         succeeded = False
 
@@ -943,11 +943,12 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
 
         # Push the backported work
         print("== Pushing work....:")
+        succeeded = True
         try:
             print(f"Trying to push to {remote_submit_branch} of {session.personal_account_name}")
             repo.remotes[session.personal_account_name].push(
                 "workbranch:{}".format(remote_submit_branch)
-            )
+            ).raise_if_error()
         except Exception as e:
             import traceback
 
@@ -955,12 +956,20 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             print("could not push to self remote")
             s_reason = "Could not push"
             keen_stats()
-            # TODO comment on issue
+
+            session.post_comment(
+                comment_url, f"Could not push to {remote_submit_branch} due to error, aborting."
+            )
             print(e)
+            succeeded = False
+
         repo.git.checkout(default_branch)
         repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
         # TODO checkout the default_branch and get rid of branch
+
+        if not succeeded:
+            return
 
         # Make the PR on GitHub
         print(
