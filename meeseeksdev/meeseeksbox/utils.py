@@ -105,9 +105,8 @@ class Authenticator:
         self.rsadata = rsadata
         self.personal_account_token = personal_account_token
         self.personal_account_name = personal_account_name
-        # TODO: this mapping is built at startup, we should update it when we
-        # have new / deleted installations
         self.idmap: Dict[str, str] = {}
+        self._org_idmap: Dict[str, str] = {}
         self._session_class = Session
 
     def session(self, installation_id: str) -> "Session":
@@ -124,24 +123,38 @@ class Authenticator:
             self.personal_account_name,
         )
 
+    def get_session(self, org_repo):
+        """Given an org and repo, return a session with the right credentials."""
+        # First try - see if we already have the auth.
+        if org_repo in self.idmap:
+            return self.session(self.idmap[org_repo])
+
+        # Next try - see if this is a newly authorized repo in an
+        # org that we've seen.
+        org, _ = org_repo.split("/")
+        if org in self._org_idmap:
+            self._update_installation(self._org_idmap[org])
+            if org_repo in self.idmap:
+                return self.session(self.idmap[org_repo])
+
+        # TODO: if we decide to allow any org without an allowlist,
+        # we should make the org list dynamic.  We would re-scan
+        # the list of installations here and update our mappings.
+
     def list_installations(self) -> Any:
-        """
-        Todo: Pagination
-        """
-        # import json
-        # response = self._integration_authenticated_request(
-        #     'GET', "https://api.github.com/integration/installations")
-        # print(yellow+'list installation')
-        # print('HEADER', response.headers)
+        """List the installations for the app."""
+        installations = []
 
-        response2 = self._integration_authenticated_request(
-            "GET", "https://api.github.com/app/installations"
-        )
+        url = "https://api.github.com/app/installations"
+        while True:
+            response = self._integration_authenticated_request("GET", url)
+            installations.extend(response.json())
+            if "next" in response.links:
+                url = response.links["next"]["url"]
+                continue
+            break
 
-        # print(yellow+'list app installation')
-        # print('HEADER II', response2.headers)
-        # print('Content II', response2.json())
-        return response2.json()
+        return installations
 
     def _build_auth_id_mapping(self):
         """
@@ -151,21 +164,33 @@ class Authenticator:
         if not self.rsadata:
             print("Skipping auth_id_mapping build since there is no B64KEY set")
             return
-        installations = self.list_installations()
-        for installation in installations:
-            iid = installation["id"]
-            session = self.session(iid)
-            try:
-                repositories = session.ghrequest(
-                    "GET", installation["repositories_url"], json=None
-                ).json()
+
+        self._installations = self.list_installations()
+        for installation in self._installations:
+            self._update_installation(installation)
+
+    def _update_installation(self, installation):
+        iid = installation["id"]
+        session = self.session(iid)
+        try:
+            # Make sure we get all pages.
+            url = installation["repositories_url"]
+            while True:
+                res = session.ghrequest("GET", url)
+                repositories = res.json()
                 for repo in repositories["repositories"]:
                     self.idmap[repo["full_name"]] = iid
-            except Forbidden:
-                print("Forbidden for", iid)
-                continue
+                    self._org_idmap[repo["owner"]["login"]] = iid
+                if "next" in res.links:
+                    url = res.links["next"]["url"]
+                    continue
+                break
 
-    def _integration_authenticated_request(self, method, url):
+        except Forbidden:
+            print("Forbidden for", iid)
+            return
+
+    def _integration_authenticated_request(self, method, url, json=None):
         self.since = int(datetime.datetime.now().timestamp())
         payload = dict(
             {
@@ -184,7 +209,7 @@ class Authenticator:
             "Host": "api.github.com",
             "User-Agent": "python/requests",
         }
-        req = requests.Request(method, url, headers=headers)
+        req = requests.Request(method, url, headers=headers, json=json)
         prepared = req.prepare()
         with requests.Session() as s:
             return s.send(prepared)
@@ -273,6 +298,7 @@ class Session(Authenticator):
                 "Host": "api.github.com",
                 "User-Agent": "python/requests",
             }
+            print(f"Making a {method} call to {url}")
             req = requests.Request(method, url, headers=headers, json=json)
             return req.prepare()
 

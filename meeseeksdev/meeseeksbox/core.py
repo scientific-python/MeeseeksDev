@@ -575,9 +575,9 @@ class WebHookHandler(MainHandler):
                         gen = YieldBreaker(maybe_gen)
                         for org_repo in gen:
                             torg, trepo = org_repo.split("/")
-                            session_id = self.auth.idmap.get(org_repo)
-                            if session_id:
-                                target_session = self.auth.session(session_id)
+                            target_session = self.auth.get_session(org_repo)
+
+                            if target_session:
                                 # TODO, if PR, admin and request is on source repo, allows anyway.
                                 # we may need to also check allow edit from maintainer and provide
                                 # another decorator for safety.
@@ -631,7 +631,6 @@ class MeeseeksBox:
             self.config.personal_account_token,
             self.config.personal_account_name,
         )
-        self.auth._build_auth_id_mapping()
 
     def sig_handler(self, sig, frame):
         print(yellow, "Caught signal: %s, Shutting down..." % sig, normal)
@@ -675,4 +674,6 @@ class MeeseeksBox:
         clear_cache_callback = tornado.ioloop.PeriodicCallback(clear_caches, callback_time_ms)
         clear_cache_callback.start()
 
-        IOLoop.instance().start()
+        loop = IOLoop.instance()
+        loop.add_callback(self.auth._build_auth_id_mapping)
+        loop.start()

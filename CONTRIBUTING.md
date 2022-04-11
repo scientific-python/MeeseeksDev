@@ -26,9 +26,15 @@ heroku git:remote -a meeseeksdev-$USER
 
 Then run:
 
-```
+```bash
 git push heroku $(git rev-parse --abbrev-ref HEAD):master
 heroku open
+```
+
+To view the logs in a terminal window, use:
+
+```bash
+heroku logs --app meeseeksdev=$USER -t
 ```
 
 ### GitHub App Configuration
