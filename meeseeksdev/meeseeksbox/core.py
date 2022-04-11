@@ -4,6 +4,7 @@ import inspect
 import json
 import re
 import time
+from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor as Pool
 
 import tornado.httpserver
@@ -26,7 +27,7 @@ pool = Pool(6)
 
 class Config:
     botname = None
-    integration_id = None
+    integration_id = -1
     key = None
     botname = None
     at_botname = None
@@ -79,7 +80,7 @@ def _strip_extras(c):
     return c
 
 
-def process_mentionning_comment(body, bot_re):
+def process_mentioning_comment(body: str, bot_re: re.Pattern) -> list:
     """
     Given a comment body and a bot name parse this into a tuple of (command, arguments)
     """
@@ -233,7 +234,7 @@ class WebHookHandler(MainHandler):
         botname = self.config.botname
         return re.compile("@?" + re.escape(botname) + r"(?:\[bot\])?", re.IGNORECASE)
 
-    def dispatch_action(self, type_, payload):
+    def dispatch_action(self, type_: str, payload: dict) -> Future:
         botname = self.config.botname
         repo = payload.get("repository", {}).get("full_name", red + "<unknown repo>" + normal)
         # new issue/PR opened
@@ -349,13 +350,13 @@ class WebHookHandler(MainHandler):
                         milestone = is_pr.get("milestone", {})
                         if milestone:
                             description.append(milestone.get("description", "") or "")
-                        description = "\n".join(description)
+                        description_str = "\n".join(description)
                         if "on-merge:" in description and is_pr["base"]["ref"] in (
                             "master",
                             "main",
                         ):
                             did_backport = False
-                            for description_line in description.splitlines():
+                            for description_line in description_str.splitlines():
                                 line = description_line.strip()
                                 if line.startswith("on-merge:"):
                                     todo = line[len("on-merge:") :].strip()
@@ -381,6 +382,7 @@ class WebHookHandler(MainHandler):
             else:
                 pass
                 # print(f"({repo}) can't deal with `{type_}` yet")
+        return self.finish()
 
     # def _action_allowed(args):
     #     """
@@ -393,7 +395,7 @@ class WebHookHandler(MainHandler):
     #       - If pull-request, the requester is the author.
     #     """
 
-    def dispatch_on_mention(self, body, payload, user):
+    def dispatch_on_mention(self, body: str, payload: dict, user: str) -> None:
         """
         Core of the logic that let people require actions from the bot.
 
@@ -445,7 +447,7 @@ class WebHookHandler(MainHandler):
             print(user, "is legitimate author of this PR, letting commands go through")
 
         permission_level = session._get_permission(org, repo, user)
-        command_args = process_mentionning_comment(body, self.mention_bot_re)
+        command_args = process_mentioning_comment(body, self.mention_bot_re)
         for (command, arguments) in command_args:
             print("    :: treating", command, arguments)
             add_event(

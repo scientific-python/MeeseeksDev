@@ -5,7 +5,7 @@ import tornado.web
 
 from ..meeseeksbox.core import Authenticator, Config, WebHookHandler
 
-commands = {}
+commands: dict = {}
 
 config = Config(
     integration_id=100,

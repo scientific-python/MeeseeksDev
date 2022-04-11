@@ -7,6 +7,7 @@ import pipes
 import re
 import shlex
 import subprocess
+from typing import Any, Dict, Optional, cast
 
 import jwt
 import requests
@@ -90,7 +91,13 @@ def fix_comment_body(body, original_poster, original_url, original_org, original
 
 
 class Authenticator:
-    def __init__(self, integration_id, rsadata, personal_account_token, personal_account_name):
+    def __init__(
+        self,
+        integration_id: int,
+        rsadata: Optional[str],
+        personal_account_token: Optional[str],
+        personal_account_name: Optional[str],
+    ):
         self.since = int(datetime.datetime.now().timestamp())
         self.duration = 60 * 10
         self._token = None
@@ -100,10 +107,10 @@ class Authenticator:
         self.personal_account_name = personal_account_name
         # TODO: this mapping is built at startup, we should update it when we
         # have new / deleted installations
-        self.idmap = {}
+        self.idmap: Dict[str, str] = {}
         self._session_class = Session
 
-    def session(self, installation_id):
+    def session(self, installation_id: str) -> "Session":
         """
         Given and installation id, return a session with the right credentials
         """
@@ -117,7 +124,7 @@ class Authenticator:
             self.personal_account_name,
         )
 
-    def list_installations(self):
+    def list_installations(self) -> Any:
         """
         Todo: Pagination
         """
@@ -168,6 +175,7 @@ class Authenticator:
             }
         )
 
+        assert self.rsadata is not None
         tok = jwt.encode(payload, key=self.rsadata, algorithm="RS256")
 
         headers = {
@@ -198,13 +206,14 @@ class Session(Authenticator):
         super().__init__(integration_id, rsadata, personal_account_token, personal_account_name)
         self.installation_id = installation_id
 
-    def token(self):
+    def token(self) -> str:
         now = datetime.datetime.now().timestamp()
         if (now > self.since + self.duration - 60) or (self._token is None):
             self.regen_token()
+        assert self._token is not None
         return self._token
 
-    def regen_token(self):
+    def regen_token(self) -> None:
         method = "POST"
         url = f"https://api.github.com/app/installations/{self.installation_id}/access_tokens"
         resp = self._integration_authenticated_request(method, url)
@@ -216,7 +225,9 @@ class Session(Authenticator):
         except Exception:
             raise ValueError(resp.content, url)
 
-    def personal_request(self, method, url, json=None, raise_for_status=True):
+    def personal_request(
+        self, method: str, url: str, json: Optional[dict] = None, raise_for_status: bool = True
+    ) -> requests.Response:
         """
         Does a request but using the personal account name and token
         """
@@ -243,13 +254,13 @@ class Session(Authenticator):
 
     def ghrequest(
         self,
-        method,
-        url,
-        json=None,
+        method: str,
+        url: str,
+        json: Optional[dict] = None,
         *,
-        override_accept_header=None,
-        raise_for_status=True,
-    ):
+        override_accept_header: Optional[str] = None,
+        raise_for_status: Optional[bool] = True,
+    ) -> requests.Response:
         accept = ACCEPT_HEADER
         if override_accept_header:
             accept = override_accept_header
@@ -294,7 +305,7 @@ class Session(Authenticator):
                 )
             return response
 
-    def _get_permission(self, org, repo, username):
+    def _get_permission(self, org: str, repo: str, username: str) -> Permission:
         get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(
             org=org, repo=repo, username=username
         )
@@ -307,19 +318,21 @@ class Session(Authenticator):
         resp.raise_for_status()
         permission = resp.json()["permission"]
         print("found permission", permission, "for user ", username, "on ", org, repo)
-        return getattr(Permission, permission)
+        return cast(Permission, getattr(Permission, permission))
 
-    def has_permission(self, org, repo, username, level=None):
+    def has_permission(
+        self, org: str, repo: str, username: str, level: Optional[Permission] = None
+    ) -> bool:
         """ """
         if not level:
             level = Permission.none
 
         return self._get_permission(org, repo, username).value >= level.value
 
-    def post_comment(self, comment_url, body):
+    def post_comment(self, comment_url: str, body: str) -> None:
         self.ghrequest("POST", comment_url, json={"body": body})
 
-    def get_collaborator_list(self, org, repo):
+    def get_collaborator_list(self, org: str, repo: str) -> Optional[Any]:
         get_collaborators_query = "https://api.github.com/repos/{org}/{repo}/collaborators".format(
             org=org, repo=repo
         )
@@ -328,11 +341,19 @@ class Session(Authenticator):
             return resp.json()
         else:
             resp.raise_for_status()
+            return None
 
     def create_issue(
-        self, org: str, repo: str, title: str, body: str, *, labels=None, assignees=None
-    ):
-        arguments = {"title": title, "body": body}
+        self,
+        org: str,
+        repo: str,
+        title: str,
+        body: str,
+        *,
+        labels: Optional[list] = None,
+        assignees: Optional[list] = None,
+    ) -> requests.Response:
+        arguments: dict = {"title": title, "body": body}
 
         if labels:
             if type(labels) in (list, tuple):

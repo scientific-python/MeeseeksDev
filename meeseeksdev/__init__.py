@@ -39,7 +39,7 @@ org_allowlist = [
     "scikit-image",
 ]
 
-usr_denylist = []
+usr_denylist: list = []
 
 usr_allowlist = [
     "Carreau",
@@ -91,12 +91,12 @@ def load_config_from_env():
     """
     Load the configuration, for now stored in the environment
     """
-    config = {}
+    config: dict = {}
 
-    integration_id = os.environ.get("GITHUB_INTEGRATION_ID")
+    integration_id_str = os.environ.get("GITHUB_INTEGRATION_ID")
     botname = os.environ.get("GITHUB_BOT_NAME", None)
 
-    if not integration_id:
+    if not integration_id_str:
         raise ValueError("Please set GITHUB_INTEGRATION_ID")
 
     if not botname:
@@ -106,7 +106,7 @@ def load_config_from_env():
 
     botname = botname.replace("@", "")
     at_botname = "@" + botname
-    integration_id = int(integration_id)
+    integration_id = int(integration_id_str)
 
     if "B64KEY" in os.environ:
         config["key"] = base64.b64decode(bytes(os.environ["B64KEY"], "ASCII"))

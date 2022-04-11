@@ -13,7 +13,7 @@ while (time.time() - t0) < 60:
         found = True
         break
     except URLError as e:
-        if e.reason.errno == errno.ECONNREFUSED:
+        if e.reason.errno == errno.ECONNREFUSED:  # type:ignore
             time.sleep(1)
             continue
         raise

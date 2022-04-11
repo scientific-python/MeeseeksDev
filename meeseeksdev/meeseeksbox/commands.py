@@ -11,6 +11,7 @@ import time
 import traceback
 from pathlib import Path
 from textwrap import dedent
+from typing import Generator, Optional
 
 import git
 import mock
@@ -117,12 +118,12 @@ def _compute_pwd_changes(allowlist):
     print("== pwd", os.getcwd())
     print("== listdir", os.listdir())
 
-    for p in glob.glob("**/*.py", recursive=True):
-        print("=== scanning", p, p in allowlist)
-        if p not in allowlist:
+    for path in glob.glob("**/*.py", recursive=True):
+        print("=== scanning", path, path in allowlist)
+        if path not in allowlist:
             # we don't touch files not in this PR.
             continue
-        p = Path(p)
+        p = Path(path)
         old = p.read_text()
         new = black.format_str(old, mode=black.FileMode())
         if new != old:
@@ -309,7 +310,9 @@ def black_suggest(*, session, payload, arguments, local_config=None):
         print("== Done cleaning ")
 
 
-def prep_for_command(name, session, payload, arguments, local_config=None):
+def prep_for_command(
+    name: str, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+) -> Generator:
     """Prepare to run a command against a local checkout of a repo."""
     print(f"===== running command {name} =====")
     print("===== ============ =====")
@@ -337,6 +340,7 @@ def prep_for_command(name, session, payload, arguments, local_config=None):
 
     # Check to see if we can successfully push changees to the PR.
     target_session = yield "{}/{}".format(author_login, repo_name)
+
     if target_session:
         print("installed on target repository")
         atk = target_session.token()
@@ -424,12 +428,14 @@ def push_the_work(session, payload, arguments, local_config=None):
         "GET", f"https://api.github.com/repos/{org_name}/{repo_name}"
     ).json()["default_branch"]
     repo.git.checkout(default_branch)
-    repo.branches.workbranch.delete(repo, "workbranch", force=True)
+    repo.branches.workbranch.delete(repo, "workbranch", force=True)  # type:ignore[attr-defined]
     return succeeded
 
 
 @admin
-def precommit(*, session, payload, arguments, local_config=None):
+def precommit(
+    *, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+) -> Generator:
     comment_url = payload["issue"]["comments_url"]
 
     """Run pre-commit against a PR and push the changes."""
@@ -602,12 +608,13 @@ def safe_backport(session, payload, arguments, local_config=None):
 
     print = lambda *args, **kwargs: builtins.print("    [backport]", *args, **kwargs)
 
-    s_clone_time = 0
+    s_clone_time = 0.0
     s_success = False
     s_reason = "unknown"
-    s_fork_time = 0
-    s_clean_time = 0
-    s_ff_time = 0
+    s_fork_time = 0.0
+    s_clean_time = 0.0
+    s_ff_time = 0.0
+    s_slug = ""
 
     def keen_stats():
         nonlocal s_slug
@@ -816,7 +823,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("== All has been fetched correctly")
 
         print("Cherry-picking %s" % merge_sha)
-        args = ("-x", "-m", "1", merge_sha)
+        args: tuple = ("-x", "-m", "1", merge_sha)
 
         msg = "Backport PR #%i: %s" % (prnumber, prtitle)
         remote_submit_branch = f"auto-backport-of-pr-{prnumber}-on-{target_branch}"
@@ -925,7 +932,11 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             session.post_comment(
                 comment_url, "Hum, I actually crashed, that should not have happened."
             )
-            print("\n" + e.stderr.decode("utf8", "replace"), file=sys.stderr)
+            if hasattr(e, "stderr"):
+                print(
+                    "\n" + e.stderr.decode("utf8", "replace"),  # type:ignore[attr-defined]
+                    file=sys.stderr,
+                )
             print("\n" + repo.git.status(), file=sys.stderr)
             add_event("error", {"git_crash": 1})
             s_reason = "Unknown error line 501"
@@ -964,7 +975,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             succeeded = False
 
         repo.git.checkout(default_branch)
-        repo.branches.workbranch.delete(repo, "workbranch", force=True)
+        repo.branches.workbranch.delete(repo, "workbranch", force=True)  # type:ignore[attr-defined]
 
         # TODO checkout the default_branch and get rid of branch
 
@@ -1142,7 +1153,9 @@ def untag(session, payload, arguments, local_config=None):
 
 
 @write
-def migrate_issue_request(*, session: Session, payload: dict, arguments: str, local_config=None):
+def migrate_issue_request(
+    *, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+) -> Generator:
     """Todo:
 
     - Works through pagination of comments
