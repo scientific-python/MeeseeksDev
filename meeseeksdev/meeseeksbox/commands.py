@@ -965,7 +965,9 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         except Exception as e:
             import traceback
 
-            traceback.print_exc()
+            content = traceback.format_exc()
+            print(content.replace(session.personal_account_token, "..."))
+
             print("could not push to self remote")
             s_reason = "Could not push"
             keen_stats()
