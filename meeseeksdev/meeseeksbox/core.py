@@ -373,8 +373,10 @@ class WebHookHandler(MainHandler):
                                 )
                                 print(description)
                         else:
-                            print(f'PR is not targeting main/master branch ({is_pr["base"]["ref"]}),'
-                                  'or "on-merge:" not in milestone (or label) description:')
+                            print(
+                                f'PR is not targeting main/master branch ({is_pr["base"]["ref"]}),'
+                                'or "on-merge:" not in milestone (or label) description:'
+                            )
                             print(description)
                     else:
                         print(f"({repo}) Hum, closed, PR but not merged")
