@@ -351,7 +351,7 @@ class WebHookHandler(MainHandler):
                         if milestone:
                             description.append(milestone.get("description", "") or "")
                         description_str = "\n".join(description)
-                        if "on-merge:" in description and is_pr["base"]["ref"] in (
+                        if "on-merge:" in description_str and is_pr["base"]["ref"] in (
                             "master",
                             "main",
                         ):
@@ -371,13 +371,13 @@ class WebHookHandler(MainHandler):
                                     '"on-merge:" found in milestone description, but unable to parse command.',
                                     'Is "on-merge:" on a separate line?',
                                 )
-                                print(description)
+                                print(description_str)
                         else:
                             print(
                                 f'PR is not targeting main/master branch ({is_pr["base"]["ref"]}),'
                                 'or "on-merge:" not in milestone (or label) description:'
                             )
-                            print(description)
+                            print(description_str)
                     else:
                         print(f"({repo}) Hum, closed, PR but not merged")
                 else:
