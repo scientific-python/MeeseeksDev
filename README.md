@@ -4,6 +4,8 @@ A base for stateless GitHub Bot,and one hosted implementation thereof.
 
 See what is a [Meeseeks and a MeeseeksBox](https://www.youtube.com/watch?v=qUYvIAP3qQk).
 
+See [usage statistics](https://meeseeksbox.github.io/).
+
 ## Hosted for you
 
 We host MeeseeksBox(es) and will expose them as GitHub Integrations so you don't
@@ -242,4 +244,4 @@ heroku addons:create keen
 
 ## Changelog
 
- Oct 31st, Backport now support squash-merge
+* 2017-10-31: Backport now support squash-merge
