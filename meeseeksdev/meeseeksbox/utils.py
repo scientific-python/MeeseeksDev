@@ -83,7 +83,7 @@ def fix_comment_body(body, original_poster, original_url, original_org, original
     This should be improved to quote mention of people
     """
 
-    body = RELINK_RE.sub("{org}/{repo}\\1".format(org=original_org, repo=original_repo), body)
+    body = RELINK_RE.sub(f"{original_org}/{original_repo}\\1", body)
 
     return """[`@{op}` commented]({original_url}): {body}""".format(
         op=original_poster, original_url=original_url, body=body
@@ -251,7 +251,11 @@ class Session(Authenticator):
             raise ValueError(resp.content, url)
 
     def personal_request(
-        self, method: str, url: str, json: Optional[dict] = None, raise_for_status: bool = True
+        self,
+        method: str,
+        url: str,
+        json: Optional[dict] = None,
+        raise_for_status: bool = True,
     ) -> requests.Response:
         """
         Does a request but using the personal account name and token
@@ -261,7 +265,7 @@ class Session(Authenticator):
 
         def prepare():
             headers = {
-                "Authorization": "token {}".format(self.personal_account_token),
+                "Authorization": f"token {self.personal_account_token}",
                 "Host": "api.github.com",
                 "User-Agent": "python/requests",
             }
@@ -293,7 +297,7 @@ class Session(Authenticator):
         def prepare():
             atk = self.token()
             headers = {
-                "Authorization": "Bearer {}".format(atk),
+                "Authorization": f"Bearer {atk}",
                 "Accept": accept,
                 "Host": "api.github.com",
                 "User-Agent": "python/requests",
@@ -395,7 +399,7 @@ class Session(Authenticator):
 
         return self.ghrequest(
             "POST",
-            "https://api.github.com/repos/{}/{}/issues".format(org, repo),
+            f"https://api.github.com/repos/{org}/{repo}/issues",
             json=arguments,
         )
 
