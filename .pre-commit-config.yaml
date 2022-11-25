@@ -35,7 +35,8 @@ repos:
     rev: v0.991
     hooks:
       - id: mypy
-        additional_dependencies: [types-mock, types-requests, types-PyYAML, tornado]
+        args: ["--config-file", ".mypy.ini"]
+        additional_dependencies: [types-requests, types-PyYAML, types-mock, tornado, black, pytest, gitpython, pyjwt]
 
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.10.1
