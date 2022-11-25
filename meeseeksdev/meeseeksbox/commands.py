@@ -843,7 +843,9 @@ def safe_backport(session, payload, arguments, local_config=None):
                         raise
 
         except git.GitCommandError as e:
-            if ("git commit --allow-empty" in e.stderr) or ("git commit --allow-empty" in e.stdout):
+            if ("git commit --allow-empty" in e.stderr.lower()) or (
+                "git commit --allow-empty" in e.stdout.lower()
+            ):
                 session.post_comment(
                     comment_url,
                     "Can't Dooooo.... It seem like this is already backported (commit is empty)."
@@ -856,7 +858,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 s_reason = "empty commit"
                 keen_stats()
                 return
-            elif "after resolving the conflicts" in e.stderr:
+            elif "after resolving the conflicts" in e.stderr.lower():
                 # TODO, here we should also do a git merge --abort
                 # to avoid thrashing the cache at next backport request.
                 cmd = " ".join(pipes.quote(arg) for arg in sys.argv)
