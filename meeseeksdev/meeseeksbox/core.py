@@ -46,7 +46,7 @@ class Config:
             if not attr.startswith("_") and getattr(self, attr) is None and attr != "key"
         ]
         if missing:
-            raise ValueError("The following configuration options are missing : {}".format(missing))
+            raise ValueError(f"The following configuration options are missing : {missing}")
         return self
 
 
@@ -462,7 +462,7 @@ class WebHookHandler(MainHandler):
                     "mention": {
                         "user": user,
                         "organisation": org,
-                        "repository": "{}/{}".format(org, repo),
+                        "repository": f"{org}/{repo}",
                         "command": command,
                     }
                 },

@@ -17,7 +17,10 @@ config = Config(
 )
 
 auth = Authenticator(
-    config.integration_id, config.key, config.personal_account_token, config.personal_account_name
+    config.integration_id,
+    config.key,
+    config.personal_account_token,
+    config.personal_account_name,
 )
 
 application = tornado.web.Application(

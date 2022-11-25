@@ -16,7 +16,7 @@ def _format_doc(function, name):
     else:
         doc = function.__doc__.splitlines()
     first, other = doc[0], "\n".join(doc[1:])
-    return "`@meeseeksdev {} {}` ({}) \n{}  ".format(name, first, function.scope, other)
+    return f"`@meeseeksdev {name} {first}` ({function.scope}) \n{other}  "
 
 
 def help_make(commands):
@@ -51,7 +51,11 @@ def open(*, session, payload, arguments, local_config=None):
 
 @write
 def migrate_issue_request(
-    *, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+    *,
+    session: Session,
+    payload: dict,
+    arguments: str,
+    local_config: Optional[dict] = None,
 ) -> Generator:
     """[to] {org}/{repo}
 
@@ -93,7 +97,7 @@ def migrate_issue_request(
     if original_labels:
         available_labels = target_session.ghrequest(
             "GET",
-            "https://api.github.com/repos/{org}/{repo}/labels".format(org=org, repo=repo),
+            f"https://api.github.com/repos/{org}/{repo}/labels",
             None,
         ).json()
 
@@ -173,7 +177,7 @@ def merge(*, session, payload, arguments, method="merge", local_config=None):
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
+        f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}",
         json=None,
     )
     pr_data = r.json()

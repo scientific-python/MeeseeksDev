@@ -19,19 +19,20 @@ The drawback is if there is a security issue, then we're screwed.
 
 ## Activate on your Repo
 
-1) Head [there](https://github.com/apps/meeseeksdev/) and activate
-MeeseeksDev on repos you have access to.
+1. Head [there](https://github.com/apps/meeseeksdev/) and activate
+   MeeseeksDev on repos you have access to.
 
-2) On a repository with MeeseeksDev installed say: `@MeeseeksDev Hello` to be
-sure MeeseeksDev is correctly installed.
+1. On a repository with MeeseeksDev installed say: `@MeeseeksDev Hello` to be
+   sure MeeseeksDev is correctly installed.
 
-3) Enjoy
+1. Enjoy
 
 Beta Phase: During Beta phase repository/users need to be vetted/allowlisted
 open an issue if you wish to participate.
 
 You might also want to tell your CI-integration (like travis-ci) **not** to test the **push** __and__ **the merge**.
 To do so use:
+
 ```
 branches:
   except:
@@ -60,9 +61,6 @@ This will allow `<username>` to ask `@meeseeksdev` to perform above commands.
 The conf file is the one that sits on the repository default  branch (usually
 `master`).
 
-
-
-
 ## What can a MeeseeksBox do ?
 
 Comment on a Pr or issue.
@@ -79,7 +77,7 @@ Respond with
 
 To test whether a Meeseeks understand you.
 
-### @MeeseeksDev backport [to] {branch}
+### @MeeseeksDev backport \[to\] {branch}
 
 If issued from a  PR which is merged, attempt to backport (cherry-pick the
 merge commit) on an older branch and submit a PR with this backport (on said branch)
@@ -88,7 +86,7 @@ Apply origin-pr labels and milestone to backport.
 
 - No option to push directly (yet), if implemented should apply only with clean backport.
 - Investigate what to do in case of conflict
-    - likely commit with conflict, and let maintainers resolve conflict
+  - likely commit with conflict, and let maintainers resolve conflict
 
 Repo admins only
 
@@ -136,14 +134,13 @@ Repo admins only, plan to make it available to PR author as well.
 MeeseeksDev Bot need to be installed on the PR source repository for this to work.
 If it's not it will ask you to do so.
 
-### @MeeseeksDev migrate [to] {target org/repo}
+### @MeeseeksDev migrate \[to\] {target org/repo}
 
 Needs MeeseeksBox to be installed on both current and target repo. Command
 issuer to be admin on both.
 
 MeeseeksDev will open a similar issue, replicate all comments with links to
 first, migrate labels (if possible).
-
 
 ### @MeeseeksDev close
 
@@ -161,7 +158,7 @@ Tag with said tags if availlable (comma separated, need to be exact match)
 
 Remove said tags if present (comma separated, need to be exact match)
 
-### @MeeseeksDev merge [merge|squash|rebase]
+### @MeeseeksDev merge \[merge|squash|rebase\]
 
 Issuer needs at least write permission.
 
@@ -178,7 +175,7 @@ You can optionally use the word "run" in the command, e.g. "@Meeseeksdev please 
 Most extension and new command for the MeeseeksBox are only one function, for
 example here is how to let everyone request the zen of Python:
 
-```python
+````python
 from textwrap import dedent
 
 @everyone
@@ -198,7 +195,7 @@ def zen(*, session, payload, arguments):
         ```
         """
     ))
-```
+````
 
 The `session` object is authenticated with the repository the command came from.
 If you need to authenticate with another repository with MeeseeksBox installed `yield` the `org/repo` slug.
@@ -214,7 +211,6 @@ def foo(*, session, payload, argument):
         session.post_comment("Sorry Jerry you are not allowed to do that.")
 ```
 
-
 # Why do you request so much permission ?
 
 GitHub API does not allow to change permissions once given (yet). We don't want
@@ -222,11 +218,9 @@ you to go though the process of reinstalling all integrations.
 
 We would like to request less permission if necessary.
 
-
 # Setup.
 
 See CONTIBUTING.md for for information.
-
 
 # Warnings
 
@@ -244,4 +238,4 @@ heroku addons:create keen
 
 ## Changelog
 
-* 2017-10-31: Backport now support squash-merge
+- 2017-10-31: Backport now support squash-merge

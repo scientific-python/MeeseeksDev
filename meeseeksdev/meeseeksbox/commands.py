@@ -12,9 +12,9 @@ import traceback
 from pathlib import Path
 from textwrap import dedent
 from typing import Generator, Optional
+from unittest import mock
 
 import git
-import mock
 
 from .scopes import admin, everyone, write
 from .utils import Session, add_event, fix_comment_body, fix_issue_body, run
@@ -103,7 +103,7 @@ def zen(*, session, payload, arguments, local_config=None):
 def replyadmin(*, session, payload, arguments, local_config=None):
     comment_url = payload["issue"]["comments_url"]
     user = payload["issue"]["user"]["login"]
-    session.post_comment(comment_url, "Hello @{user}. Waiting for your orders.".format(user=user))
+    session.post_comment(comment_url, f"Hello @{user}. Waiting for your orders.")
 
 
 def _compute_pwd_changes(allowlist):
@@ -158,7 +158,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
+        f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}",
         json=None,
     )
     pr_data = r.json()
@@ -214,7 +214,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
-        run("rm -rf {}".format(repo_name))
+        run(f"rm -rf {repo_name}")
         print("== Done cleaning ")
 
     print(f"== Cloning repository from {org_name}/{repo_name}, this can take some time ...")
@@ -240,7 +240,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # repo.remotes.origin.fetch("{}:workbranch".format(branch))
     # repo.git.checkout("workbranch")
     print("== Fetching Commits to reformat ...")
-    repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
+    repo.remotes.origin.fetch(f"{head_sha}")
     print("== All have been fetched correctly")
     repo.git.checkout(head_sha)
     print(f"== checked PR head {head_sha}")
@@ -306,12 +306,16 @@ def black_suggest(*, session, payload, arguments, local_config=None):
                 pass
     if os.path.exists(repo_name):
         print("== Cleaning up repo... ")
-        run("rm -rf {}".format(repo_name))
+        run(f"rm -rf {repo_name}")
         print("== Done cleaning ")
 
 
 def prep_for_command(
-    name: str, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+    name: str,
+    session: Session,
+    payload: dict,
+    arguments: str,
+    local_config: Optional[dict] = None,
 ) -> Generator:
     """Prepare to run a command against a local checkout of a repo."""
     print(f"===== running command {name} =====")
@@ -328,7 +332,7 @@ def prep_for_command(
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
+        f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}",
         json=None,
     )
     pr_data = r.json()
@@ -339,7 +343,7 @@ def prep_for_command(
     maintainer_can_modify = pr_data["maintainer_can_modify"]
 
     # Check to see if we can successfully push changees to the PR.
-    target_session = yield "{}/{}".format(author_login, repo_name)
+    target_session = yield f"{author_login}/{repo_name}"
 
     if target_session:
         print("installed on target repository")
@@ -365,7 +369,7 @@ def prep_for_command(
 
     if os.path.exists(repo_name):
         print("== Cleaning up previous work ... ")
-        run("rm -rf {}".format(repo_name), check=True)
+        run(f"rm -rf {repo_name}", check=True)
         print("== Done cleaning ")
 
     print(f"== Cloning repository from {author_login}/{repo_name}, this can take some time ...")
@@ -373,7 +377,7 @@ def prep_for_command(
         [
             "git",
             "clone",
-            "https://x-access-token:{}@github.com/{}/{}".format(atk, author_login, repo_name),
+            f"https://x-access-token:{atk}@github.com/{author_login}/{repo_name}",
         ]
     )
     print("== Cloned..")
@@ -385,10 +389,10 @@ def prep_for_command(
     # do the command on local filesystem
     repo = git.Repo(repo_name)
     print(f"== Fetching branch `{branch}` to run {name} on ...")
-    repo.remotes.origin.fetch("{}:workbranch".format(branch))
+    repo.remotes.origin.fetch(f"{branch}:workbranch")
     repo.git.checkout("workbranch")
     print(f"== Fetching Commits to run {name} on ...")
-    repo.remotes.origin.fetch("{head_sha}".format(head_sha=head_sha))
+    repo.remotes.origin.fetch(f"{head_sha}")
     print("== All have been fetched correctly")
 
     os.chdir(repo_name)
@@ -404,7 +408,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     print("== Collecting data on Pull-request...")
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
+        f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}",
         json=None,
     )
     pr_data = r.json()
@@ -419,9 +423,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     print(f"pushing with workbranch:{branch}")
     succeeded = True
     try:
-        repo.remotes.origin.push(
-            "workbranch:{}".format(branch), force=True
-        ).raise_if_error()  # type:ignore[operator]
+        repo.remotes.origin.push(f"workbranch:{branch}", force=True).raise_if_error()
     except Exception:
         succeeded = False
 
@@ -430,13 +432,17 @@ def push_the_work(session, payload, arguments, local_config=None):
         "GET", f"https://api.github.com/repos/{org_name}/{repo_name}"
     ).json()["default_branch"]
     repo.git.checkout(default_branch)
-    repo.branches.workbranch.delete(repo, "workbranch", force=True)  # type:ignore[attr-defined]
+    repo.branches.workbranch.delete(repo, "workbranch", force=True)
     return succeeded
 
 
 @admin
 def precommit(
-    *, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+    *,
+    session: Session,
+    payload: dict,
+    arguments: str,
+    local_config: Optional[dict] = None,
 ) -> Generator:
     comment_url = payload["issue"]["comments_url"]
 
@@ -544,7 +550,7 @@ def blackify(*, session, payload, arguments, local_config=None):
 
     r = session.ghrequest(
         "GET",
-        "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
+        f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}",
         json=None,
     )
     pr_data = r.json()
@@ -689,7 +695,7 @@ def safe_backport(session, payload, arguments, local_config=None):
         print("== Collecting data on Pull-request ...")
         r = session.ghrequest(
             "GET",
-            "https://api.github.com/repos/{}/{}/pulls/{}".format(org_name, repo_name, prnumber),
+            f"https://api.github.com/repos/{org_name}/{repo_name}/pulls/{prnumber}",
             json=None,
         )
         pr_data = r.json()
@@ -773,7 +779,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 clean_epoch = time.time()
                 if os.path.exists(repo_name):
                     print("== Cleaning up previous work... ")
-                    run("rm -rf {}".format(repo_name))
+                    run(f"rm -rf {repo_name}")
                     print("== Done cleaning ")
                 s_clean_time = time.time() - clean_epoch
                 import traceback
@@ -790,7 +796,7 @@ def safe_backport(session, payload, arguments, local_config=None):
                 [
                     "git",
                     "clone",
-                    "https://x-access-token:{}@github.com/{}/{}".format(atk, org_name, repo_name),
+                    f"https://x-access-token:{atk}@github.com/{org_name}/{repo_name}",
                 ]
             )
             process.check_returncode()
@@ -817,11 +823,11 @@ def safe_backport(session, payload, arguments, local_config=None):
 
         # do the backport on local filesystem
         repo = git.Repo(repo_name)
-        print("== Fetching branch to backport on ... {}".format(target_branch))
-        repo.remotes.origin.fetch("refs/heads/{}:workbranch".format(target_branch))
+        print(f"== Fetching branch to backport on ... {target_branch}")
+        repo.remotes.origin.fetch(f"refs/heads/{target_branch}:workbranch")
         repo.git.checkout("workbranch")
-        print("== Fetching Commits to {mergesha} backport...".format(mergesha=merge_sha))
-        repo.remotes.origin.fetch("{mergesha}".format(mergesha=merge_sha))
+        print(f"== Fetching Commits to {merge_sha} backport...")
+        repo.remotes.origin.fetch(f"{merge_sha}")
         print("== All has been fetched correctly")
 
         print("Cherry-picking %s" % merge_sha)
@@ -938,7 +944,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             )
             if hasattr(e, "stderr"):
                 print(
-                    "\n" + e.stderr.decode("utf8", "replace"),  # type:ignore[attr-defined]
+                    "\n" + e.stderr.decode("utf8", "replace"),
                     file=sys.stderr,
                 )
             print("\n" + repo.git.status(), file=sys.stderr)
@@ -961,8 +967,8 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         succeeded = True
         try:
             print(f"Trying to push to {remote_submit_branch} of {session.personal_account_name}")
-            repo.remotes[session.personal_account_name].push(  # type:ignore[operator]
-                "workbranch:{}".format(remote_submit_branch)
+            repo.remotes[session.personal_account_name].push(
+                f"workbranch:{remote_submit_branch}"
             ).raise_if_error()
         except Exception as e:
             import traceback
@@ -975,13 +981,14 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
             keen_stats()
 
             session.post_comment(
-                comment_url, f"Could not push to {remote_submit_branch} due to error, aborting."
+                comment_url,
+                f"Could not push to {remote_submit_branch} due to error, aborting.",
             )
             print(e)
             succeeded = False
 
         repo.git.checkout(default_branch)
-        repo.branches.workbranch.delete(repo, "workbranch", force=True)  # type:ignore[attr-defined]
+        repo.branches.workbranch.delete(repo, "workbranch", force=True)
 
         # TODO checkout the default_branch and get rid of branch
 
@@ -997,11 +1004,11 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         )
         new_pr = session.personal_request(
             "POST",
-            "https://api.github.com/repos/{}/{}/pulls".format(org_name, repo_name),
+            f"https://api.github.com/repos/{org_name}/{repo_name}/pulls",
             json={
                 "title": f"Backport PR #{prnumber} on branch {target_branch} ({prtitle})",
                 "body": msg,
-                "head": "{}:{}".format(session.personal_account_name, remote_submit_branch),
+                "head": f"{session.personal_account_name}:{remote_submit_branch}",
                 "base": target_branch,
             },
         ).json()
@@ -1009,7 +1016,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         new_number = new_pr["number"]
         resp = session.ghrequest(
             "PATCH",
-            "https://api.github.com/repos/{}/{}/issues/{}".format(org_name, repo_name, new_number),
+            f"https://api.github.com/repos/{org_name}/{repo_name}/issues/{new_number}",
             json={"milestone": milestone_number, "labels": labels_names},
         )
         # print(resp.json())
@@ -1148,7 +1155,7 @@ def untag(session, payload, arguments, local_config=None):
     num = payload.get("issue", payload.get("pull_request")).get("number")
     tags = [arg.strip() for arg in arguments.split(",")]
     name = "{name}"
-    url = "https://api.github.com/repos/{org}/{repo}/issues/{num}/labels/{name}".format(**locals())
+    url = f"https://api.github.com/repos/{org}/{repo}/issues/{num}/labels/{name}"
     no_untag = []
     for tag in tags:
         try:
@@ -1160,7 +1167,11 @@ def untag(session, payload, arguments, local_config=None):
 
 @write
 def migrate_issue_request(
-    *, session: Session, payload: dict, arguments: str, local_config: Optional[dict] = None
+    *,
+    session: Session,
+    payload: dict,
+    arguments: str,
+    local_config: Optional[dict] = None,
 ) -> Generator:
     """Todo:
 
@@ -1193,7 +1204,7 @@ def migrate_issue_request(
     if original_labels:
         available_labels = target_session.ghrequest(
             "GET",
-            "https://api.github.com/repos/{org}/{repo}/labels".format(org=org, repo=repo),
+            f"https://api.github.com/repos/{org}/{repo}/labels",
             None,
         ).json()
 
