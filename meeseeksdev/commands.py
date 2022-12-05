@@ -103,8 +103,14 @@ def migrate_issue_request(
 
         available_labels = [l["name"] for l in available_labels]
 
-    migrate_labels = [l for l in original_labels if l in available_labels]
-    not_set_labels = [l for l in original_labels if l not in available_labels]
+    migrate_labels = [
+        l for l in original_labels if (l in available_labels and l != "Still Needs Manual Backport")
+    ]
+    not_set_labels = [
+        l
+        for l in original_labels
+        if (l not in available_labels and l != "Still Needs Manual Backport")
+    ]
 
     new_response = target_session.create_issue(
         org,
