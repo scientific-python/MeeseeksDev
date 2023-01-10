@@ -423,9 +423,7 @@ def push_the_work(session, payload, arguments, local_config=None):
     print(f"pushing with workbranch:{branch}")
     succeeded = True
     try:
-        repo.remotes.origin.push(
-            f"workbranch:{branch}", force=True
-        ).raise_if_error()  # type:ignore[operator]
+        repo.remotes.origin.push(f"workbranch:{branch}", force=True).raise_if_error()
     except Exception:
         succeeded = False
 
@@ -975,7 +973,7 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         succeeded = True
         try:
             print(f"Trying to push to {remote_submit_branch} of {session.personal_account_name}")
-            repo.remotes[session.personal_account_name].push(  # type:ignore[operator]
+            repo.remotes[session.personal_account_name].push(
                 f"workbranch:{remote_submit_branch}"
             ).raise_if_error()
         except Exception as e:
