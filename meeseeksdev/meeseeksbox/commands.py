@@ -973,7 +973,9 @@ If these instructions are inaccurate, feel free to [suggest an improvement](http
         succeeded = True
         try:
             print(f"Trying to push to {remote_submit_branch} of {session.personal_account_name}")
-            repo.remotes[session.personal_account_name].push(f"workbranch:{remote_submit_branch}").raise_if_error()
+            repo.remotes[session.personal_account_name].push(
+                f"workbranch:{remote_submit_branch}"
+            ).raise_if_error()
         except Exception as e:
             import traceback
 
