@@ -7,7 +7,7 @@ pip==22.0.4
 pre-commit==2.17
 pyjwt==2.4.0
 pyyaml==6.0
-requests==2.27
+requests==2.31.0
 there==0.0.9
 tornado==6.2
 yieldbreaker==0.0.1
