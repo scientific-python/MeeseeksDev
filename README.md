@@ -19,7 +19,7 @@ The drawback is if there is a security issue, then we're screwed.
 
 ## Activate on your Repo
 
-1. Head [there](https://github.com/apps/meeseeksdev/) and activate
+1. Head [there](https://github.com/apps/lumberbot-app/) and activate
    MeeseeksDev on repos you have access to.
 
 1. On a repository with MeeseeksDev installed say: `@MeeseeksDev Hello` to be
