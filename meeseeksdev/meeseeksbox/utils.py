@@ -212,7 +212,7 @@ class Authenticator:
         req = requests.Request(method, url, headers=headers, json=json)
         prepared = req.prepare()
         with requests.Session() as s:
-            return s.send(prepared)
+            return s.send(prepared)  # type:ignore[attr-defined]
 
 
 class Forbidden(Exception):
@@ -273,13 +273,13 @@ class Session(Authenticator):
             return req.prepare()
 
         with requests.Session() as s:
-            response = s.send(prepare())
+            response = s.send(prepare())  # type:ignore[attr-defined]
             if response.status_code == 401:
                 self.regen_token()
-                response = s.send(prepare())
+                response = s.send(prepare())  # type:ignore[attr-defined]
             if raise_for_status:
                 response.raise_for_status()
-            return response
+            return response  # type:ignore[no-any-return]
 
     def ghrequest(
         self,
@@ -307,10 +307,10 @@ class Session(Authenticator):
             return req.prepare()
 
         with requests.Session() as s:
-            response = s.send(prepare())
+            response = s.send(prepare())  # type:ignore[attr-defined]
             if response.status_code == 401:
                 self.regen_token()
-                response = s.send(prepare())
+                response = s.send(prepare())  # type:ignore[attr-defined]
             if raise_for_status:
                 response.raise_for_status()
             rate_limit = response.headers.get("X-RateLimit-Limit", -1)
@@ -333,7 +333,7 @@ class Session(Authenticator):
                         "installation": repo_name,
                     },
                 )
-            return response
+            return response  # type:ignore[no-any-return]
 
     def _get_permission(self, org: str, repo: str, username: str) -> Permission:
         get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(
