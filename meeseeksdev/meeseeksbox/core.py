@@ -137,7 +137,7 @@ class WebHookHandler(MainHandler):
                         req = requests.Request("POST", url, headers=headers, data=req.body)
                         prepared = req.prepare()
                         with requests.Session() as s:
-                            res = s.send(prepared)
+                            res = s.send(prepared)  # type:ignore[attr-defined]
                         return res
                     except Exception:
                         import traceback
