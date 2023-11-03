@@ -13,4 +13,10 @@ extend-ignore =
     E731
     # E203 whitespace before ':'
     E203
+    # E231 whitespace after ':'
+    E231
+    # E221 multiple spaces before operator
+    E221
+    # E222 multiple spaces after operator
+    E222
 per-file-ignores =
