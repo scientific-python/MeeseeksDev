@@ -13,4 +13,6 @@ extend-ignore =
     E731
     # E203 whitespace before ':'
     E203
+    # E231 whitespace after ':'
+    E231
 per-file-ignores =
