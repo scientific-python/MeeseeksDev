@@ -1,6 +1,6 @@
 black==22.1
 cryptography==41.0.6
-gitpython==3.1.37
+gitpython==3.1.41
 keen==0.7
 mock==4.0
 pip==23.3
