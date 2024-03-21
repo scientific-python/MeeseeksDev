@@ -1,4 +1,4 @@
-black==22.1
+black==24.3.0
 cryptography==42.0.4
 gitpython==3.1.41
 keen==0.7
