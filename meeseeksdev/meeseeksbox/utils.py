@@ -170,7 +170,9 @@ class Authenticator:
             self._update_installation(installation)
 
     def _update_installation(self, installation):
+        print("Updating installations")
         iid = installation["id"]
+        print("... making a session")
         session = self.session(iid)
         try:
             # Make sure we get all pages.
@@ -309,6 +311,7 @@ class Session(Authenticator):
         with requests.Session() as s:
             response = s.send(prepare())  # type:ignore[attr-defined]
             if response.status_code == 401:
+                print("Unauthorized, regen token")
                 self.regen_token()
                 response = s.send(prepare())  # type:ignore[attr-defined]
             if raise_for_status:
@@ -339,6 +342,7 @@ class Session(Authenticator):
         get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(
             org=org, repo=repo, username=username
         )
+        print("_get_permission")
         resp = self.ghrequest(
             "GET",
             get_collaborators_query,
