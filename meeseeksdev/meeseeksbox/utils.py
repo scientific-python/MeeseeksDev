@@ -170,9 +170,9 @@ class Authenticator:
             self._update_installation(installation)
 
     def _update_installation(self, installation):
-        print("Updating installations")
+        print("Updating installations", installation)
         iid = installation["id"]
-        print("... making a session")
+        print("... making a session", iid)
         session = self.session(iid)
         try:
             # Make sure we get all pages.
@@ -181,6 +181,12 @@ class Authenticator:
                 res = session.ghrequest("GET", url)
                 repositories = res.json()
                 for repo in repositories["repositories"]:
+                    print(
+                        "Mapping repo to installation:",
+                        repo["full_name"],
+                        repo["owner"]["login"],
+                        iid,
+                    )
                     self.idmap[repo["full_name"]] = iid
                     self._org_idmap[repo["owner"]["login"]] = iid
                 if "next" in res.links:
