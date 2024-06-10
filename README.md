@@ -27,9 +27,6 @@ The drawback is if there is a security issue, then we're screwed.
 
 1. Enjoy
 
-Beta Phase: During Beta phase repository/users need to be vetted/allowlisted
-open an issue if you wish to participate.
-
 You might also want to tell your CI-integration (like travis-ci) **not** to test the **push** __and__ **the merge**.
 To do so use:
 
