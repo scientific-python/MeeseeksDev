@@ -9,5 +9,5 @@ pyjwt==2.4.0
 pyyaml==6.0
 requests==2.32.0
 there==0.0.9
-tornado==6.4.1
+tornado==6.4.2
 yieldbreaker==0.0.1
