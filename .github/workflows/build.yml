@@ -1,8 +1,9 @@
 name: Tests
 on:
   push:
-    branches: ["master"]
+    branches: ["main"]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,7 +12,7 @@ concurrency:
 jobs:
   # Run "pre-commit run --all-files --hook-stage=manual"
   pre-commit:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
