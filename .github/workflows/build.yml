@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: --all-files --hook-stage=manual
