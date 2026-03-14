@@ -5,7 +5,7 @@ keen==0.7
 mock==4.0
 pip==26.0
 pre-commit==2.17
-pyjwt==2.4.0
+pyjwt==2.12.0
 pyyaml==6.0
 requests==2.32.4
 there==0.0.9
