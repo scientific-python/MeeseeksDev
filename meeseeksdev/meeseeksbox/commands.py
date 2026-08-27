@@ -884,11 +884,13 @@ def safe_backport(session, payload, arguments, local_config=None):
                     f"""Owee, I'm MrMeeseeks, Look at me.
 
 There seem to be a conflict, please backport manually. Here are approximate instructions:
+They assume that the base project is the Git remote `upstream` and your fork is `origin`.
 
 1. Update backport branch.
 
 ```
-git fetch origin {target_branch}:{target_branch}
+git fetch upstream {target_branch}:{target_branch}
+# or `git pull upstream {target_branch}` if you are on {target_branch}
 ```
 
 2. Create PR branch.
@@ -912,7 +914,7 @@ git commit -am {msg!r}
 5. Push to a named branch:
 
 ```
-git push YOURFORK {remote_submit_branch}
+git push --set-upstream origin {remote_submit_branch}
 ```
 
 6. Create a PR against branch {target_branch}, I would have named this PR:
