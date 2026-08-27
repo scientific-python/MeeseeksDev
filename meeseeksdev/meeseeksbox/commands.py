@@ -899,7 +899,7 @@ git fetch upstream {target_branch}:{target_branch}
 git switch -c {remote_submit_branch} {target_branch}
 ```
 
-3. Cherry pick the first parent branch of the this PR on top of the older branch:
+3. Cherry pick the first parent branch of this PR on top of the older branch:
 
 ```
 git cherry-pick -x -m1 {merge_sha}
