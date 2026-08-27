@@ -884,34 +884,42 @@ def safe_backport(session, payload, arguments, local_config=None):
                     f"""Owee, I'm MrMeeseeks, Look at me.
 
 There seem to be a conflict, please backport manually. Here are approximate instructions:
+They assume that the base project is the Git remote `upstream` and your fork is `origin`.
 
-1. Checkout backport branch and update it.
+1. Update backport branch.
 
 ```
-git checkout {target_branch}
-git pull
+git fetch upstream {target_branch}:{target_branch}
+# or `git pull upstream {target_branch}` if you are on {target_branch}
 ```
 
-2. Cherry pick the first parent branch of the this PR on top of the older branch:
+2. Create PR branch.
+
+```
+git switch -c {remote_submit_branch} {target_branch}
+```
+
+3. Cherry pick the first parent branch of this PR on top of the older branch:
+
 ```
 git cherry-pick -x -m1 {merge_sha}
 ```
 
-3. You will likely have some merge/cherry-pick conflict here, fix them and commit:
+4. You will likely have some merge/cherry-pick conflict here, fix them and commit:
 
 ```
 git commit -am {msg!r}
 ```
 
-4. Push to a named branch:
+5. Push to a named branch:
 
 ```
-git push YOURFORK {target_branch}:{remote_submit_branch}
+git push --set-upstream origin {remote_submit_branch}
 ```
 
-5. Create a PR against branch {target_branch}, I would have named this PR:
+6. Create a PR against branch {target_branch}, I would have named this PR:
 
-> "Backport PR #{prnumber} on branch {target_branch} ({prtitle})"
+> Backport PR #{prnumber} on branch {target_branch} ({prtitle})
 
 And apply the correct labels and milestones.
 
