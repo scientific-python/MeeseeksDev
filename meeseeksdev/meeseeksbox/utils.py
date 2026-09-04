@@ -6,6 +6,8 @@ import json
 import re
 import shlex
 import subprocess
+import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Optional, Sequence, cast
 
 import jwt
@@ -189,9 +191,32 @@ class Authenticator:
             return
 
         self._installations = self.list_installations()
-        for installation in self._installations:
-            self._update_installation(installation)
-        print(f"Mapped {len(self.idmap)} repositories over {len(self._installations)} installations")
+
+        # Each installation needs its own paginated walk of the repositories
+        # API. Done one after another that is a few hundred round trips of
+        # latency, all of it blocking the event loop, since `requests` is
+        # synchronous. The walks are independent, so fan them out and merge the
+        # (GIL-protected) dict writes as they land.
+        started = time.monotonic()
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [
+                executor.submit(self._update_installation, installation)
+                for installation in self._installations
+            ]
+            # Report in submission order rather than completion order, so the
+            # startup log stays stable and comparable between restarts.
+            for installation, future in zip(self._installations, futures):
+                try:
+                    print(future.result())
+                except Exception as e:
+                    # One unreachable installation should not cost us the rest.
+                    print(f"Installation {installation.get('id')}: could not list repositories: {e!r}")
+
+        elapsed = time.monotonic() - started
+        print(
+            f"Mapped {len(self.idmap)} repositories over "
+            f"{len(self._installations)} installations in {elapsed:.1f}s"
+        )
 
     def _update_installation(self, installation):
         iid = installation["id"]
@@ -212,11 +237,10 @@ class Authenticator:
                     url = res.links["next"]["url"]
                     continue
                 break
-            print(f"Installation {iid} ({account}): {summarise(mapped)}")
+            return f"Installation {iid} ({account}): {summarise(mapped)}"
 
         except Forbidden:
-            print("Forbidden for", iid)
-            return
+            return f"Installation {iid} ({account}): forbidden"
 
     def _integration_authenticated_request(self, method, url, json=None):
         self.since = int(datetime.datetime.now().timestamp())
