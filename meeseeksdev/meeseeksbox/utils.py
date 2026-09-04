@@ -10,8 +10,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Optional, Sequence, cast
 
+import httpx
 import jwt
-import requests
 
 from .scopes import Permission
 
@@ -47,6 +47,19 @@ def add_event(*args):
     except Exception:
         print("Failed to log keen event:")
         print(f"   {args}")
+
+
+# httpx defaults differ from the `requests` ones this code was written
+# against: it applies a 5 second timeout where requests applied none, and it
+# does not follow redirects where requests did for GET. GitHub redirects
+# renamed repositories, and some of these calls are slow, so ask for the old
+# behaviour explicitly rather than inherit either default by accident.
+HTTP_TIMEOUT = httpx.Timeout(30.0)
+
+
+def http_client() -> httpx.Client:
+    """An httpx client configured the way the rest of this module expects."""
+    return httpx.Client(timeout=HTTP_TIMEOUT, follow_redirects=True)
 
 
 # Credentials are passed to git in the clone/remote URL, so they end up in
@@ -210,7 +223,11 @@ class Authenticator:
                     print(future.result())
                 except Exception as e:
                     # One unreachable installation should not cost us the rest.
-                    print(f"Installation {installation.get('id')}: could not list repositories: {e!r}")
+                    # `installation` is whatever the API handed back, which is
+                    # not necessarily a dict when the call itself failed, so do
+                    # not let the reporting raise over the error it reports.
+                    iid = installation.get("id") if isinstance(installation, dict) else installation
+                    print(f"Installation {iid!r}: could not list repositories: {e!r}")
 
         elapsed = time.monotonic() - started
         print(
@@ -259,12 +276,10 @@ class Authenticator:
             "Authorization": f"Bearer {tok}",
             "Accept": ACCEPT_HEADER_V3,
             "Host": "api.github.com",
-            "User-Agent": "python/requests",
+            "User-Agent": "python/httpx",
         }
-        req = requests.Request(method, url, headers=headers, json=json)
-        prepared = req.prepare()
-        with requests.Session() as s:
-            return s.send(prepared)  # type:ignore[attr-defined]
+        with http_client() as client:
+            return client.request(method, url, headers=headers, json=json)
 
 
 class Forbidden(Exception):
@@ -311,30 +326,30 @@ class Session(Authenticator):
         url: str,
         json: Optional[dict] = None,
         raise_for_status: bool = True,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         Does a request but using the personal account name and token
         """
         if not json:
             json = {}
 
-        def prepare():
-            headers = {
-                "Authorization": f"token {self.personal_account_token}",
-                "Host": "api.github.com",
-                "User-Agent": "python/requests",
-            }
-            req = requests.Request(method, url, headers=headers, json=json)
-            return req.prepare()
+        with http_client() as client:
 
-        with requests.Session() as s:
-            response = s.send(prepare())  # type:ignore[attr-defined]
+            def prepare():
+                headers = {
+                    "Authorization": f"token {self.personal_account_token}",
+                    "Host": "api.github.com",
+                    "User-Agent": "python/httpx",
+                }
+                return client.build_request(method, url, headers=headers, json=json)
+
+            response = client.send(prepare())
             if response.status_code == 401:
                 self.regen_token()
-                response = s.send(prepare())  # type:ignore[attr-defined]
+                response = client.send(prepare())
             if raise_for_status:
                 response.raise_for_status()
-            return response  # type:ignore[no-any-return]
+            return response
 
     def ghrequest(
         self,
@@ -344,29 +359,29 @@ class Session(Authenticator):
         *,
         override_accept_header: Optional[str] = None,
         raise_for_status: Optional[bool] = True,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         accept = ACCEPT_HEADER
         if override_accept_header:
             accept = override_accept_header
 
-        def prepare():
-            atk = self.token()
-            headers = {
-                "Authorization": f"Bearer {atk}",
-                "Accept": accept,
-                "Host": "api.github.com",
-                "User-Agent": "python/requests",
-            }
-            print(f"Making a {method} call to {url}")
-            req = requests.Request(method, url, headers=headers, json=json)
-            return req.prepare()
+        with http_client() as client:
 
-        with requests.Session() as s:
-            response = s.send(prepare())  # type:ignore[attr-defined]
+            def prepare():
+                atk = self.token()
+                headers = {
+                    "Authorization": f"Bearer {atk}",
+                    "Accept": accept,
+                    "Host": "api.github.com",
+                    "User-Agent": "python/httpx",
+                }
+                print(f"Making a {method} call to {url}")
+                return client.build_request(method, url, headers=headers, json=json)
+
+            response = client.send(prepare())
             if response.status_code == 401:
                 print("Unauthorized, regen token")
                 self.regen_token()
-                response = s.send(prepare())  # type:ignore[attr-defined]
+                response = client.send(prepare())
             if raise_for_status:
                 response.raise_for_status()
             rate_limit = response.headers.get("X-RateLimit-Limit", -1)
@@ -445,7 +460,7 @@ class Session(Authenticator):
         *,
         labels: Optional[list] = None,
         assignees: Optional[list] = None,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         arguments: dict = {"title": title, "body": body}
 
         if labels:

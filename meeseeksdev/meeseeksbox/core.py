@@ -15,7 +15,7 @@ from tornado.ioloop import IOLoop
 from yieldbreaker import YieldBreaker
 
 from .scopes import Permission
-from .utils import ACCEPT_HEADER_SYMMETRA, Authenticator, add_event, clear_caches
+from .utils import ACCEPT_HEADER_SYMMETRA, Authenticator, add_event, clear_caches, http_client
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
@@ -126,8 +126,6 @@ class WebHookHandler(MainHandler):
 
                 def fn(req, url):
                     try:
-                        import requests
-
                         headers = {
                             k: req.headers[k]
                             for k in (
@@ -138,11 +136,8 @@ class WebHookHandler(MainHandler):
                                 "X-Hub-Signature",
                             )
                         }
-                        req = requests.Request("POST", url, headers=headers, data=req.body)
-                        prepared = req.prepare()
-                        with requests.Session() as s:
-                            res = s.send(prepared)  # type:ignore[attr-defined]
-                        return res
+                        with http_client() as client:
+                            return client.request("POST", url, headers=headers, content=req.body)
                     except Exception:
                         import traceback
 
