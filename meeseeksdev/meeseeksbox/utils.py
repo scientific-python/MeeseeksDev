@@ -6,7 +6,7 @@ import json
 import re
 import shlex
 import subprocess
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, Sequence, cast
 
 import jwt
 import requests
@@ -96,6 +96,7 @@ class Authenticator:
         rsadata: Optional[str],
         personal_account_token: Optional[str],
         personal_account_name: Optional[str],
+        superusers: Sequence[str] = (),
     ):
         self.since = int(datetime.datetime.now().timestamp())
         self.duration = 60 * 10
@@ -104,6 +105,7 @@ class Authenticator:
         self.rsadata = rsadata
         self.personal_account_token = personal_account_token
         self.personal_account_name = personal_account_name
+        self.superusers = frozenset(u.lower() for u in superusers)
         self.idmap: Dict[str, str] = {}
         self._org_idmap: Dict[str, str] = {}
         self._session_class = Session
@@ -120,6 +122,7 @@ class Authenticator:
             installation_id,
             self.personal_account_token,
             self.personal_account_name,
+            self.superusers,
         )
 
     def get_session(self, org_repo):
@@ -234,8 +237,11 @@ class Session(Authenticator):
         installation_id,
         personal_account_token,
         personal_account_name,
+        superusers=(),
     ):
-        super().__init__(integration_id, rsadata, personal_account_token, personal_account_name)
+        super().__init__(
+            integration_id, rsadata, personal_account_token, personal_account_name, superusers
+        )
         self.installation_id = installation_id
 
     def token(self) -> str:
@@ -344,6 +350,12 @@ class Session(Authenticator):
             return response  # type:ignore[no-any-return]
 
     def _get_permission(self, org: str, repo: str, username: str) -> Permission:
+        # Superusers are the people running this deployment. They are trusted
+        # everywhere the bot is installed, whatever GitHub says about their
+        # access to any one repository, so short-circuit before asking.
+        if username.lower() in self.superusers:
+            print("superuser", username, "granted admin on", org, repo)
+            return Permission.admin
         get_collaborators_query = API_COLLABORATORS_TEMPLATE.format(
             org=org, repo=repo, username=username
         )

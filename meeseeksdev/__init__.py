@@ -128,6 +128,17 @@ def load_config_from_env():
     config["personal_account_name"] = os.environ.get("PERSONAL_ACCOUNT_NAME")
     config["personal_account_token"] = os.environ.get("PERSONAL_ACCOUNT_TOKEN")
 
+    # Comma separated list of GitHub usernames trusted on every repository the
+    # bot is installed on; typically whoever runs this deployment. A leading @
+    # is tolerated so that the value can be pasted straight from a mention.
+    config["superusers"] = [
+        u.strip().lstrip("@")
+        for u in os.environ.get("SUPERUSERS", "").split(",")
+        if u.strip().lstrip("@")
+    ]
+    if config["superusers"]:
+        print("superusers:", ", ".join(config["superusers"]))
+
     return Config(**config).validate()
 
 

@@ -80,6 +80,20 @@ PERSONAL_ACCOUNT_NAME="<account name>"
 PERSONAL_ACCOUNT_TOKEN="<github personal access token with repo access>"
 ```
 
+Optionally:
+
+```
+SUPERUSERS="<comma separated github usernames>"
+```
+
+Superusers are treated as administrators on every repository the bot is
+installed on, whatever their actual GitHub permissions are there. This is
+meant for whoever operates the deployment, so that the bot does not refuse
+their commands on repositories they do not have admin rights to. A leading
+`@` is accepted and the comparison is case insensitive, so
+`SUPERUSERS="@Carreau"` and `SUPERUSERS="carreau"` are equivalent. Leave it
+unset to give nobody special treatment.
+
 ### Code Styling
 
 `MeeseeksDev` has adopted automatic code formatting so you shouldn't

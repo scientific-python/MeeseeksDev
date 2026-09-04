@@ -35,6 +35,10 @@ class Config:
     webhook_secret = None
     personal_account_name = None
     personal_account_token = None
+    # Users trusted on every repository the bot is installed on, regardless of
+    # their GitHub permissions there. Empty by default, never None, so that
+    # validate() does not treat "no superusers" as missing configuration.
+    superusers: list = []
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -644,6 +648,7 @@ class MeeseeksBox:
             self.config.key,
             self.config.personal_account_token,
             self.config.personal_account_name,
+            self.config.superusers,
         )
 
     def sig_handler(self, sig, frame):
