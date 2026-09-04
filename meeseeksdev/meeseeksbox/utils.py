@@ -244,7 +244,7 @@ class Authenticator:
             url = installation["repositories_url"]
             mapped = []
             while True:
-                res = session.ghrequest("GET", url)
+                res = session.ghrequest("GET", url, quiet=True)
                 repositories = res.json()
                 for repo in repositories["repositories"]:
                     mapped.append(repo["full_name"])
@@ -359,7 +359,15 @@ class Session(Authenticator):
         *,
         override_accept_header: Optional[str] = None,
         raise_for_status: Optional[bool] = True,
+        quiet: bool = False,
     ) -> httpx.Response:
+        """Make an authenticated call to the GitHub API.
+
+        Each call announces itself, which is what makes a command's API
+        traffic followable in the logs. Pass `quiet` for bulk walks whose
+        individual pages are not interesting and which would otherwise bury
+        everything else.
+        """
         accept = ACCEPT_HEADER
         if override_accept_header:
             accept = override_accept_header
@@ -374,7 +382,8 @@ class Session(Authenticator):
                     "Host": "api.github.com",
                     "User-Agent": "python/httpx",
                 }
-                print(f"Making a {method} call to {url}")
+                if not quiet:
+                    print(f"Making a {method} call to {url}")
                 return client.build_request(method, url, headers=headers, json=json)
 
             response = client.send(prepare())
