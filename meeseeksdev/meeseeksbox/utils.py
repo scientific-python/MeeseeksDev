@@ -3,7 +3,6 @@ Utility functions to work with github.
 """
 import datetime
 import json
-import pipes
 import re
 import shlex
 import subprocess
@@ -52,7 +51,7 @@ def run(cmd, **kwargs):
     """Print a command and then run it."""
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)
-    print(" ".join(map(pipes.quote, cmd)))
+    print(" ".join(map(shlex.quote, cmd)))
     return subprocess.run(cmd, **kwargs)
 
 
@@ -204,7 +203,7 @@ class Authenticator:
             {
                 "iat": self.since,
                 "exp": self.since + self.duration,
-                "iss": self.integration_id,
+                "iss": str(self.integration_id),
             }
         )
 

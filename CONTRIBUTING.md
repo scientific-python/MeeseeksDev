@@ -15,7 +15,7 @@ heroku login
 If creating, run:
 
 ```bash
-heroku create meeseeksdev-$USER
+heroku create meeseeksdev-$USER --stack heroku-26
 ```
 
 Otherwise, run:
@@ -23,6 +23,19 @@ Otherwise, run:
 ```bash
 heroku git:remote -a meeseeksdev-$USER
 ```
+
+### Stack and Python version
+
+The app runs on the `heroku-26` stack. The Python version is pinned in
+`.python-version` (Heroku's `runtime.txt` is no longer used). To check or change
+the stack of an existing app:
+
+```bash
+heroku stack -a meeseeksdev-$USER            # list stacks, current one is starred
+heroku stack:set heroku-26 -a meeseeksdev-$USER
+```
+
+A stack change only takes effect on the next deploy, so push afterwards.
 
 Then run:
 
