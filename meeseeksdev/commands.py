@@ -189,7 +189,10 @@ def merge(*, session, payload, arguments, method="merge", local_config=None):
     pr_data = r.json()
     head_sha = pr_data["head"]["sha"]
     mergeable = pr_data["mergeable"]
-    repo_name = pr_data["head"]["repo"]["name"]
+    # The merge endpoint lives on the base repository, so keep `repo_name` as
+    # it came from the payload. Reading it off `head.repo` happened to work
+    # while the fork kept the upstream name, but broke outright once the fork
+    # was renamed or deleted (`head.repo` is null in the latter case).
     if mergeable:
 
         resp = session.ghrequest(

@@ -145,6 +145,36 @@ def _compute_pwd_changes(allowlist):
     return post_changes
 
 
+DELETED_FORK_MESSAGE = (
+    "I can't run `{name}` on this Pull Request: the fork it was opened from has "
+    "been deleted, so there is no branch left for me to push the result back to.\n\n"
+    "If you still need this, please re-open the Pull Request from a branch that "
+    "still exists, or apply the change by hand."
+)
+
+
+def _pr_head_repo(pr_data: dict) -> Optional[dict]:
+    """Return the repository a Pull Request was opened from, or None.
+
+    GitHub sets both `head.repo` and `head.user` to null once the fork a Pull
+    Request came from is deleted. The commits themselves survive on the base
+    repository under `refs/pull/<number>/head` (and, for a merged PR, as
+    `merge_commit_sha` on the base branch), so commands that only need to read
+    the PR's commits keep working against the base repo. Commands that need to
+    push the branch back, however, have nowhere left to push to.
+    """
+    return (pr_data.get("head") or {}).get("repo")
+
+
+def _bail_on_deleted_fork(session, comment_url: str, pr_data: dict, name: str) -> bool:
+    """Post an explanation and return True if the PR's fork is gone."""
+    if _pr_head_repo(pr_data) is not None:
+        return False
+    print(f"== Fork deleted, cannot run {name}")
+    session.post_comment(comment_url, body=DELETED_FORK_MESSAGE.format(name=name))
+    return True
+
+
 @admin
 def black_suggest(*, session, payload, arguments, local_config=None):
     print("===== reformatting suggestions. =====")
@@ -166,7 +196,9 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # base_sha = pr_data["base"]["sha"]
     # branch = pr_data["head"]["ref"]
     # author_login = pr_data["head"]["repo"]["owner"]["login"]
-    repo_name = pr_data["head"]["repo"]["name"]
+    # We only ever read the PR's commits here, never push them, so work from
+    # the base repository: GitHub keeps the head reachable there as
+    # `refs/pull/<number>/head` even after the fork has been deleted.
 
     # commits_url = pr_data["commits_url"]
 
@@ -240,7 +272,7 @@ def black_suggest(*, session, payload, arguments, local_config=None):
     # repo.remotes.origin.fetch("{}:workbranch".format(branch))
     # repo.git.checkout("workbranch")
     print("== Fetching Commits to reformat ...")
-    repo.remotes.origin.fetch(f"{head_sha}")
+    repo.remotes.origin.fetch(f"refs/pull/{prnumber}/head")
     print("== All have been fetched correctly")
     repo.git.checkout(head_sha)
     print(f"== checked PR head {head_sha}")
@@ -336,6 +368,8 @@ def prep_for_command(
         json=None,
     )
     pr_data = r.json()
+    if _bail_on_deleted_fork(session, comment_url, pr_data, name):
+        return
     head_sha = pr_data["head"]["sha"]
     branch = pr_data["head"]["ref"]
     author_login = pr_data["head"]["repo"]["owner"]["login"]
@@ -412,6 +446,10 @@ def push_the_work(session, payload, arguments, local_config=None):
         json=None,
     )
     pr_data = r.json()
+    if _pr_head_repo(pr_data) is None:
+        # The fork can be deleted between preparing the work and pushing it.
+        print("== Fork deleted while working, nothing to push to")
+        return False
     branch = pr_data["head"]["ref"]
     repo_name = pr_data["head"]["repo"]["name"]
 
