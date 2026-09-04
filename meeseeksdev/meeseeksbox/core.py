@@ -436,14 +436,22 @@ class WebHookHandler(MainHandler):
         pull_request = payload.get("issue", payload).get("pull_request")
         pr_author = None
         pr_origin_org_repo = None
+        origin_repo_org = None
         allow_edit_from_maintainer = None
         session = self.auth.session(installation_id)
         if pull_request:
             # The PR author _may_ not have access to origin branch
             pr_author = payload.get("issue", {"user": {"login": None}})["user"]["login"]
             pr = session.ghrequest("GET", pull_request["url"]).json()
-            pr_origin_org_repo = pr["head"]["repo"]["full_name"]
-            origin_repo_org = pr["head"]["user"]["login"]
+            # `head.repo` and `head.user` are null when the fork the PR was
+            # opened from has since been deleted. Nothing can be pushed to a
+            # branch that no longer exists, so leave the origin unset and let
+            # the permission checks below fall back to the target repository.
+            head = pr["head"]
+            if head["repo"]:
+                pr_origin_org_repo = head["repo"]["full_name"]
+            if head["user"]:
+                origin_repo_org = head["user"]["login"]
             allow_edit_from_maintainer = pr["maintainer_can_modify"]
 
         # might want to just look at whether the commenter has permission over said branch.
