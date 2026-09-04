@@ -47,11 +47,32 @@ def add_event(*args):
         print(f"   {args}")
 
 
+# Credentials are passed to git in the clone/remote URL, so they end up in
+# anything that echoes the command line.
+_URL_CREDENTIALS = re.compile(r"(?<=://)[^/\s@]+(?=@)")
+
+
+def redact(text: str) -> str:
+    """Replace the credentials of any URL in `text` with a placeholder."""
+    return _URL_CREDENTIALS.sub("***:***", text)
+
+
+def summarise(names, limit: int = 4) -> str:
+    """Render a list of names as a short, countable one-liner."""
+    if not names:
+        return "no repositories"
+    shown = ", ".join(names[:limit])
+    if len(names) > limit:
+        shown += f", and {len(names) - limit} more"
+    plural = "repository" if len(names) == 1 else "repositories"
+    return f"{len(names)} {plural}: {shown}"
+
+
 def run(cmd, **kwargs):
     """Print a command and then run it."""
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)
-    print(" ".join(map(shlex.quote, cmd)))
+    print(redact(" ".join(map(shlex.quote, cmd))))
     return subprocess.run(cmd, **kwargs)
 
 
@@ -170,31 +191,28 @@ class Authenticator:
         self._installations = self.list_installations()
         for installation in self._installations:
             self._update_installation(installation)
+        print(f"Mapped {len(self.idmap)} repositories over {len(self._installations)} installations")
 
     def _update_installation(self, installation):
-        print("Updating installations", installation)
         iid = installation["id"]
-        print("... making a session", iid)
+        account = installation.get("account", {}).get("login", "?")
         session = self.session(iid)
         try:
             # Make sure we get all pages.
             url = installation["repositories_url"]
+            mapped = []
             while True:
                 res = session.ghrequest("GET", url)
                 repositories = res.json()
                 for repo in repositories["repositories"]:
-                    print(
-                        "Mapping repo to installation:",
-                        repo["full_name"],
-                        repo["owner"]["login"],
-                        iid,
-                    )
+                    mapped.append(repo["full_name"])
                     self.idmap[repo["full_name"]] = iid
                     self._org_idmap[repo["owner"]["login"]] = iid
                 if "next" in res.links:
                     url = res.links["next"]["url"]
                     continue
                 break
+            print(f"Installation {iid} ({account}): {summarise(mapped)}")
 
         except Forbidden:
             print("Forbidden for", iid)
