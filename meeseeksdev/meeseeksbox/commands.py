@@ -166,7 +166,9 @@ def _pr_head_repo(pr_data: dict) -> Optional[dict]:
     return (pr_data.get("head") or {}).get("repo")
 
 
-def _bail_on_deleted_fork(session, comment_url: str, pr_data: dict, name: str) -> bool:
+def _bail_on_deleted_fork(
+    session: Session, comment_url: str, pr_data: dict, name: str
+) -> bool:
     """Post an explanation and return True if the PR's fork is gone."""
     if _pr_head_repo(pr_data) is not None:
         return False

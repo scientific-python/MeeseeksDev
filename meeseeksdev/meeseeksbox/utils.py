@@ -72,7 +72,7 @@ def redact(text: str) -> str:
     return _URL_CREDENTIALS.sub("***:***", text)
 
 
-def summarise(names, limit: int = 4) -> str:
+def summarise(names: Sequence[str], limit: int = 4) -> str:
     """Render a list of names as a short, countable one-liner."""
     if not names:
         return "no repositories"
@@ -203,7 +203,16 @@ class Authenticator:
             print("Skipping auth_id_mapping build since there is no B64KEY set")
             return
 
-        self._installations = self.list_installations()
+        all_installations = self.list_installations()
+
+        # An organisation can suspend the app rather than uninstall it. The
+        # installation still exists and is still listed, but minting a token
+        # for it is refused, so walking it costs a round trip to be told 403.
+        # The listing already says which ones those are.
+        self._installations = [
+            i for i in all_installations if not (isinstance(i, dict) and i.get("suspended_at"))
+        ]
+        suspended = len(all_installations) - len(self._installations)
 
         # Each installation needs its own paginated walk of the repositories
         # API. Done one after another that is a few hundred round trips of
@@ -230,9 +239,10 @@ class Authenticator:
                     print(f"Installation {iid!r}: could not list repositories: {e!r}")
 
         elapsed = time.monotonic() - started
+        skipped = f", {suspended} suspended and skipped" if suspended else ""
         print(
             f"Mapped {len(self.idmap)} repositories over "
-            f"{len(self._installations)} installations in {elapsed:.1f}s"
+            f"{len(self._installations)} installations{skipped} in {elapsed:.1f}s"
         )
 
     def _update_installation(self, installation):
@@ -413,7 +423,7 @@ class Session(Authenticator):
                         "installation": repo_name,
                     },
                 )
-            return response  # type:ignore[no-any-return]
+            return response
 
     def _get_permission(self, org: str, repo: str, username: str) -> Permission:
         # Superusers are the people running this deployment. They are trusted
