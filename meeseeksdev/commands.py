@@ -28,12 +28,8 @@ def help_make(commands):
         comment_url = payload["issue"]["comments_url"]
         session.post_comment(
             comment_url,
-            dedent(
-                """The following commands are available:\n\n{}
-                """.format(
-                    data
-                )
-            ),
+            dedent("""The following commands are available:\n\n{}
+                """.format(data)),
         )
 
     return help

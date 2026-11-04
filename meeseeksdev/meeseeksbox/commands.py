@@ -3,9 +3,9 @@ Define a few commands
 """
 
 import os
-import shlex
 import random
 import re
+import shlex
 import sys
 import time
 import traceback
@@ -69,8 +69,7 @@ def zen(*, session, payload, arguments, local_config=None):
     comment_url = payload.get("issue", payload.get("pull_request"))["comments_url"]
     session.post_comment(
         comment_url,
-        dedent(
-            """
+        dedent("""
         Zen of Python ([pep 20](https://www.python.org/dev/peps/pep-0020/))
         ```
         >>> import this
@@ -94,8 +93,7 @@ def zen(*, session, payload, arguments, local_config=None):
         If the implementation is easy to explain, it may be a good idea.
         Namespaces are one honking great idea -- let's do more of those!
         ```
-        """
-        ),
+        """),
     )
 
 
@@ -166,9 +164,7 @@ def _pr_head_repo(pr_data: dict) -> Optional[dict]:
     return (pr_data.get("head") or {}).get("repo")
 
 
-def _bail_on_deleted_fork(
-    session: Session, comment_url: str, pr_data: dict, name: str
-) -> bool:
+def _bail_on_deleted_fork(session: Session, comment_url: str, pr_data: dict, name: str) -> bool:
     """Post an explanation and return True if the PR's fork is gone."""
     if _pr_head_repo(pr_data) is not None:
         return False
@@ -495,12 +491,10 @@ def precommit(
         # Alert the caller and bail.
         session.post_comment(
             comment_url,
-            body=dedent(
-                """
+            body=dedent("""
             I was unable to fix pre-commit errors because there is no
             ".pre-commit-config.yaml" file.
-            """
-            ),
+            """),
         )
         return
 
@@ -519,11 +513,9 @@ def precommit(
         # Alert the caller and bail.
         session.post_comment(
             comment_url,
-            body=dedent(
-                """
+            body=dedent("""
             I was unable to run "pre-commit" because there was nothing to do.
-            """
-            ),
+            """),
         )
         return
 
@@ -541,22 +533,18 @@ def precommit(
             # Alert the caller and bail.
             session.post_comment(
                 comment_url,
-                body=dedent(
-                    """
+                body=dedent("""
                 I was unable to fix pre-commit errors automatically.
                 Try running `pre-commit run --all-files` locally.
-                """
-                ),
+                """),
             )
             return
 
         session.post_comment(
             comment_url,
-            body=dedent(
-                """
+            body=dedent("""
                 I was unable to fix all of the pre-commit errors automatically.  Try running `pre-commit run --all-files` locally.
-                """
-            ),
+                """),
         )
 
     succeeded = push_the_work(session, payload, arguments, local_config=local_config)
@@ -566,12 +554,10 @@ def precommit(
     if succeeded:
         session.post_comment(
             comment_url,
-            body=dedent(
-                """
+            body=dedent("""
             I've applied "pre-commit" and pushed. You may have trouble pushing further
             commits, but feel free to force push and ask me to run again.
-            """
-            ),
+            """),
         )
     else:
         session.post_comment(comment_url, body="I was unable to push due to errors")
@@ -623,11 +609,9 @@ def blackify(*, session, payload, arguments, local_config=None):
     if process.returncode != 0:
         session.post_comment(
             comment_url,
-            body=dedent(
-                """
+            body=dedent("""
             I was unable to run "blackify" due to an error.
-            """
-            ),
+            """),
         )
         return
 
@@ -637,13 +621,11 @@ def blackify(*, session, payload, arguments, local_config=None):
     if succeeded:
         session.post_comment(
             comment_url,
-            body=dedent(
-                """
+            body=dedent("""
             I've rebased this Pull Request, applied `black` on all the
             individual commits, and pushed. You may have trouble pushing further
             commits, but feel free to force push and ask me to reformat again.
-            """
-            ),
+            """),
         )
     else:
         session.post_comment(comment_url, body="I was unable to push due to errors")
@@ -665,13 +647,6 @@ def safe_backport(session, payload, arguments, local_config=None):
     s_slug = ""
 
     def keen_stats():
-        nonlocal s_slug
-        nonlocal s_clone_time
-        nonlocal s_success
-        nonlocal s_reason
-        nonlocal s_fork_time
-        nonlocal s_clean_time
-        nonlocal s_ff_time
         add_event(
             "backport_stats",
             {
@@ -913,7 +888,7 @@ def safe_backport(session, payload, arguments, local_config=None):
             elif "after resolving the conflicts" in e.stderr.lower():
                 # TODO, here we should also do a git merge --abort
                 # to avoid thrashing the cache at next backport request.
-                cmd = " ".join(shlex.quote(arg) for arg in sys.argv)
+                cmd = shlex.join(sys.argv)
                 print(
                     "\nPatch did not apply. Resolve conflicts (add, not commit), then re-run `%s`"
                     % cmd,
@@ -1319,7 +1294,5 @@ def quote(*, session, payload, arguments, local_config=None):
         """
 > MeeseeksDev: Gee, {user}, what do you want to do tonight?
 {user}: The same thing we do every night, MeeseeksDev - try to take over the world!
-""".format(
-            user=user
-        ),
+""".format(user=user),
     )

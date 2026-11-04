@@ -15,6 +15,7 @@ config = Config(
     forward_staging_url="",
     webhook_secret="foo",
 )
+assert config.integration_id is not None
 
 auth = Authenticator(
     config.integration_id,
