@@ -1,6 +1,7 @@
 """
 Meeseeksbox main app module
 """
+
 import base64
 import os
 import signal

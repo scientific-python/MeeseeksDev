@@ -15,7 +15,13 @@ from tornado.ioloop import IOLoop
 from yieldbreaker import YieldBreaker
 
 from .scopes import Permission
-from .utils import ACCEPT_HEADER_SYMMETRA, Authenticator, add_event, clear_caches, http_client
+from .utils import (
+    ACCEPT_HEADER_SYMMETRA,
+    Authenticator,
+    add_event,
+    clear_caches,
+    http_client,
+)
 
 green = "\033[0;32m"
 yellow = "\033[0;33m"
@@ -26,12 +32,10 @@ pool = Pool(6)
 
 
 class Config:
-    botname = None
-    integration_id = -1
     key = None
     botname = None
     at_botname = None
-    integration_id = None
+    integration_id: int | None = None
     webhook_secret = None
     personal_account_name = None
     personal_account_token = None
@@ -461,7 +465,7 @@ class WebHookHandler(MainHandler):
 
         permission_level = session._get_permission(org, repo, user)
         command_args = process_mentioning_comment(body, self.mention_bot_re)
-        for (command, arguments) in command_args:
+        for command, arguments in command_args:
             print("    :: treating", command, arguments)
             add_event(
                 "dispatch",
@@ -609,9 +613,9 @@ class WebHookHandler(MainHandler):
                                 gen.send(None)
                 else:
                     try:
-                        comment_url = payload.get("issue", payload.get("pull_request"))[
-                            "comments_url"
-                        ]
+                        issue_or_pr = payload.get("issue", payload.get("pull_request"))
+                        assert issue_or_pr is not None
+                        comment_url = issue_or_pr["comments_url"]
                         user = payload["comment"]["user"]["login"]
                         session.post_comment(
                             comment_url,

@@ -55,7 +55,7 @@ users:
 ```
 
 This will allow `<username>` to ask `@meeseeksdev` to perform above commands.
-The conf file is the one that sits on the repository default  branch (usually
+The conf file is the one that sits on the repository default branch (usually
 `master`).
 
 ## What can a MeeseeksBox do ?
@@ -74,9 +74,9 @@ Respond with
 
 To test whether a Meeseeks understand you.
 
-### @MeeseeksDev backport \[to\] {branch}
+### @MeeseeksDev backport [to] {branch}
 
-If issued from a  PR which is merged, attempt to backport (cherry-pick the
+If issued from a PR which is merged, attempt to backport (cherry-pick the
 merge commit) on an older branch and submit a PR with this backport (on said branch)
 
 Apply origin-pr labels and milestone to backport.
@@ -106,7 +106,7 @@ If it's not it will ask you to do so.
 ### @MeeseeksDev pre-commit
 
 If issued from a PR, will apply pre-commit to this PR and push
-a commit with the changes made.  If no changes are made, or the changes
+a commit with the changes made. If no changes are made, or the changes
 cannot be automatically fixed, it will show a comment in the PR and bail.
 
 You can also use "precommit" as an alias.
@@ -131,7 +131,7 @@ Repo admins only, plan to make it available to PR author as well.
 MeeseeksDev Bot need to be installed on the PR source repository for this to work.
 If it's not it will ask you to do so.
 
-### @MeeseeksDev migrate \[to\] {target org/repo}
+### @MeeseeksDev migrate [to] {target org/repo}
 
 Needs MeeseeksBox to be installed on both current and target repo. Command
 issuer to be admin on both.
@@ -155,7 +155,7 @@ Tag with said tags if availlable (comma separated, need to be exact match)
 
 Remove said tags if present (comma separated, need to be exact match)
 
-### @MeeseeksDev merge \[merge|squash|rebase\]
+### @MeeseeksDev merge [merge|squash|rebase]
 
 Issuer needs at least write permission.
 

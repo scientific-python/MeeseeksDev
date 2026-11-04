@@ -10,8 +10,7 @@ def test1():
 
     assert (
         process_mentioning_comment(
-            textwrap.dedent(
-                """
+            textwrap.dedent("""
         @meeseeksdev nothing
         @meeseeksdev[bot] do nothing
         meeseeksdev[bot] do something
@@ -19,8 +18,7 @@ def test1():
         @meeseeksdev run something
 
 
-    """
-            ),
+    """),
             reg,
         )
         == [
